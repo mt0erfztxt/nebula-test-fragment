@@ -1,0 +1,25 @@
+{
+  "name": "nebula-test-fragment",
+  "version": "0.1.0",
+  "description": "Base fragment and utilities for e2e testing",
+  "license": "Apache-2.0",
+  "author": "mt0erfztxt",
+  "main": "index.js",
+  "directories": {
+    "test": "test"
+  },
+  "scripts": {
+    "test": "mocha --require babel-core/register ./test/**/*.spec.js"
+  },
+  "dependencies": {
+    "babel-core": "^6.26.3",
+    "babel-preset-env": "^1.6.1",
+    "change-case": "^3.0.1",
+    "lodash": "^4.17.10",
+    "mocha": "^5.1.1",
+    "testcafe": "^0.16.2",
+    "typeof--": "^1.3.3",
+    "unexpected": "^10.37.5",
+    "url-parse": "^1.1.9"
+  }
+}
