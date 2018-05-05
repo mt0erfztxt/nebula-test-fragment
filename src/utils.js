@@ -2,7 +2,7 @@ import _ from 'lodash';
 import typeOf from 'typeof--';
 
 /**
- * Options object - a plain object.
+ * Options - just a plain object.
  *
  * @typedef {object} Options
  */
@@ -12,82 +12,103 @@ const utils = {
   isEmptyString,
   isNonEmptyString,
   isOptions,
-  isString
+  isString,
+  maybeOptions
 };
 
 /**
- * Initializes passed in value as `Options` object.
+ * Initializes passed in `value` as `Options` object.
  *
- * @param {*} [value] - Value to initialize
- * @param {?Options} [options] - Options for initialization
- * @param {object} [options.defaults] - Default values not provided in `value`
- * @returns {Options} Initialized `Options` object.
- * @throws {TypeError} When arguments are not valid.
+ * @param {?*} value - Value to initialize
+ * @param {?Options} [options] - Options
+ * @param {function|object} [options.defaults] - Defaults for key-value pairs not provided in `value` or a function that accepts `value` and `options` and returns such defaults
+ * @param {function} [options.validator] - Validates resulting value before it would be returned. Accepts resulting value and must return `null` in case of successful validation
+ * @returns {Options} Initialized, and optionally validated, `Options` object.
+ * @throws {TypeError} When arguments are not valid or validation failed.
  */
 function initializeOptions(value, options) {
-  if (!(isOptions(options) || _.isUndefined(options))) {
+  if (!maybeOptions(options)) {
     throw new TypeError(
-      `'options' must be of type Options but it is ${typeOf(options)} (${options})`
+      `'options' argument must be a nil or of type Options but it is ${typeOf(options)} (${options})`
     );
   }
 
   const opts = options || {};
-  const {defaults} = opts;
+  const {defaults, validator} = opts;
 
-  if (!(isOptions(value) || _.isUndefined(value))) {
+  if (!maybeOptions(value)) {
     throw new TypeError(
-      `'value' must be an undefined or of type Options but it is ${typeOf(value)} (${value})`
+      `'value' argument must be a nil or of type Options but it is ${typeOf(value)} (${value})`
     );
   }
 
-  if (!(_.isNil(defaults) || _.isPlainObject(defaults))) {
+  if (!(_.isNil(defaults) || _.isPlainObject(defaults) || _.isFunction(defaults))) {
     throw new TypeError(
-      `'options.defaults' must be a plain object but it is ${typeOf(defaults)} (${defaults})`
+      `'options.defaults' argument must be a function or a plain object but it is ${typeOf(defaults)} (${defaults})`
     );
   }
 
-  return _.assign({}, value, defaults);
+  const chosenDefaults = _.isFunction(defaults) ? defaults(value, opts) : defaults;
+  const result = _.defaults({}, value, chosenDefaults);
+
+  if (validator) {
+    if (!_.isFunction(validator)) {
+      throw new TypeError(
+        `'options.validator' argument must be a function but it is ${typeOf(validator)} (${validator})`
+      );
+    }
+
+    const validationMessage = validator(result);
+
+    if (!_.isNull(validationMessage)) {
+      throw new TypeError(
+        "'value' argument is of type Options but validation failed with error - " + validationMessage
+      );
+    }
+  }
+
+  return result;
 }
 
-
 /**
- * Returns `true` when passed in subject is an empty string, otherwise returns
+ * Returns `true` when passed in `value` is an empty string, otherwise returns
  * `false`.
  *
- * @param {*} subject - Subject that must be tested whether it's an empty string or not
+ * @param {*} value - Subject that must be tested
  * @returns {boolean}
  */
-function isEmptyString(subject) {
-  return (isString(subject) && subject.length === 0);
+function isEmptyString(value) {
+  return (isString(value) && value.length === 0);
 }
 
 /**
- * Returns `true` when passed in subject is a non-empty string, otherwise
+ * Returns `true` when passed in `value` is a non-empty string, otherwise
  * returns `false`.
  *
- * @param {*} subject - Subject that must be tested whether it's a non-empty string or not
+ * @param {*} value - Subject that must be tested
  * @returns {boolean}
  */
-function isNonEmptyString(subject) {
-  return (isString(subject) && subject.length > 0);
+function isNonEmptyString(value) {
+  return (isString(value) && value.length > 0);
 }
 
 /**
- * Returns `true` when subject is of type `Options`, otherwise returns `false`.
+ * Returns `true` when passed in `value` is of type `Options`, otherwise
+ * returns `false`.
  *
- * @param {*} subject - Subject that must be tested
- * @param {boolean} [throwWhenFalse=false] - When truthy an error would be thrown instead of returning `false`.
+ * @param {*} value - Subject that must be tested
+ * @param {boolean} [throwWhenFalse=false] - When truthy an error would be thrown instead of returning `false`
  * @returns {boolean}
- * @throws {TypeError} When `throwWhenFalse` is truthy and `subject` is not of type `Options`.
+ * @throws {TypeError} When `throwWhenFalse` is truthy and `value` doesn't pass test.
  */
-function isOptions(subject, throwWhenFalse = false) {
-  if ((_.isNull(subject) || _.isPlainObject(subject))) {
+function isOptions(value, throwWhenFalse = false) {
+  if (_.isPlainObject(value)) {
     return true;
   }
   else {
     if (throwWhenFalse) {
       throw new TypeError(
-        `'subject' must be of type Options but it is ${typeOf(subject)} (${subject})`
+        `'value' argument must be of type Options but it is ${typeOf(value)} (${value})`
       );
     }
 
@@ -96,12 +117,37 @@ function isOptions(subject, throwWhenFalse = false) {
 }
 
 /**
- * Returns `true` when subject is a string, otherwise returns `false`.
+ * Returns `true` when `value` is a string, otherwise returns `false`.
  *
- * @param {*} subject - Subject that must be tested whether it's a string or not
+ * @param {*} value - Subject that must be tested
  * @returns {boolean}
  */
-function isString(subject) {
-  return (Object.prototype.toString.call(subject) === '[object String]');
+function isString(value) {
+  return (Object.prototype.toString.call(value) === '[object String]');
 }
+
+/**
+ * Returns `true` when passed in `value` is nil or of type `Options`, otherwise
+ * returns `false`.
+ *
+ * @param {*} value - Subject that must be tested
+ * @param {boolean} [throwWhenFalse=false] - When truthy an error would be thrown instead of returning `false`
+ * @returns {boolean}
+ * @throws {TypeError} When `throwWhenFalse` is truthy and `value` doesn't pass test.
+ */
+function maybeOptions(value, throwWhenFalse = false) {
+  if ((_.isNil(value) || isOptions(value))) {
+    return true;
+  }
+  else {
+    if (throwWhenFalse) {
+      throw new TypeError(
+        `'value' argument must be a nil or of type Options but it is ${typeOf(value)} (${value})`
+      );
+    }
+
+    return false;
+  }
+}
+
 export default utils;

@@ -9,17 +9,29 @@
     "test": "test"
   },
   "scripts": {
-    "test": "mocha --require babel-core/register ./test/**/*.spec.js"
+    "ci-tests": "npm run test-unit && npm run test-real_browserstack",
+    "local-tests": "npm run test-unit && npm run test-real_local",
+    "test": "npm run ci-tests",
+    "test-real_browserstack": "testcafe 'browserstack:Chrome@53.0:Windows 10' test/**/*.test.js",
+    "test-real_local": "testcafe chrome test/**/*.test.js",
+    "test-unit": "mocha --require babel-core/register test/**/*.spec.js"
   },
   "dependencies": {
+    "app-root-path": "^2.0.1",
     "babel-core": "^6.26.3",
     "babel-preset-env": "^1.6.1",
     "change-case": "^3.0.1",
     "lodash": "^4.17.10",
-    "mocha": "^5.1.1",
     "testcafe": "^0.16.2",
+    "testcafe-browser-provider-browserstack": "^1.4.0",
     "typeof--": "^1.3.3",
-    "unexpected": "^10.37.5",
     "url-parse": "^1.1.9"
+  },
+  "devDependencies": {
+    "mocha": "^5.1.1",
+    "nyc": "^11.7.1",
+    "sinon": "^5.0.3",
+    "unexpected": "^10.37.5",
+    "unexpected-sinon": "^10.10.0"
   }
 }
