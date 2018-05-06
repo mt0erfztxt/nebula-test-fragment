@@ -22,19 +22,19 @@ test("010 It uses `spec.cns` argument to filter fragments by 'cns'", async (t) =
   await t.expect(myFragmentWithoutCns.selector.exists).ok();
   await t.expect(myFragmentWithoutCns.selector.count).eql(3);
   await t.expect(myFragmentWithoutCns.selector.nth(0).textContent).eql('MyFragment');
-  await t.expect(myFragmentWithoutCns.selector.nth(1).textContent).eql('MyFragment with cns foo');
-  await t.expect(myFragmentWithoutCns.selector.nth(2).textContent).eql('MyFragment with cns foo and in custom parent');
+  await t.expect(myFragmentWithoutCns.selector.nth(1).textContent).eql('MyFragment, cns foo');
+  await t.expect(myFragmentWithoutCns.selector.nth(2).textContent).eql('MyFragment, parent, cns foo');
 
   const myFragmentWithCns = new MyFragment({cns: 'foo'});
   await t.expect(myFragmentWithCns.selector.exists).ok();
   await t.expect(myFragmentWithCns.selector.count).eql(2);
-  await t.expect(myFragmentWithCns.selector.nth(0).textContent).eql('MyFragment with cns foo');
-  await t.expect(myFragmentWithCns.selector.nth(1).textContent).eql('MyFragment with cns foo and in custom parent');
+  await t.expect(myFragmentWithCns.selector.nth(0).textContent).eql('MyFragment, cns foo');
+  await t.expect(myFragmentWithCns.selector.nth(1).textContent).eql('MyFragment, parent, cns foo');
 });
 
 test("020 It respects `spec.parent` argument when uses `spec.cns` argument to filter fragments by 'cns'", async (t) => {
-  const myFragment = new MyFragment({cns: 'foo', parent: '.parent'});
+  const myFragment = new MyFragment({parent: '.parent', cns: 'foo'});
   await t.expect(myFragment.selector.exists).ok();
   await t.expect(myFragment.selector.count).eql(1);
-  await t.expect(myFragment.selector.nth(0).textContent).eql('MyFragment with cns foo and in custom parent');
+  await t.expect(myFragment.selector.nth(0).textContent).eql('MyFragment, parent, cns foo');
 });

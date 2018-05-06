@@ -36,6 +36,22 @@ class Fragment {
    */
   constructor(spec, opts) {
 
+    // Ensure that `opts` argument is valid.
+    if (!(_.isNil(opts) || utils.isOptions(opts))) {
+      throw new TypeError(
+        `${this.displayName}.constructor(): 'opts' argument must be a nil or of type Options but it is ` +
+        `${typeOf(opts)} (${opts})`
+      );
+    }
+
+    // Ensure that `spec` argument is valid.
+    if (!(_.isNil(spec) || _.isPlainObject(spec))) {
+      throw new TypeError(
+        `${this.displayName}.constructor(): 'spec' argument must be a nil or a plain object but it is ` +
+        `${typeOf(spec)} (${spec})`
+      );
+    }
+
     /**
      * Reference to `opts` object passed to fragment's constructor.
      *
@@ -50,46 +66,11 @@ class Fragment {
      */
     this._originalSpec = spec;
 
-    // Ensure that `spec` argument is valid.
-    if (!(_.isNil(spec) || _.isPlainObject(spec))) {
-      throw new TypeError(
-        `${this.displayName}.constructor(): 'spec' argument must be a nil or a plain object but it is ` +
-        `${typeOf(spec)} (${spec})`
-      );
-    }
-
-    /**
-     * Parent selector for new fragment's selector.
-     */
-    let parentSelector = null;
-
-    // We need a parent for new fragment's selector and to choose it we must
-    // handle three possible cases:
-    // 1. Parent is specified and it's a fragment - we use that fragment's
-    // selector as parent for new fragment's selector.
-    // 2. Parent is specified and it isn't a fragment - we use it as
-    // initializer to create parent selector for new fragment's selector.
-    // 3. No parent specified - we use 'body' as initializer to create parent
-    // selector for new fragment's selector.
-    if (spec && spec.parent instanceof Fragment) {
-      parentSelector = spec.parent.selector;
-    }
-    else {
-      parentSelector = Selector((spec && spec.parent) || 'body');
-    }
-
-    // We must check that `opts` argument is valid - it can be a nil or of type `Options`.
-    if (!(_.isNil(opts) || utils.isOptions(opts))) {
-      throw new TypeError(
-        `${this.displayName}.constructor(): 'opts' argument must be a nil or of type Options but it is ` +
-        `${typeOf(opts)} (${opts})`
-      );
-    }
-
     // We allow BEM base for new fragment to be set explicitly as
-    // `opts.bemBase` or implicitly as `bemBase` property of fragment's class.
-    opts = opts || {};
-    const chosenBemBase = (opts.bemBase || this.constructor.bemBase || super.bemBase);
+    // `opts.bemBase` or implicitly as `bemBase` property of fragment's class,
+    // otherwise it would be populated using parent fragment's BEM base.
+    const _opts = this._originalOpts || {};
+    const chosenBemBase = (_opts.bemBase || this.constructor.bemBase || super.bemBase);
     const chosenBemBaseAsStr = chosenBemBase + '';
 
     // Ensure that BEM base for fragment is available.
@@ -105,11 +86,7 @@ class Fragment {
      *
      * @private
      */
-    this._opts = _
-      .chain(this._originalOpts)
-      .omit(['selectorCustomizer'])
-      .assign({bemBase: new bem.BemBase(chosenBemBase, {isFinal: true})})
-      .value();
+    this._opts = _.assign({}, _opts, {bemBase: new bem.BemBase(chosenBemBase, {isFinal: true})});
 
     /**
      * `spec` argument that was used to create this instance of fragment.
@@ -117,20 +94,50 @@ class Fragment {
      *
      * @private
      */
-    this._spec = spec;
+    this._spec = _.assign({}, this._originalSpec);
 
     const {bemBase} = this._opts;
 
     /**
      * Fragment's BEM base.
      *
-     * @type {BemBase}
      * @private
+     * @type {BemBase}
      */
     this._bemBase = bemBase;
 
-    // Would be used to create new fragment's selector.
-    let selectorInitializer = parentSelector.find(`.${bemBase}`);
+    /**
+     * Store for persisted states.
+     *
+     * @private
+     */
+    this._persistedStates = {};
+
+    /**
+     * TestCafe's selector for fragment.
+     *
+     * @private
+     * @type {Selector}
+     */
+    this._selector = null;
+
+    // Fragment's selector scoped into parent selector and we choose it here:
+    // 1. Parent is specified and it's a fragment - we use that fragment's
+    // selector as parent selector.
+    // 2. Parent is specified and it isn't a fragment - we use it as
+    // initializer to create parent selector.
+    // 3. No parent specified - we use 'body' as initializer to create parent
+    // selector.
+    if (this._spec.parent instanceof Fragment) {
+      this._selector = this._spec.parent.selector;
+    }
+    else {
+      this._selector = Selector((this._spec.parent) || 'body');
+    }
+
+    // Narrow down fragment's selector to select only elements with fragment's
+    // BEM base.
+    this._selector = this._selector.find(`.${bemBase}`);
 
     // New fragment's selector is build using provided `specs` and `opts`, and
     // so we must handle all possible cases:
@@ -141,64 +148,73 @@ class Fragment {
     // 'parent' spec is respected.
     // 2. We have number of specs that are built-in into base fragment class
     // and all of them respects 'parent' spec.
-    if (_.isPlainObject(spec)) {
+    if (!_.isEmpty(this._spec)) {
+      const cidSpec = this._spec.cid;
+      const cnsSpec = this._spec.cns;
+      const customSpec = this._spec.custom;
+      const idxSpec = this._spec.idx;
 
       // 2.1 'cns' (component namespace) often used to build one widget on top
       // of other widget that provides generic functionality and that spec is
       // for such cases. It respects 'parent' spec.
-      if (spec.cns) {
-        if (!utils.isNonEmptyString(spec.cns)) {
+      if (cnsSpec) {
+        if (!utils.isNonEmptyString(cnsSpec)) {
           throw new TypeError(
             `${this.displayName}.constructor(): Built-in 'cns' spec must be a non-empty string but it is ` +
-            `${typeOf(spec.cns)} (${spec.cns})`
+            `${typeOf(cnsSpec)} (${cnsSpec})`
           );
         }
 
-        selectorInitializer = selectorInitializer.filter(`.${bemBase.setMod(['cns', spec.cns], {fresh: true})}`);
+        this._selector = this._selector.filter(`.${bemBase.setMod(['cns', cnsSpec], {fresh: true})}`);
       }
 
-      // Currently, all following built-in specs is not composable, e.g. you
-      // can't choose fragment by 'cid' and 'custom' spec - 'custom' spec wins.
+      // Following spec aren't composable with each other!
 
-      // 2.2 'custom' spec is used to allow derived fragments to have their own
-      // built-in specs. It respects 'cns' and 'parent' specs.
-      if (spec.custom) {
-        if (!_.isFunction(spec.custom)) {
-          throw new TypeError(
-            `${this.displayName}.constructor(): Built-in 'custom' spec must be a function but it is ` +
-            `${typeOf(spec.custom)} (${spec.custom})`
-          );
-        }
-
-        selectorInitializer = spec.custom.call(this, selectorInitializer, spec, opts);
-      }
-      // 2.3 'cid' (component id) often used to get specific fragment. It
+      // 2.2 'cid' (component id) often used to get specific fragment. It
       // respects 'cns' and 'parent' specs.
-      else if (spec.cid) {
-        if (!utils.isNonEmptyString(spec.cid)) {
+      if (cidSpec) {
+        if (!utils.isNonEmptyString(cidSpec)) {
           throw new TypeError(
             `${this.displayName}.constructor(): Built-in 'cid' spec must be a non-empty string but it is ` +
-            `${typeOf(spec.cid)} (${spec.cid})`
+            `${typeOf(cidSpec)} (${cidSpec})`
           );
         }
 
-        selectorInitializer = selectorInitializer.filter(`.${bemBase.setMod(['cid', spec.cid], {fresh: true})}`);
+        this._selector = this._selector.filter(`.${bemBase.setMod(['cid', cidSpec], {fresh: true})}`);
       }
-      // 2.4 'idx' often used to get specific fragment by its index in parent.
+      // 2.3 'idx' often used to get specific fragment by its index in parent.
       // It respects 'cns' and 'parent' specs.
-      else if (_.has(spec, 'idx')) {
-        if (!(_.isInteger(spec.idx) && spec.idx >= 0)) {
+      else if (_.has(this._spec, 'idx')) {
+        if (!(_.isInteger(idxSpec))) {
           throw new TypeError(
             `${this.displayName}.constructor(): Built-in 'idx' spec must be an integer greater than or equal zero ` +
-            `but it is ${typeOf(spec.idx)} (${spec.idx})`
+            `but it is ${typeOf(idxSpec)} (${idxSpec})`
           );
         }
 
-        selectorInitializer = selectorInitializer.nth(spec.idx);
+        this._selector = this._selector.nth(idxSpec);
       }
-      // Unknown spec throws error to simplify debugging.
+      // 2.4 'custom' spec is used to allow derived fragments to have their own
+      // built-in specs. It respects 'cns' and 'parent' specs.
+      else if (customSpec) {
+        if (!_.isFunction(customSpec)) {
+          throw new TypeError(
+            `${this.displayName}.constructor(): Built-in 'custom' spec must be a function but it is ` +
+            `${typeOf(customSpec)} (${customSpec})`
+          );
+        }
+
+        this._selector = customSpec(this._selector, this._spec, this._opts);
+      }
+      // To simplify debugging we throw error when unsupported spec found. Note
+      // that 'cns' and 'parent' specs were added earlier and must be excluded
+      // explicitly.
       else {
-        const unknownSpecs = _.remove(_.keys(spec), it => !_.includes(['cns', 'parent'], it));
+        const unknownSpecs = _
+          .chain(this._spec)
+          .keys()
+          .remove((s) => !_.includes(['cns', 'parent'], s))
+          .value();
 
         if (!_.isEmpty(unknownSpecs)) {
           throw new TypeError(
@@ -206,33 +222,6 @@ class Fragment {
           );
         }
       }
-    }
-
-    /**
-     * Store for persisted states.
-     *
-     * @private
-     */
-    this._persistedStates = {};
-
-    /**
-     * TestCafe selector for fragment's DOM element.
-     *
-     * @type {Selector}
-     * @todo Make it private plus getter.
-     */
-    this.selector = Selector(selectorInitializer);
-
-    // We allow to use function to customize fragment's selector when required.
-    if (opts && opts.selectorCustomizer) {
-      if (!_.isFunction(opts.selectorCustomizer)) {
-        throw new TypeError(
-          `${this.displayName}.constructor(): 'opts.selectorCustomizer' argument must be a function but it is ` +
-          `${typeOf(opts.selectorCustomizer)} (${opts.selectorCustomizer})`
-        );
-      }
-
-      this.selector = opts.selectorCustomizer(this.selector, this._spec, this._opts);
     }
   }
 
@@ -264,7 +253,16 @@ class Fragment {
   }
 
   /**
-   * Creates new instance of `BEM` class using fragment's `bemBase` as its
+   * TestCafe's selector for fragment.
+   *
+   * @return {Selector}
+   */
+  get selector() {
+    return this._selector;
+  }
+
+  /**
+   * Creates new instance of BEM base using fragment's `bemBase` as its
    * initializer.
    *
    * @returns {BemBase}
