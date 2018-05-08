@@ -262,6 +262,75 @@ class Fragment {
   }
 
   /**
+   * Initializes passed in `spec` and `opts` so they can be conveniently passed
+   * to fragment's constructor.
+   *
+   * @static
+   * @param {?object} spec - `spec` argument passed in to fragment's constructor. See `Fragment`'s constructor
+   * @param {?Options} opts - `opts` argument passed in to fragment's constructor. See `Fragment`'s constructor
+   * @param {?object} [defaults] - Defaults for `spec` and `opts`
+   * @param {?object} [defaults.opts] - Object of default values for attributes of `opts` argument. Default value would be used when `opts` attribute value is `null`, `undefined` or `NaN`
+   * @param {?object} [defaults.spec] - Object of default values for attributes of `spec` argument. Default value would be used when `spec` attribute value is `null`, `undefined` or `NaN`
+   * @returns {object} Returns plain object with `isInstance` attribute set to `true` when `spec` argument is already an instance of non-base fragment, or plain object that have `spec` and `opts` attributes that contains `spec` and `opts` populated with defaults when `spec` is a specification object or nil.
+   * @throws {TypeError} When passed in arguments aren't valid.
+   */
+  static initializeFragmentSpecAndOpts(spec, opts, defaults) {
+    if (spec instanceof this) {
+      return {isInstance: true};
+    }
+
+    if (spec instanceof Fragment) {
+      throw new TypeError(
+        `'spec' argument can not be instance of fragment other than ${this.displayName}`
+      );
+    }
+
+    if (!_.isNil(opts)) {
+      utils.isOptions(opts, true);
+    }
+
+    const initializedOpts = _.assign({}, opts);
+    const initializedSpec = _.assign({}, spec);
+
+    if (!(_.isNil(defaults) || _.isPlainObject(defaults))) {
+      throw new TypeError(
+        `'defaults' argument must be a nil or plain object but it is ${typeOf(defaults)} (${defaults})`
+      );
+    }
+
+    if (defaults) {
+      const defaultsOpts = defaults.opts;
+      const defaultsSpec = defaults.spec;
+
+      if (!(_.isNil(defaultsSpec) || _.isPlainObject(defaultsSpec))) {
+        throw new TypeError(
+          `'defaults.spec' argument must be a nil or plain object but it is ${typeOf(defaultsSpec)} (${defaultsSpec})`
+        );
+      }
+
+      if (!(_.isNil(defaultsOpts) || _.isPlainObject(defaultsOpts))) {
+        throw new TypeError(
+          `'defaults.opts' argument must be a nil or plain object but it is ${typeOf(defaultsOpts)} (${defaultsOpts})`
+        );
+      }
+
+      if (!_.isEmpty(defaultsSpec)) {
+        _.forOwn(defaultsSpec, (v, k) => {
+          initializedSpec[k] = _.defaultTo(initializedSpec[k], v);
+        });
+      }
+
+      if (!_.isEmpty(defaultsOpts)) {
+        _.forOwn(defaultsOpts, (v, k) => {
+          initializedOpts[k] = _.defaultTo(initializedOpts[k], v);
+        });
+      }
+    }
+
+    return {initializedOpts, initializedSpec};
+  }
+
+  /**
    * Creates new instance of BEM base using fragment's `bemBase` as its
    * initializer.
    *
@@ -270,7 +339,6 @@ class Fragment {
   cloneBemBase() {
     return new bem.BemBase(this.bemBase);
   }
-
 }
 
 Object.defineProperties(Fragment, {

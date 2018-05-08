@@ -36,5 +36,6 @@ test("020 It respects `spec.parent` argument when uses `spec.cns` argument to fi
   const myFragment = new MyFragment({parent: '.parent', cns: 'foo'});
   await t.expect(myFragment.selector.exists).ok();
   await t.expect(myFragment.selector.count).eql(1);
-  await t.expect(myFragment.selector.nth(0).textContent).eql('MyFragment, parent, cns foo');
+  await t.expect(myFragment.selector.textContent).eql('MyFragment, parent, cns foo');
+  await t.expect(myFragment.selector.parent().classNames).eql(['parent']);
 });

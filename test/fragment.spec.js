@@ -186,3 +186,113 @@ describe("constructor()", function () {
     expect(fragment.selector, 'to be ok');
   });
 });
+
+describe(".initializeFragmentSpecAndOpts()", function () {
+  class FragmentA extends Fragment {
+  }
+
+  Object.defineProperties(FragmentA, {
+    bemBase: {
+      value: 'fragment-a'
+    },
+    displayName: {
+      value: 'FragmentA'
+    }
+  });
+
+  class FragmentB extends Fragment {
+    constructor(spec, opts) {
+      const {initializedOpts, initializedSpec, isInstance} = FragmentB.initializeFragmentSpecAndOpts(spec, opts);
+
+      if (isInstance === true) {
+        return spec;
+      }
+
+      super(initializedSpec, initializedOpts);
+      return this;
+    }
+  }
+
+  Object.defineProperties(FragmentB, {
+    bemBase: {
+      value: 'fragment-b'
+    },
+    displayName: {
+      value: 'FragmentB'
+    }
+  });
+
+  it("should return plain object with `isInstance` attribute set to `true` when 'spec' argument is already an instance of fragment that must be constructed", function () {
+    const instOfB = new FragmentB();
+    expect(FragmentB.initializeFragmentSpecAndOpts(instOfB, null), 'to equal', {isInstance: true});
+  });
+
+  it("should throw error when 'spec' argument is already an instance of fragment but other than that must be constructed", function () {
+    const instOfA = new FragmentA();
+    expect(
+      () => FragmentB.initializeFragmentSpecAndOpts(instOfA, null),
+      'to throw',
+      new TypeError(
+        "'spec' argument can not be instance of fragment other than FragmentB"
+      )
+    );
+  });
+
+  it("should throw error when 'opts' argument is not nil or of type Options", function () {
+    expect(
+      () => FragmentB.initializeFragmentSpecAndOpts(null, 'opts'),
+      'to throw',
+      new TypeError(
+        "'value' argument must be of type Options but it is String (opts)"
+      )
+    );
+  });
+
+  it("should throw error when 'defaults' argument is not a nil or plain object", function () {
+    expect(
+      () => FragmentB.initializeFragmentSpecAndOpts(null, null, 'defaults'),
+      'to throw',
+      new TypeError(
+        "'defaults' argument must be a nil or plain object but it is String (defaults)"
+      )
+    );
+  });
+
+  it("should throw error when 'defaults.spec' argument is not a nil or plain object", function () {
+    expect(
+      () => FragmentB.initializeFragmentSpecAndOpts(null, null, {spec: 'spec'}),
+      'to throw',
+      new TypeError(
+        "'defaults.spec' argument must be a nil or plain object but it is String (spec)"
+      )
+    );
+  });
+
+  it("should throw error when 'defaults.opts' argument is not a nil or plain object", function () {
+    expect(
+      () => FragmentB.initializeFragmentSpecAndOpts(null, null, {opts: 'opts'}),
+      'to throw',
+      new TypeError(
+        "'defaults.opts' argument must be a nil or plain object but it is String (opts)"
+      )
+    );
+  });
+
+  it("should apply spec defaults", function () {
+    const spec = {cid: 'qwerty'};
+    const defaults = {spec: {cns: 'foo', cid: 'foobar'}};
+    const result = FragmentB.initializeFragmentSpecAndOpts(spec, void(0), defaults);
+    expect(result, 'to equal', {initializedSpec: {cid: 'qwerty', cns: 'foo'}, initializedOpts: {}});
+    expect(result.initializedSpec !== spec, 'to be true');
+  });
+
+  it("should apply opts defaults", function () {
+    const opts = {option1: 1};
+    const spec = {cid: 'qwerty'};
+    const defaults = {opts: {bemBase: 'my-widget', option1: 2}};
+    const result = FragmentB.initializeFragmentSpecAndOpts(spec, opts, defaults);
+    expect(result, 'to equal', {initializedSpec: {cid: 'qwerty'}, initializedOpts: {bemBase: 'my-widget', option1: 1}});
+    expect(result.initializedOpts !== opts, 'to be true');
+    expect(result.initializedSpec !== spec, 'to be true');
+  });
+});
