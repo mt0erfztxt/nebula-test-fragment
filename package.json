@@ -23,7 +23,7 @@
     "change-case": "^3.0.1",
     "escape-string-regexp": "^1.0.5",
     "lodash": "^4.17.10",
-    "testcafe": "^0.16.2",
+    "testcafe": "^0.19.2",
     "testcafe-browser-provider-browserstack": "^1.4.0",
     "typeof--": "^1.3.3",
     "url-parse": "^1.1.9"
