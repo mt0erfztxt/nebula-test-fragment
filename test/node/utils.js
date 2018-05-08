@@ -1,6 +1,6 @@
 import expect from 'unexpected';
 
-import utils from '../src/utils';
+import utils from '../../src/utils';
 
 describe('utils', () => {
   describe('initializeOptions()', () => {

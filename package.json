@@ -9,12 +9,12 @@
     "test": "test"
   },
   "scripts": {
-    "ci-tests": "npm run test-unit && npm run test-real_browserstack",
-    "local-tests": "npm run test-unit && npm run test-real_local",
+    "ci-tests": "npm run test-node && npm run test-browser_browserstack",
+    "local-tests": "npm run test-node && npm run test-browser_local",
     "test": "npm run ci-tests",
-    "test-real_browserstack": "testcafe 'browserstack:Chrome@53.0:Windows 10' test/fragment test/selector",
-    "test-real_local": "testcafe chrome test/fragment test/selector",
-    "test-unit": "mocha --require babel-core/register test/**/*.spec.js"
+    "test-browser_browserstack": "testcafe 'browserstack:Chrome@53.0:Windows 10' test/browser",
+    "test-browser_local": "testcafe chrome test/browser",
+    "test-node": "mocha --require babel-core/register test/node/**"
   },
   "dependencies": {
     "app-root-path": "^2.0.1",

@@ -1,7 +1,7 @@
 import appRootPath from 'app-root-path';
 import {Selector} from 'testcafe';
 
-import selector from '../../src/selector';
+import selector from '../../../src/selector';
 
 fixture `selector :: 010 filterByText`
   .page(appRootPath.path + '/test/fixtures/selector/010-filter-by-text.html');
