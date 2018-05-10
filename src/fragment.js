@@ -3,6 +3,7 @@ import {Selector} from 'testcafe';
 import typeOf from 'typeof--'
 
 import bem from "./bem";
+import selector from "./selector";
 import utils from './utils';
 
 /**
@@ -338,6 +339,67 @@ class Fragment {
    */
   cloneBemBase() {
     return new bem.BemBase(this.bemBase);
+  }
+
+  /**
+   * Asserts that fragment's selector exists.
+   *
+   * @param {?Options} [options] - Options
+   * @param {boolean} [options.allowMultiple=true] - When falsey then selector must return only one DOM element to pass assertion
+   * @param {boolean} [options.isNot=false] - When truthy selector must not exist (return zero DOM elements) to pass assertion
+   * @param {string} [options.message] - Custom message for error
+   * @return {Promise<void>}
+   */
+  async expectIsExist(options) {
+    await selector.expectIsExist(this.selector, options);
+  }
+
+  /**
+   * Asserts that fragment's selector does not exist.
+   *
+   * @param {?Options} [options] - Options
+   * @param {string} [options.message] - Custom message for error
+   * @return {Promise<void>}
+   */
+  async expectIsNotExist(options) {
+    await selector.expectIsNotExist(this.selector, options);
+  }
+
+  /**
+   * Returns array of CSS class names of fragment's selector that have `name`
+   * as name of BEM modifier. When `name` is nil array would contain all CSS
+   * class names that have (any) BEM modifier.
+   *
+   * @param {?string} [modifierName] - BEM modifier name
+   * @return {Promise<BemModifier[]>}
+   */
+  async getBemModifiers(modifierName) {
+    if (!(_.isNil(modifierName) || utils.isNonBlankString(modifierName))) {
+      throw new TypeError(
+        `'modifierName' argument must be a nil or non-blank string but it is ${typeOf(modifierName)} (${modifierName})`
+      );
+    }
+
+    if (this.bemBase.mod) {
+      throw new TypeError(
+        `Can not obtain BEM modifiers because fragment's BEM base already have modifier '${this.bemBase.mod}'`
+      );
+    }
+
+    await this.expectIsExist({allowMultiple: false});
+
+    const bemBasePlusModifierName = modifierName ? `${this.bemBase}--${modifierName}` : `${this.bemBase}--`;
+    const bemMods = [];
+    const classNames = await this.selector.classNames;
+
+    for (const className of classNames) {
+      if (_.startsWith(className, bemBasePlusModifierName)) {
+        const bemBase = new bem.BemBase(className);
+        bemMods.push(bemBase.mod);
+      }
+    }
+
+    return bemMods;
   }
 }
 

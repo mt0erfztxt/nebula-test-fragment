@@ -1,4 +1,3 @@
-import _ from 'lodash';
 import appRootPath from 'app-root-path';
 
 import {Fragment} from '../../../../src';

@@ -10,6 +10,7 @@ import typeOf from 'typeof--';
 const utils = {
   initializeOptions,
   isEmptyString,
+  isNonBlankString,
   isNonEmptyString,
   isOptions,
   isString,
@@ -79,6 +80,17 @@ function initializeOptions(value, options) {
  */
 function isEmptyString(value) {
   return (isString(value) && value.length === 0);
+}
+
+/**
+ * Returns `true` when passed in `value` is a non-blank string, otherwise
+ * returns `false`.
+ *
+ * @param {*} value - Subject that must be tested
+ * @returns {boolean}
+ */
+function isNonBlankString(value) {
+  return (isString(value) && _.trim(value).length > 0);
 }
 
 /**

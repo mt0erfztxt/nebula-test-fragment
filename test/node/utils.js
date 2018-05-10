@@ -119,13 +119,30 @@ describe('utils', () => {
     });
   });
 
+  describe('isNonBlankString()', () => {
+    it("should return `true` when passed in `value` argument is a non-blank string", () => {
+      expect(utils.isNonBlankString('1'), 'to be', true);
+      expect(utils.isNonBlankString('1  '), 'to be', true);
+      expect(utils.isNonBlankString(' 1'), 'to be', true);
+      expect(utils.isNonBlankString(' 1  '), 'to be', true);
+    });
+
+    it("should return `false` when passed in `value` argument is not a non-blank string", () => {
+      expect(utils.isNonBlankString(''), 'to be', false);
+      expect(utils.isNonBlankString(' '), 'to be', false);
+      expect(utils.isNonBlankString(1), 'to be', false);
+      expect(utils.isNonBlankString(false), 'to be', false);
+      expect(utils.isNonBlankString({}), 'to be', false);
+    });
+  });
+
   describe('isNonEmptyString()', () => {
     it("should return `true` when passed in `value` argument is a non-empty string", () => {
       expect(utils.isNonEmptyString(' '), 'to be', true);
       expect(utils.isNonEmptyString('1'), 'to be', true);
     });
 
-    it("should return `false` when passed in `value` argument is not an empty string", () => {
+    it("should return `false` when passed in `value` argument is not a non-empty string", () => {
       expect(utils.isNonEmptyString(''), 'to be', false);
       expect(utils.isNonEmptyString(1), 'to be', false);
       expect(utils.isNonEmptyString(false), 'to be', false);
