@@ -1,4 +1,5 @@
 import _ from 'lodash';
+import {lcFirst, ucFirst} from 'change-case';
 import typeOf from 'typeof--';
 
 /**
@@ -7,7 +8,27 @@ import typeOf from 'typeof--';
  * @typedef {object} Options
  */
 
+const testCafeAssertionNames = [
+  'eql',
+  'notEql',
+  'ok',
+  'notOk',
+  'contains',
+  'notContains',
+  'typeOf',
+  'notTypeOf',
+  'gt',
+  'gte',
+  'lt',
+  'lte',
+  'within',
+  'notWithin',
+  'match',
+  'notMatch'
+];
+
 const utils = {
+  buildTestCafeAssertionName,
   initializeOptions,
   isEmptyString,
   isNonBlankString,
@@ -16,6 +37,62 @@ const utils = {
   isString,
   maybeOptions
 };
+
+/**
+ * Checks that TestCafe provides assertion with specified name and returns it.
+ * Note that check is done after whitespaces trimmed down from both sides of
+ * `assertionName` argument. Also see `options` for available transformations
+ * and etc.
+ *
+ * @param {string} assertionName - Name of TestCafe assertion
+ * @param {?Options} [options] - Options
+ * @param {boolean} [options.isNot=false] - When truthy assertion name would be negated, for example, 'eql' would be toggled to 'notEql'
+ * @returns {string} Returns TestCafe assertion name
+ * @throws {TypeError} When arguments aren't valid.
+ */
+function buildTestCafeAssertionName(assertionName, options) {
+  const opts = initializeOptions(options, {defaults: {isNot: false}});
+  const {isNot} = opts;
+
+  if (!isNonBlankString(assertionName)) {
+    throw new TypeError(
+      `'assertionName' argument must be a non-blank string but it is ${typeOf(assertionName)} (${assertionName})`
+    );
+  }
+
+  assertionName = _.trim(assertionName);
+
+  if (!_.includes(testCafeAssertionNames, assertionName)) {
+    throw new TypeError(
+      `TestCafe doesn't provide '${assertionName}' assertion`
+    );
+  }
+
+  if (isNot) {
+    if (assertionName === 'gt') {
+      assertionName = 'lte';
+    }
+    else if (assertionName === 'gte') {
+      assertionName = 'lt';
+    }
+    else if (assertionName === 'lt') {
+      assertionName = 'gte';
+    }
+    else if (assertionName === 'lte') {
+      assertionName = 'gt';
+    }
+    else if (_.startsWith(assertionName, 'not')) {
+      assertionName = assertionName.substr(3);
+      assertionName = lcFirst(assertionName);
+    }
+    else {
+      assertionName = ucFirst(assertionName);
+      assertionName = 'not' + assertionName;
+    }
+  }
+
+  return assertionName;
+}
 
 /**
  * Initializes passed in `value` as `Options` object.
