@@ -1,6 +1,7 @@
 import _ from 'lodash';
 import escapeStringRegexp from 'escape-string-regexp';
 import {Selector, t} from 'testcafe';
+import typeOf from 'typeof--';
 
 import utils from './utils';
 
@@ -32,6 +33,106 @@ function filterByText(selectorInitializer, text, options) {
     text : new RegExp(`^${escapeStringRegexp('' + text)}$`);
 
   return Selector(selectorInitializer).withText(textAsRegExp);
+}
+
+/**
+ * Asserts that TestCafe selector initialized using `selectorInitializer` have
+ * specified (CSS) class names. Note that TestCafe's auto wait feature used
+ * to test for presence/absence of each (CSS) class name of `classNames`.
+ *
+ * @param {*} selectorInitializer - Initializer for TestCafe selector. See TestCafe's `Selector` for more info. Note that selector must return exactly one DOM node, otherwise error would be thrown
+ * @param {array|string} classNames - (CSS) Class names which selector must have. Examples: 'className', ['className'], [['className']], [['className', false]], [['className', true]], [['className'], ['other-class-name', true]]. In case of array, passing truthy value as second element of `classNames` array item allows to assert that selector doesn't have specified (CSS) class name
+ * @param {?Options} [options] - Options
+ * @param {boolean} [options.only=false] - When truthy selector must have only (CSS) class names specified in `classNames` argument
+ * @throws {TypeError} When arguments aren't valid.
+ */
+async function expectHasClassNames(selectorInitializer, classNames, options) {
+  if (!(utils.isNonBlankString(classNames) || _.isArray(classNames))) {
+    throw new TypeError(
+      `'classNames' argument must be a non-blank string or array but it is ${typeOf(classNames)} (${classNames})`
+    );
+  }
+
+  const opts = utils.initializeOptions(options, {defaults: {only: false}});
+  const {only} = opts;
+
+  const sel = Selector(selectorInitializer);
+  await expectIsExist(sel, {allowMultiple: false});
+
+  // `classNames` argument allowed to be a string but we work with array.
+  classNames = _.isArray(classNames) ? classNames : [classNames];
+
+  // ---------------------------------------------------------------------------
+  // Handling case when selector must not have CSS classes at all
+  // ---------------------------------------------------------------------------
+
+  if (_.isEmpty(classNames)) {
+    await t
+      .expect(sel.classNames)
+      .eql([''], `Selector must not have (CSS) class names but it does`);
+
+    return;
+  }
+
+  // ---------------------------------------------------------------------------
+  // Handling case when selector must have/haven't specified CSS classes
+  // ---------------------------------------------------------------------------
+
+  const classNamesMustPresent = [];
+
+  for (const item of classNames) {
+    if (!(utils.isNonBlankString(item) || _.isArray(item))) {
+      throw new TypeError(
+        `Item of 'classNames' array argument must be a non-blank string or array but it is` +
+        ` ${typeOf(item)} (${item})`
+      );
+    }
+
+    let className = item;
+    let isNot = false;
+
+    if (_.isArray(item)) {
+      [className, isNot = false] = item;
+    }
+
+    if (!utils.isNonBlankString(className)) {
+      throw new TypeError(
+        `First element of array item of 'classNames' array argument must be a non-blank string but it is` +
+        ` ${typeOf(className)} (${className})`
+      );
+    }
+
+    if (!_.isBoolean(isNot)) {
+      throw new TypeError(
+        `Second element of array item of 'classNames' array argument must be a nil or boolean but it is` +
+        ` ${typeOf(isNot)} (${isNot})`
+      );
+    }
+
+    if (!isNot) {
+      classNamesMustPresent.push(className);
+    }
+
+    const assertionName = utils.buildTestCafeAssertionName('ok', {isNot});
+    const message =
+      `Selector must ${isNot ? 'not have' : 'have'} '${className}' (CSS) class name ` +
+      `but it ${isNot ? 'does' : "doesn't"}`;
+
+    await t.expect(sel.hasClass(className))[assertionName](message);
+  }
+
+  if (only) {
+    const classNamesMustPresentTxt = _.join(classNamesMustPresent, ', ');
+    const selClassNames = await sel.classNames;
+    const selClassNamesTxt = _.join(selClassNames, ', ');
+
+    await t
+      .expect(selClassNames.length)
+      .eql(
+        classNamesMustPresent.length,
+        `Selector must have only '${classNamesMustPresentTxt}' (CSS) class names but it have '${selClassNamesTxt}'`
+      );
+  }
 }
 
 /**
@@ -114,6 +215,7 @@ async function expectIsNotExist(selectorInitializer, options) {
 }
 
 const selector = {
+  expectHasClassNames,
   expectIsExist,
   expectIsNotExist,
   filterByText
