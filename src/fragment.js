@@ -1,5 +1,5 @@
 import _ from 'lodash';
-import {Selector} from 'testcafe';
+import {Selector, t} from 'testcafe';
 import typeOf from 'typeof--'
 
 import bem from "./bem";
@@ -339,6 +339,40 @@ class Fragment {
    */
   cloneBemBase() {
     return new bem.BemBase(this.bemBase);
+  }
+
+  /**
+   * Asserts that fragment's selector has specified BEM modifier.
+   *
+   * @param {BemModifier|*[]|string} bemModifier - BEM modifier. Examples: ['foo'], ['foo', null], ['foo', 'bar'], 'foo'
+   * @return {Promise<void>}
+   */
+  async expectHasBemModifier(bemModifier) {
+    // We don't use `getBemModifier()` here as page may not have DOM element or
+    // element may not have modifier right now, for example, remote operation
+    // is in progress. Instead we use TestCafe's `expect` directly as it has
+    // auto waiting feature.
+    const className = this.cloneBemBase().setMod(bemModifier);
+    await t
+      .expect(this.selector.hasClass(className.toString()))
+      .ok(`'${this.displayName}' fragment must have BEM modifier '${bemModifier}' (${className}) but it doesn't`);
+  }
+
+  /**
+   * Asserts that fragment's selector has no specified BEM modifier.
+   *
+   * @param {BemModifier|*[]|string} bemModifier - BEM modifier. Examples: ['foo'], ['foo', null], ['foo', 'bar'], 'foo'
+   * @return {Promise<void>}
+   */
+  async expectHasNoBemModifier(bemModifier) {
+    // We don't use `getBemModifier()` here as page may not have DOM element or
+    // element may not have modifier right now, for example, remote operation
+    // is in progress. Instead we use TestCafe's `expect` directly as it has
+    // auto waiting feature.
+    const className = this.cloneBemBase().setMod(bemModifier);
+    await t
+      .expect(this.selector.hasClass(className.toString()))
+      .notOk(`'${this.displayName}' fragment must not have BEM modifier '${bemModifier}' (${className}) but it does`);
   }
 
   /**
