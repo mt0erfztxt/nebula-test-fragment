@@ -8,7 +8,7 @@ import selector from '../../../src/selector';
 const expect = unexpected.clone();
 expect.use(unexpectedSinon);
 
-fixture `selector :: 040 expectHasClassNames`
+fixture `selector :: 030 expectHasClassNames()`
   .page(appRootPath.path + '/test/fixtures/selector/030-expect-has-class-names.html');
 
 test("010 It should throw error when `classNames` argument is not a non-blank string or array", async () => {

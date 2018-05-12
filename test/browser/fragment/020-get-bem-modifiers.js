@@ -10,18 +10,27 @@ expect.use(unexpectedSinon);
 fixture `Fragment :: 020 #getBemModifiers()`
   .page(appRootPath.path + '/test/fixtures/fragment/020-get-bem-modifiers.html');
 
-test("010 It should throw error when `modifierName` argument is not a nil or non-blank string", async () => {
+test("010 It should throw error when `modifierName` argument is not a nil or non-blank string", async (t) => {
+  let isThrown = false;
   let msg;
   const fragment = new Fragment(null, {bemBase: 'foobar'});
-  await fragment.expectIsExist();
 
+  await t.expect(fragment.selector.count).gte(1);
+
+  // 1
   try {
     await fragment.getBemModifiers('');
   }
   catch (e) {
     msg = "'modifierName' argument must be a nil or non-blank string but it is String ()";
     expect(e.message, 'to equal', msg);
+    isThrown = true;
   }
+
+  expect(isThrown, 'to be true');
+
+  // 2
+  isThrown = false;
 
   try {
     await fragment.getBemModifiers('  ');
@@ -29,7 +38,13 @@ test("010 It should throw error when `modifierName` argument is not a nil or non
   catch (e) {
     msg = "'modifierName' argument must be a nil or non-blank string but it is String (  )";
     expect(e.message, 'to equal', msg);
+    isThrown = true;
   }
+
+  expect(isThrown, 'to be true');
+
+  // 3
+  isThrown = false;
 
   try {
     await fragment.getBemModifiers(1);
@@ -37,12 +52,17 @@ test("010 It should throw error when `modifierName` argument is not a nil or non
   catch (e) {
     msg = "'modifierName' argument must be a nil or non-blank string but it is Number (1)";
     expect(e.message, 'to equal', msg);
+    isThrown = true;
   }
+
+  expect(isThrown, 'to be true');
 });
 
-test("020 It should throw error when fragment's BEM base already have BEM modifier", async () => {
+test("020 It should throw error when fragment's BEM base already have BEM modifier", async (t) => {
+  let isThrown = false;
   const fragment = new Fragment(null, {bemBase: 'foobar--foo'});
-  await fragment.expectIsExist();
+
+  await t.expect(fragment.selector.count).gte(1);
 
   try {
     await fragment.getBemModifiers();
@@ -50,29 +70,46 @@ test("020 It should throw error when fragment's BEM base already have BEM modifi
   catch (e) {
     const msg = "Can not obtain BEM modifiers because fragment's BEM base already have modifier 'foo'";
     expect(e.message, 'to equal', msg);
+    isThrown = true;
   }
+
+  expect(isThrown, 'to be true');
 });
 
 test("030 It should throw error when fragment's selector does not return DOM elements", async (t) => {
+  let isThrown = false;
   const fragment = new Fragment(null, {bemBase: 'non-existent'});
+
+  await t.expect(fragment.selector.count).eql(0);
+
   try {
     await fragment.getBemModifiers();
   }
   catch (e) {
-    const msgPattern = /.*Selector must return only one DOM element but it doesn't: expected 0.*/;
+    const msgPattern = /.*'Fragment' fragment's selector must return exactly one DOM element but it doesn't: expected 0.*/;
     expect(e.errMsg, 'to match', msgPattern);
+    isThrown = true;
   }
+
+  expect(isThrown, 'to be true');
 });
 
 test("040 It should throw error when fragment's selector return more than one DOM element", async (t) => {
+  let isThrown = false;
   const fragment = new Fragment(null, {bemBase: 'multiple'});
+
+  await t.expect(fragment.selector.count).gte(1);
+
   try {
     await fragment.getBemModifiers();
   }
   catch (e) {
-    const msgPattern = /.*Selector must return only one DOM element but it doesn't: expected 2.*/;
+    const msgPattern = /.*'Fragment' fragment's selector must return exactly one DOM element but it doesn't: expected 2.*/;
     expect(e.errMsg, 'to match', msgPattern);
+    isThrown = true;
   }
+
+  expect(isThrown, 'to be true');
 });
 
 test("050 It should return array that contains all BEM modifiers when `modifierName` argument is nil", async () => {
