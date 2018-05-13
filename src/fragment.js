@@ -32,7 +32,6 @@ class Fragment {
    * @param {*} [spec.parent='body'] - Parent scope for fragment's selector. Can be anything that TestCafe `Selector` accepts
    * @param {?Options} [opts] - Options
    * @param {string} [opts.bemBase] - BEM base of component, may be omitted when `handler` or `selector` spec is used
-   * @param {selectorCustomizerFn} [opts.selectorCustomizer] - Selector customizer. Used as last resort to augment created fragment's selector somehow. Accepts created fragment selector, `spec` and `opts` (with defaults) arguments passed to fragment's class constructor and must return TestCafe selector that would be used as new selector of fragment
    * @throws {TypeError} When constructor arguments are not valid.
    */
   constructor(spec, opts) {
@@ -374,6 +373,24 @@ class Fragment {
       .expect(this.selector.hasClass(className.toString()))
       .notOk(`'${this.displayName}' fragment must not have BEM modifier '${bemModifier}' (${className}) but it does`);
   }
+
+  /**
+   * Asserts that fragment is exist and found in parent at specified index.
+   *
+   * @param {*} parent - Same as `Fragment` constructor's `spec.parent` argument
+   * @param {number} idx - Position at which fragment must be found in parent to pass assertion. Must be an integer greater or equal zero
+   * @return {Promise<void>}
+   */
+  async expectIndexInParentIs(parent, idx) {
+    await this.expectIsExist();
+
+    const instAtIndex = new this.constructor({idx, parent});
+    await instAtIndex.expectIsExist();
+
+    const srcTextContent = await this.selector.textContent;
+    const trgTextContent = await instAtIndex.selector.textContent;
+    await t.expect(srcTextContent).eql(trgTextContent);
+  };
 
   /**
    * Asserts that fragment is exist - its selector returns one or more DOM
