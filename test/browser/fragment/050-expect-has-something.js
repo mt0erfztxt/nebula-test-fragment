@@ -4,8 +4,8 @@ import expect from 'unexpected';
 
 import {Fragment} from '../../../src';
 
-fixture `Fragment :: 050 #expectSomethingIndexIs()`
-  .page(appRootPath.path + '/test/fixtures/fragment/050-expect-something-index-is.html');
+fixture `Fragment :: 050 #expectHasSomething()`
+  .page(appRootPath.path + '/test/fixtures/fragment/050-expect-has-something.html');
 
 class Bar extends Fragment {
 }
@@ -84,11 +84,10 @@ Object.defineProperties(Foo, {
 
 test("010 It should throw error when fragment class doesn't have corresponding getter", async () => {
   let isThrown = false;
-
   const foo = new Foo();
 
   try {
-    await foo.expectSomethingIndexIs('Buz', null, null, 1);
+    await foo.expectHasSomething('Buz', null, null);
   }
   catch (e) {
     expect(e.message, 'to equal', "'Foo' fragment must have 'getBuz' method but it doesn't");
@@ -98,13 +97,42 @@ test("010 It should throw error when fragment class doesn't have corresponding g
   expect(isThrown, 'to be true');
 });
 
-test("020 It should throw error when fragment of something not found at specified index", async (t) => {
+test("020 It should throw error when fragment of something doesn't exist in fragment", async () => {
   let isThrown = false;
-
   const foo = new Foo();
 
   try {
-    await foo.expectSomethingIndexIs('Bar', {cid: '0'}, null, 1);
+    await foo.expectHasSomething('Bar', {cid: '42'}, null);
+  }
+  catch (e) {
+    const msgPattern = /.*'Bar' fragment's selector must return exactly one DOM element but it doesn't: expected 0.*/;
+    expect(e.errMsg, 'to match', msgPattern);
+    isThrown = true;
+  }
+
+  expect(isThrown, 'to be true');
+});
+
+test("030 It should not throw error when fragment of something does exist in fragment", async () => {
+  let isThrown = false;
+  const foo = new Foo();
+
+  try {
+    await foo.expectHasSomething('Bar', {cid: '1'}, null);
+  }
+  catch (e) {
+    isThrown = true;
+  }
+
+  expect(isThrown, 'to be false');
+});
+
+test("040 It should throw error when fragment of something does exist in fragment but not at specified index", async () => {
+  let isThrown = false;
+  const foo = new Foo();
+
+  try {
+    await foo.expectHasSomething('Bar', {cid: '0'}, null, {idx: 1});
   }
   catch (e) {
     const msgPattern = /.*expected 'bar 0' to deeply equal 'bar 1'.*/;
@@ -115,13 +143,12 @@ test("020 It should throw error when fragment of something not found at specifie
   expect(isThrown, 'to be true');
 });
 
-test("030 It should not throw error when fragment of something found at specified index", async (t) => {
+test("050 It should not throw error when fragment of something does exist in fragment at specified index", async () => {
   let isThrown = false;
-
   const foo = new Foo();
 
   try {
-    await foo.expectSomethingIndexIs('Bar', {cid: '1'}, null, 1);
+    await foo.expectHasSomething('Bar', {cid: '1'}, null, {idx: 1});
   }
   catch (e) {
     isThrown = true;

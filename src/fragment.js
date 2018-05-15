@@ -393,6 +393,40 @@ class Fragment {
   }
 
   /**
+   * Asserts that fragment has other fragment, named `somethingName`, and that
+   * other fragment must be obtained using `somethingSpecification` and
+   * `somethingOptions`, and optionally, asserts that other fragment found at
+   * position specified by `idx`.
+   *
+   * @param {string} somethingName - Name of something. For example, in Dialog it can be an Action
+   * @param {*} somethingSpecification - See `spec` parameter of Something's constructor
+   * @param {*} somethingOptions - See `opts` parameter of Something's constructor
+   * @param {Options} [options] - Options
+   * @param {number} [options.idx] - Position at which other fragment must be found to pass assertion. Must be an integer greater than or equal zero
+   * @return {Promise<void>}
+   * @throws {TypeError} When argument aren't valid.
+   */
+  async expectHasSomething(somethingName, somethingSpecification, somethingOptions, options) {
+    const opts = utils.initializeOptions(options);
+    const getterName = `get${somethingName}`;
+
+    if (!_.isFunction(this[getterName])) {
+      throw new TypeError(
+        `'${this.displayName}' fragment must have '${getterName}' method but it doesn't`
+      );
+    }
+
+    const something = this[getterName](somethingSpecification, somethingOptions);
+    await something.expectIsExist();
+
+    const {idx} = opts;
+
+    if (_.isInteger(idx)) {
+      await something.expectIndexInParentIs(this.selector, idx);
+    }
+  }
+
+  /**
    * Asserts that fragment is exist and found in parent at specified index.
    *
    * @param {*} parent - Same as `Fragment` constructor's `spec.parent` argument
@@ -492,30 +526,6 @@ class Fragment {
 
     opts['isNot'] = !opts.isNot;
     await this.expectIsExist(opts);
-  }
-
-  /**
-   * Do the same as `expectIndexInParentIs()` but from other side - asserts
-   * that other fragment, named `Something`, found in fragment at specified
-   * index. Note that fragment must have `get[Something]()` method.
-   *
-   * @param {string} Something - Name of something, for example, in `Dialog` it can be an 'Action'
-   * @param {object} spec - See `spec` parameter of `Something` constructor
-   * @param {Options} opts - See `opts` parameter of `Something` constructor
-   * @param {number} idx - Position at which something must be found to pass assertion. Must be an integer greater or equal zero
-   * @throws {TypeError} When requirements failed.
-   */
-  async expectSomethingIndexIs(Something, spec, opts, idx) {
-    const getterName = `get${Something}`;
-
-    if (!_.isFunction(this[getterName])) {
-      throw new TypeError(
-        `'${this.displayName}' fragment must have '${getterName}' method but it doesn't`
-      );
-    }
-
-    const something = this[getterName](spec, opts);
-    await something.expectIndexInParentIs(this.selector, idx);
   }
 
   /**
