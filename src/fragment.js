@@ -280,6 +280,27 @@ class Fragment {
   }
 
   /**
+   * Asserts that count of somethings in fragment equal value specified in
+   * `count`.
+   *
+   * @param {*} somethingSelector - TestCafe selector for something
+   * @param {array|number} count - Fragment must have that number of somethings to pass assertion. When you need more flexibility than just equality pass an `Array` with TestCafe assertion name (default to 'eql') as first element and expected value for assertion as second, for example, `['gte', 3]`
+   * @param {Options} [options] - Options
+   * @param {boolean} [options.isNot=false] - When `true` assertion would be negated
+   */
+  static async expectSomethingsCountIs(somethingSelector, count, options) {
+    let assertionName = 'eql';
+    const opts = utils.initializeOptions(options, {defaults: {isNot: false}});
+
+    if (_.isArray(count)) {
+      [assertionName, count] = count;
+    }
+
+    assertionName = utils.buildTestCafeAssertionName(assertionName, opts);
+    await t.expect(somethingSelector.count)[assertionName](count);
+  }
+
+  /**
    * Initializes passed in `spec` and `opts` so they can be conveniently passed
    * to fragment's constructor.
    *
@@ -398,6 +419,8 @@ class Fragment {
    * `somethingOptions`, and optionally, asserts that other fragment found at
    * position specified by `idx`.
    *
+   * It requires that fragment has `#get[somethingName]()` method implemented.
+   *
    * @param {string} somethingName - Name of something. For example, in Dialog it can be an Action
    * @param {*} somethingSpecification - See `spec` parameter of Something's constructor
    * @param {*} somethingOptions - See `opts` parameter of Something's constructor
@@ -408,21 +431,66 @@ class Fragment {
    */
   async expectHasSomething(somethingName, somethingSpecification, somethingOptions, options) {
     const opts = utils.initializeOptions(options);
-    const getterName = `get${somethingName}`;
+    const somethingGetterName = `get${ucFirst(somethingName)}`;
 
-    if (!_.isFunction(this[getterName])) {
+    if (!_.isFunction(this[somethingGetterName])) {
       throw new TypeError(
-        `'${this.displayName}' fragment must have '${getterName}' method but it doesn't`
+        `'${this.displayName}' fragment must have '${somethingGetterName}' method but it doesn't`
       );
     }
 
-    const something = this[getterName](somethingSpecification, somethingOptions);
+    const something = this[somethingGetterName](somethingSpecification, somethingOptions);
     await something.expectIsExist();
 
     const {idx} = opts;
 
     if (_.isInteger(idx)) {
       await something.expectIndexInParentIs(this.selector, idx);
+    }
+  }
+
+  /**
+   * Asserts that fragment has list of other fragments, named `somethingName`,
+   * and that other fragments. Optionally, asserts that `this` fragment has
+   * only specified other fragments, and, also optionally, asserts that other
+   * fragments found in fragment in same order as in
+   * `somethingSpecificationsAndOptions`.
+   *
+   * It requires that fragment has `#expect[somethingName]sCountIs()` and
+   * `#expectHas[somethingName]()` methods.
+   *
+   * @param {string} somethingName - Name of something. For example, in Dialog it can be an Action
+   * @param {array} somethingSpecificationsAndOptions - An array where each element is an array of two elements - something's specification and something's options. See `spec` and `opts` arguments of something's constructor
+   * @param {Options} [options] - Options
+   * @param {boolean} [options.only=false] - When `true` fragment must have only specified other fragments to pass assertion
+   * @param {boolean} [options.sameOrder=false] - When `true` other fragments must be found in fragment in same order as in `somethingSpecificationsAndOptions` to pass assertion. Work only in conjunction with `only` parameter
+   * @throws {TypeError} When requirements failed.
+   */
+  async expectHasSomethings(somethingName, somethingSpecificationsAndOptions, options) {
+    const len = somethingSpecificationsAndOptions.length;
+    const opts = utils.initializeOptions(options, {defaults: {only: false, sameOrder: false}});
+    const {only, sameOrder} = opts;
+
+    if (only === true) {
+      const counterMethodName = `expect${ucFirst(somethingName)}sCountIs`;
+
+      if (!_.isFunction(this[counterMethodName])) {
+        throw new TypeError(
+          `'${this.displayName}' fragment must have '${counterMethodName}' method but it doesn't`
+        );
+      }
+
+      await this[counterMethodName](len);
+    }
+
+    for (let i = 0; i < len; i++) {
+      const idx = (only === true && sameOrder === true && i);
+      await this.expectHasSomething(
+        somethingName,
+        somethingSpecificationsAndOptions[i][0],
+        somethingSpecificationsAndOptions[i][1],
+        {idx}
+      );
     }
   }
 
