@@ -6,36 +6,6 @@ import typeOf from 'typeof--';
 import utils from './utils';
 
 /**
- * Accepts TestCafe selector initializer and creates new selector filtered by
- * `text`. It's a wrapper around TestCafe's `withText` selector that provides
- * filtering by text equality. Needed because currently TestCafe's `withText`
- * always filters by regular expression matching.
- *
- * @param {*} selectorInitializer - Anything that TestCafe accepts as initializer for `Selector`
- * @param {*} text - Text to equal/match. When it's not a string/RegExp it would be stringified beforehand
- * @param {?Options} [options] - Options
- * @param {boolean} [options.isNot=false] - When truthy then filter would be negated. Not implemented yet
- * @returns {object} Returns TestCafe selector.
- */
-function filterByText(selectorInitializer, text, options) {
-  const opts = utils.initializeOptions(options, {defaults: {isNot: false}});
-  const {isNot} = opts;
-
-  if (isNot) {
-    throw new Error(
-      `'options.isNot' argument functionality is not implemented yet`
-    );
-  }
-
-  // XXX TestCafe, currently, always converts `withText` argument to `RegExp`
-  // and so we must use workaround to use string equality.
-  const textAsRegExp = _.isRegExp(text) ?
-    text : new RegExp(`^${escapeStringRegexp('' + text)}$`);
-
-  return Selector(selectorInitializer).withText(textAsRegExp);
-}
-
-/**
  * Asserts that TestCafe selector initialized using `selectorInitializer` have
  * specified (CSS) class names. Note that TestCafe's auto wait feature used
  * to test for presence/absence of each (CSS) class name of `classNames`.
@@ -135,8 +105,90 @@ async function expectHasClassNames(selectorInitializer, classNames, options) {
   }
 }
 
+/**
+ * Accepts TestCafe selector initializer and creates new selector filtered by
+ * attribute.
+ *
+ * @param {*} selectorInitializer - Anything that TestCafe accepts as its `Selector` initializer
+ * @param {string[]|string} attribute - Attribute to filter by. Must be an array where first element is an attribute name, which must be a non-blank string, and second is optional attribute value. When it's a nil then selector would be filtered by existence of attribute. When it's a regular expression then selector would be filtered by matching its value to that regular expression. Otherwise selector would be filtered by strict equality of attribute value to stringified version of that value. When attribute has no value (a nil value) then just string of attribute name can be passed instead. Examples: ['foo', /.*bar$/], ['cid', 1], ['disabled'], 'disabled
+ * @param {Options} [options] - Options
+ * @param {boolean} [options.isNot=false] - When `true` then filter condition would be negated, for example, calling it with 'value', 123, `false` would return selector with only DOM nodes that doesn't have 'value' attribute with value equal '123'
+ * @returns {Selector}
+ */
+function filterByAttribute(selectorInitializer, attribute, options) {
+  const opts = utils.initializeOptions(options, {defaults: {isNot: false}});
+  const {isNot} = opts;
+
+  let attrName = attribute;
+  let attrValue = null;
+
+  if (_.isArray(attribute)) {
+    [attrName, attrValue] = attribute;
+  }
+
+  if (!utils.isNonBlankString(attrName)) {
+    throw new TypeError(
+      `Attribute name must be a non-blank string but it is ${typeOf(attrName)} (${attrName})`
+    );
+  }
+
+  return Selector(selectorInitializer).filter(
+    (node) => {
+      if (!node.hasAttribute(attrName)) {
+        return !!isNot;
+      }
+
+      if (attrValue === void(0) || attrValue === null) {
+        return !isNot;
+      }
+
+      const attr = node.getAttribute(attrName);
+
+      // When attribute value is `RegExp` we use match otherwise we use string equality.
+      if (attrValue.test && attrValue.exec && (attrValue.ignoreCase || attrValue.ignoreCase === false)) {
+        const matches = attrValue.test(attr);
+        return isNot ? !matches : matches;
+      }
+      else {
+        return isNot ? (attr !== (attrValue + '')) : (attr === (attrValue + ''));
+      }
+    }, {attrName, attrValue, isNot} // dependencies
+  );
+}
+
+/**
+ * Accepts TestCafe selector initializer and creates new selector filtered by
+ * `text`. It's a wrapper around TestCafe's `withText` selector that provides
+ * filtering by text equality. Needed because currently TestCafe's `withText`
+ * always filters by regular expression matching.
+ *
+ * @param {*} selectorInitializer - Anything that TestCafe accepts as initializer for `Selector`
+ * @param {*} text - Text to equal/match. When it's not a string/RegExp it would be stringified beforehand
+ * @param {?Options} [options] - Options
+ * @param {boolean} [options.isNot=false] - When truthy then filter would be negated. Not implemented yet
+ * @returns {object} Returns TestCafe selector.
+ */
+function filterByText(selectorInitializer, text, options) {
+  const opts = utils.initializeOptions(options, {defaults: {isNot: false}});
+  const {isNot} = opts;
+
+  if (isNot) {
+    throw new Error(
+      `'options.isNot' argument functionality is not implemented yet`
+    );
+  }
+
+  // XXX TestCafe, currently, always converts `withText` argument to `RegExp`
+  // and so we must use workaround to use string equality.
+  const textAsRegExp = _.isRegExp(text) ?
+    text : new RegExp(`^${escapeStringRegexp('' + text)}$`);
+
+  return Selector(selectorInitializer).withText(textAsRegExp);
+}
+
 const selector = {
   expectHasClassNames,
+  filterByAttribute,
   filterByText
 };
 
