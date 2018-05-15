@@ -1,9 +1,9 @@
 import _ from 'lodash';
+import {ucFirst} from 'change-case';
 import {Selector, t} from 'testcafe';
 import typeOf from 'typeof--'
 
 import bem from "./bem";
-import selector from "./selector";
 import utils from './utils';
 
 /**
@@ -253,12 +253,30 @@ class Fragment {
   }
 
   /**
+   * Initialized fragment options.
+   *
+   * @return {Options}
+   */
+  get opts() {
+    return this._opts;
+  }
+
+  /**
    * TestCafe's selector for fragment.
    *
    * @return {Selector}
    */
   get selector() {
     return this._selector;
+  }
+
+  /**
+   * Initialized fragment specification.
+   *
+   * @return {Options}
+   */
+  get spec() {
+    return this._spec;
   }
 
   /**
@@ -477,6 +495,30 @@ class Fragment {
   }
 
   /**
+   * Do the same as `expectIndexInParentIs()` but from other side - asserts
+   * that other fragment, named `Something`, found in fragment at specified
+   * index. Note that fragment must have `get[Something]()` method.
+   *
+   * @param {string} Something - Name of something, for example, in `Dialog` it can be an 'Action'
+   * @param {object} spec - See `spec` parameter of `Something` constructor
+   * @param {Options} opts - See `opts` parameter of `Something` constructor
+   * @param {number} idx - Position at which something must be found to pass assertion. Must be an integer greater or equal zero
+   * @throws {TypeError} When requirements failed.
+   */
+  async expectSomethingIndexIs(Something, spec, opts, idx) {
+    const getterName = `get${Something}`;
+
+    if (!_.isFunction(this[getterName])) {
+      throw new TypeError(
+        `'${this.displayName}' fragment must have '${getterName}' method but it doesn't`
+      );
+    }
+
+    const something = this[getterName](spec, opts);
+    await something.expectIndexInParentIs(this.selector, idx);
+  }
+
+  /**
    * Returns array of CSS class names of fragment's selector that have `name`
    * as name of BEM modifier. When `name` is nil array would contain all CSS
    * class names that have (any) BEM modifier.
@@ -511,6 +553,63 @@ class Fragment {
     }
 
     return bemMods;
+  }
+
+  /**
+   * Returns instance of `FragmentOfSomething` that matches `spec`. Optional BEM
+   * base for `FragmentOfSomething` can be provided as `optsOfSomething` when
+   * needed.
+   *
+   * @param {*} FragmentOfSomething - Fragment class of something, must be descendant of `Fragment` class
+   * @param {object} [specOfSomething] - See `spec` parameter of `FragmentOfSomething` constructor
+   * @param {object} [optsOfSomething] - See `opts` parameter of `FragmentOfSomething` constructor
+   * @returns {*}
+   * @throws {TypeError} When argument aren't valid.
+   */
+  getSomething(FragmentOfSomething, specOfSomething, optsOfSomething) {
+    if (!(FragmentOfSomething && FragmentOfSomething.isFragment)) {
+      throw new TypeError(
+        `'FragmentOfSomething' argument must be a fragment class but it is ` +
+        `${typeOf(FragmentOfSomething)} (${FragmentOfSomething})`
+      );
+    }
+
+    if (specOfSomething instanceof Fragment) {
+      throw new TypeError(
+        `'specOfSomething' argument is a '${specOfSomething.displayName}' fragment but it must be a fragment ` +
+        'specification or nil'
+      );
+    }
+
+    const somethingSpec = _.assign({}, {parent: this.selector}, specOfSomething);
+    return new FragmentOfSomething(somethingSpec, optsOfSomething);
+  }
+
+  /**
+   * Returns class of named fragment that exists as property of fragment, its
+   * class or in fragments hierarchy up to `RootFragmentOfSomething`.
+   *
+   * @param {string} name - Name (without 'Fragment' suffix) of fragment's class to return
+   * @param {class} RootFragmentOfSomething - Root of fragments hierarchy
+   * @return {class}
+   * @throws {TypeError} When matching fragment class not found.
+   */
+  getSomethingFragment(name, RootFragmentOfSomething) {
+    const propName = ucFirst(name) + 'Fragment'; // e.g. 'TextInputFragment'
+
+    const FromInst = this.opts[propName];
+    const FromClass = this.constructor[propName];
+    const FromParent = (this instanceof RootFragmentOfSomething && this.constructor !== RootFragmentOfSomething && super[propName]);
+
+    const SomethingFragment = FromInst || FromClass || FromParent;
+
+    if (!(SomethingFragment && SomethingFragment.isFragment)) {
+      throw new TypeError(
+        `'${propName}' must be a fragment class but it is ${typeOf(SomethingFragment)} (${SomethingFragment})`
+      );
+    }
+
+    return SomethingFragment;
   }
 }
 
