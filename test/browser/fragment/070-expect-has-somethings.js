@@ -66,26 +66,6 @@ class Foo extends Fragment {
     return this._barSelector;
   }
 
-  // /**
-  //  * Asserts that fragment has list of other fragments, named `somethingName`,
-  //  * and that other fragments. Optionally, asserts that `this` fragment has
-  //  * only specified other fragments, and, also optionally, asserts that other
-  //  * fragments found in fragment in same order as in
-  //  * `somethingSpecificationsAndOptions`.
-  //  *
-  //  * It requires that fragment has `#expect[somethingName]sCountIs()` method
-  //  * implemented.
-  //  *
-  //  * @param {array} barSpecificationsAndOptions - An array where each element is an array of two elements - item's specification and item's options. See `spec` and `opts` arguments of item's constructor
-  //  * @param {Options} options - Options
-  //  * @param {boolean} [options.only=false] - When `true` fragment must have only specified other fragments to pass assertion
-  //  * @param {boolean} [options.sameOrder=false] - When `true` other fragments must be found in fragment in same order as in `somethingSpecificationsAndOptions` to pass assertion. Work only in conjunction with `only` parameter
-  //  * @throws {TypeError} When requirements failed.
-  //  */
-  // async expectHasBars(barSpecificationsAndOptions, options) {
-  //   await this.expectHasSomethings('Bar', barSpecificationsAndOptions, options);
-  // }
-
   /**
    * Asserts that count of items in fragment equal value specified in `count`.
    *

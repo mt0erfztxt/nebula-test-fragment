@@ -1,9 +1,11 @@
 import _ from 'lodash';
+import escapeStringRegexp from 'escape-string-regexp';
 import {ucFirst} from 'change-case';
 import {Selector, t} from 'testcafe';
 import typeOf from 'typeof--'
 
 import bem from "./bem";
+import selector from "./selector";
 import utils from './utils';
 
 /**
@@ -377,6 +379,144 @@ class Fragment {
    */
   cloneBemBase() {
     return new bem.BemBase(this.bemBase);
+  }
+
+  /**
+   * Asserts that fragment's selector conforms specified requirements.
+   *
+   * @param {object} [requirements] - Requirements. Nil means assert only for existence
+   * @param {array} [requirements.attributes] - Allows to assert that fragment's selector have or have no specified attribute(-s). Each element of array is:
+   - First element is an attribute name which is a string. `RegExp` attribute name is not supported.
+   - Second optional element is an attribute value and when it's a `nil` then assertion would be just for presence of attribute with specified name, when it's a `RegExp` then value of attribute must match that value to pass assertion, otherwise attribute value must be equal stringified version of that value to pass assertion.
+   - Third optional element can be used to specify that assertion condition must be negated, for example, `['value', 123]` requirement can be used to assert that fragment's selector has 'value' attribute equal to '123' and `['value', 123, true]` requirement can be used to assert that fragment's selector has no 'value' attribute with value equal '123'.
+   Because second and third elements are optional we can pass just attribute name to assert that fragment's selector has that attribute, for example, `['disabled']` can be simplified to just `'disabled'`
+   * @param {object} [requirements.bemModifiers] - Allows to assert that fragment's selector have or have no specified BEM modifier(-s). Same as for `requirements.attributes` but instead of attribute name and value pass BEM modifier name and value
+   * @param {string} [requirements.tagName] - Allows to assert that fragment's selector rendered using specified tag
+   * @param {array|string|RegExp} [requirements.text] - Allows to assert that fragment selector's text equal or matches specified value. Condition of assertion can be reversing by passing `Array` where first element is a text and second is a flag that specifies whether condition must be negated or not, for example, `'Qwerty'` can be used to assert that text of fragment's selector is equal 'Qwerty' and `['Qwerty', true]'` can be used to assert that text of `selector` isn't equal 'Qwerty'
+   * @param {*} [requirements.textContent] - Allows to assert that fragment selector's text content equal or matches specified value. When value is not regular expression it would be coerced to string as `value + ''`. To negate assertion condition pass `Array` with text content and boolean flag, see `requirements.text` for examples
+   */
+  async expectExistsAndConformsRequirements(requirements) {
+    await this.expectIsExist();
+
+    if (_.isNil(requirements)) {
+      return;
+    }
+
+    if (!_.isPlainObject(requirements)) {
+      throw new TypeError(
+        `'requirements' argument must be a nil or plain object but it is ${typeOf(requirements)} (${requirements})`
+      );
+    }
+
+    // Attributes asserted by one at a time!
+    if (requirements.attributes) {
+      if (!_.isArray(requirements.attributes)) {
+        throw new TypeError(
+          `'requirements.attributes' argument must be an array but it is ` +
+          `${typeOf(requirements.attributes)} (${requirements.attributes})`
+        );
+      }
+
+      for (const item of requirements.attributes) {
+        let attrName = item;
+        let attrValue = null;
+        let isNot = false;
+
+        if (_.isArray(item)) {
+          [attrName, attrValue, isNot] = item;
+        }
+
+        let errorMessage = `Expected '${this.displayName}' fragment's selector to `;
+        const sel = selector.filterByAttribute(this.selector, [attrName, attrValue], {isNot});
+
+        if (isNot) {
+          errorMessage += 'not ';
+        }
+
+        errorMessage += `return DOM element with attribute '${attrName}'`;
+
+        if (!_.isNil(attrValue)) {
+          errorMessage += ` valued '${attrValue}'`;
+        }
+
+        await t.expect(sel.count).eql(1, errorMessage);
+      }
+    }
+
+    // BEM modifiers asserted by one at a time!
+    if (requirements.bemModifiers) {
+      if (!_.isArray(requirements.bemModifiers)) {
+        throw new TypeError(
+          `'requirements.bemModifiers' argument must be an array but it is ` +
+          `${typeOf(requirements.bemModifiers)} (${requirements.bemModifiers})`
+        );
+      }
+
+      for (const item of requirements.bemModifiers) {
+        let mod = item;
+        let isNot = false;
+
+        if (_.isArray(item)) {
+          [mod, isNot] = item;
+        }
+
+        const assertion = isNot ? 'expectHasNoBemModifier' : 'expectHasBemModifier';
+        await this[assertion](mod);
+      }
+    }
+
+    if (requirements.tagName) {
+      if (!utils.isNonBlankString(requirements.tagName)) {
+        throw new TypeError(
+          `'requirements.tagName' argument must be a nil or non-blank string but it is ` +
+          `${typeOf(requirements.tagName)} (${requirements.tagName})`
+        );
+      }
+
+      await t.expect(this.selector.tagName).eql(requirements.tagName);
+    }
+
+    if (_.has(requirements, 'text')) {
+      let expectedValue = requirements.text;
+      let isNot = false;
+
+      if (_.isArray(requirements.text)) {
+        expectedValue = requirements.text[0];
+        isNot = !!requirements.text[1];
+      }
+
+      // XXX TestCafe, currently, always converts `withText`'s' argument to
+      // `RegExp` and so we must use workaround to use string equality.
+      // await t.expect(selector.withText(requirements.text).count).eql(1);
+      const expectedValueAsRegExp = _.isRegExp(expectedValue) ?
+        expectedValue : new RegExp(`^${escapeStringRegexp(expectedValue + '')}$`);
+
+      await t
+        .expect(this.selector.withText(expectedValueAsRegExp).count)
+        .eql(
+          isNot ? 0 : 1,
+          `'${this.displayName}' fragment's selector text must ${isNot ? 'not ' : ''}match ${expectedValueAsRegExp}`
+        );
+    }
+
+    if (_.has(requirements, 'textContent')) {
+      let expectedValue = requirements.textContent;
+      let isNot = false;
+
+      if (_.isArray(requirements.textContent)) {
+        expectedValue = requirements.textContent[0];
+        isNot = !!requirements.textContent[1];
+      }
+
+      if (_.isRegExp(expectedValue)) {
+        const assertion = isNot ? 'notMatch' : 'match';
+        await t.expect(this.selector.textContent)[assertion](expectedValue);
+      }
+      else {
+        const assertion = isNot ? 'notEql' : 'eql';
+        await t.expect(this.selector.textContent)[assertion](expectedValue + '');
+      }
+    }
   }
 
   /**
