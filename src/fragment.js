@@ -1,6 +1,7 @@
 import _ from 'lodash';
+import {detailedDiff} from 'deep-object-diff';
 import escapeStringRegexp from 'escape-string-regexp';
-import {ucFirst} from 'change-case';
+import {pascalCase, ucFirst} from 'change-case';
 import {Selector, t} from 'testcafe';
 import typeOf from 'typeof--'
 
@@ -289,6 +290,7 @@ class Fragment {
    * @param {array|number} count - Fragment must have that number of somethings to pass assertion. When you need more flexibility than just equality pass an `Array` with TestCafe assertion name (default to 'eql') as first element and expected value for assertion as second, for example, `['gte', 3]`
    * @param {Options} [options] - Options
    * @param {boolean} [options.isNot=false] - When `true` assertion would be negated
+   * @return {Promise<void>}
    */
   static async expectSomethingsCountIs(somethingSelector, count, options) {
     let assertionName = 'eql';
@@ -394,6 +396,7 @@ class Fragment {
    * @param {string} [requirements.tagName] - Allows to assert that fragment's selector rendered using specified tag
    * @param {array|string|RegExp} [requirements.text] - Allows to assert that fragment selector's text equal or matches specified value. Condition of assertion can be reversing by passing `Array` where first element is a text and second is a flag that specifies whether condition must be negated or not, for example, `'Qwerty'` can be used to assert that text of fragment's selector is equal 'Qwerty' and `['Qwerty', true]'` can be used to assert that text of `selector` isn't equal 'Qwerty'
    * @param {*} [requirements.textContent] - Allows to assert that fragment selector's text content equal or matches specified value. When value is not regular expression it would be coerced to string as `value + ''`. To negate assertion condition pass `Array` with text content and boolean flag, see `requirements.text` for examples
+   * @return {Promise<void>}
    */
   async expectExistsAndConformsRequirements(requirements) {
     await this.expectIsExist();
@@ -604,6 +607,7 @@ class Fragment {
    * @param {Options} [options] - Options
    * @param {boolean} [options.only=false] - When `true` fragment must have only specified other fragments to pass assertion
    * @param {boolean} [options.sameOrder=false] - When `true` other fragments must be found in fragment in same order as in `somethingSpecificationsAndOptions` to pass assertion. Work only in conjunction with `only` parameter
+   * @return {Promise<void>}
    * @throws {TypeError} When requirements failed.
    */
   async expectHasSomethings(somethingName, somethingSpecificationsAndOptions, options) {
@@ -737,6 +741,54 @@ class Fragment {
   }
 
   /**
+   * Asserts that fragment's current state is equal state specified by
+   * `stateOrId`.
+   *
+   * @param {object|string} stateOrId - When it's an object than fragment's current state must be deeply equal it to pass assertion, otherwise it must be a string - id of persisted state to which fragment's current state must be deeply equal to pass assertion
+   * @param {Options} [options] - Options. Same as in `#getState()` plus following ones
+   * @param {boolean} [options.debug=false] - When truthy then detailed diff would be logged to console on assertion failure
+   * @return {Promise<void>}
+   * @throws {TypeError} When arguments aren't valid.
+   */
+  async expectStateIs(stateOrId, options) {
+    if (!(_.isPlainObject(stateOrId) || utils.isNonBlankString(stateOrId))) {
+      throw new TypeError(
+        `'stateOrId' argument must be a plain object or non-blank string but it is ` +
+        `${typeOf(stateOrId)} (${stateOrId})`
+      );
+    }
+
+    const stateToMatch = _.isPlainObject(stateOrId) ? stateOrId : this.getPersistedState(stateOrId);
+
+    if (!_.isPlainObject(stateToMatch)) {
+      throw new TypeError(
+        `State to match must be a plain object but it is ${typeOf(stateToMatch)} (${stateToMatch})`
+      );
+    }
+
+    const opts = utils.initializeOptions(options, {defaults: {debug: false}});
+    const currentState = await this.getState(_.omit(opts, ['debug']));
+
+    if (opts.debug) {
+      console.log('// ----------------------------- Current State --------------------------------');
+      console.log(JSON.stringify(currentState, null, '\t'));
+      console.log('// ----------------------------------------------------------------------------');
+      console.log();
+      console.log('// ------------------------------Expected State--------------------------------');
+      console.log(JSON.stringify(stateToMatch, null, '\t'));
+      console.log('// ----------------------------------------------------------------------------');
+    }
+
+    await t
+      .expect(currentState)
+      .eql(
+        stateToMatch,
+        `'${this.displayName}' fragment's current state doesn't match expected\n` +
+        `${JSON.stringify(detailedDiff(stateToMatch, currentState), null, '\t')}\n`
+      );
+  }
+
+  /**
    * Returns array of CSS class names of fragment's selector that have `name`
    * as name of BEM modifier. When `name` is nil array would contain all CSS
    * class names that have (any) BEM modifier.
@@ -771,6 +823,31 @@ class Fragment {
     }
 
     return bemMods;
+  }
+
+  /**
+   * Returns fragment's state that was persisted earlier under specified `id`.
+   *
+   * @param {string} id - Id of state that was persisted earlier
+   * @returns {object|null} Persisted state.
+   * @throws {TypeError} When argument isn't valid or persisted state identified by `id` not exists.
+   */
+  getPersistedState(id) {
+    if (!utils.isNonBlankString(id)) {
+      throw new TypeError(
+        `'id' argument must be a non-blank string but it is ${typeOf(id)} (${id})`
+      );
+    }
+
+    const state = this._persistedStates && this._persistedStates[id];
+
+    if (_.isUndefined(state)) {
+      throw new TypeError(
+        `Persisted state with id '${id}' does not exist`
+      );
+    }
+
+    return state;
   }
 
   /**
@@ -828,6 +905,209 @@ class Fragment {
     }
 
     return SomethingFragment;
+  }
+
+  /**
+   * Returns fragment's state (all parts).
+   *
+   * @param {Options} [options] - Options
+   * @param {string[]} [options.omitParts] - Only parts of state that not found in that list would be in returned state. Applied after `options.onlyParts`
+   * @param {string[]} [options.onlyParts] - Only parts of state that found in that list would be in returned state. Applied before `options.omitParts`
+   * @return {Promise<{}>}
+   * @throws {TypeError} When arguments aren't valid.
+   */
+  async getState(options) {
+    let statePartList = this.getStateParts();
+
+    if (!_.isArray(statePartList)) {
+      throw new Error(
+        `'${this.displayName}#getStateParts()' must return an array of state parts but it return ` +
+        `${typeOf(statePartList)} (${statePartList})`
+      );
+    }
+    else {
+      statePartList = _.uniq(statePartList);
+    }
+
+    const opts = utils.initializeOptions(options);
+    const {omitParts, onlyParts, waitBefore} = opts;
+
+    if (waitBefore) {
+      await t.wait(waitBefore);
+    }
+
+    if (!(_.isNil(omitParts) || (_.isArray(omitParts) && _.every(omitParts, utils.isNonBlankString)))) {
+      throw new TypeError(
+        `'options.omitParts' argument must be a nil or array of non-blank strings but it is ` +
+        `${typeOf(omitParts)} (${omitParts})`
+      );
+    }
+
+    if (!(_.isNil(onlyParts) || (_.isArray(onlyParts) && _.every(onlyParts, utils.isNonBlankString)))) {
+      throw new TypeError(
+        `'options.onlyParts' argument must be a nil or array of non-blank strings but it is ` +
+        `${typeOf(onlyParts)} (${onlyParts})`
+      );
+    }
+
+    const state = {};
+
+    if (statePartList.length) {
+      const partNames = [];
+      const partGetStatePromises = [];
+
+      for (const k of statePartList) {
+        let mustBeIncluded = true;
+        let mustBeExcluded = false;
+
+        if (onlyParts && !_.includes(onlyParts, k)) {
+          mustBeIncluded = false;
+        }
+
+        if (omitParts && _.includes(omitParts, k)) {
+          mustBeExcluded = true;
+        }
+
+        if (mustBeIncluded && !mustBeExcluded) {
+          const partOfStateGetterName = `get${pascalCase(k)}PartOfState`;
+          partNames.push(k);
+
+          if (!_.isFunction(this[partOfStateGetterName])) {
+            throw new TypeError(
+              `'${this.displayName}#${partOfStateGetterName}' must be a function but it is ` +
+              `${this[partOfStateGetterName]}`
+            );
+          }
+
+          partGetStatePromises.push(this[partOfStateGetterName](options));
+        }
+      }
+
+      const partStateList = await Promise.all(partGetStatePromises);
+      const partStateListLength = partStateList.length;
+
+      for (let i = 0; i < partStateListLength; i++) {
+        state[partNames[i]] = partStateList[i];
+      }
+    }
+
+    return state;
+  }
+
+  /**
+   * Returns list of fragment's state parts.
+   *
+   * @param {Options} [options] - Options
+   * @param {boolean} [options.onlyWritable=false] - When truthy then only writable state parts would be returned
+   * @return {Array} List of parts of fragment's state.
+   */
+  getStateParts(options) {
+    return [];
+  }
+
+  /**
+   * Persists fragment's state under specified `id` and returns it. When
+   * optional `state` argument is `nil` then fragment's current state would be
+   * persisted.
+   *
+   * @param {string} id - Id that would be used to identify persisted state
+   * @param {object} [state] - Optional, state that must be persisted. Pass `nil` to persist fragment's current state
+   * @param {Options} [options] - Options. Same as for `#getState()`
+   * @return {Promise<{}>} State that was persisted.
+   * @throws {TypeError} When arguments aren't valid.
+   */
+  async persistState(id, state, options) {
+    if (!utils.isNonBlankString(id)) {
+      throw new TypeError(
+        `'id' argument must be a non-blank string but it is ${typeOf(id)} (${id})`
+      );
+    }
+
+    if (_.isNil(state)) {
+      state = await this.getState(options);
+    }
+    else if (!_.isPlainObject(state)) {
+      throw new TypeError(
+        `'state' argument must be a nil or plain object but it is ${typeOf(state)} (${state})`
+      );
+    }
+
+    return this._persistedStates[id] = state;
+  }
+
+  /**
+   * Sets fragment's state to one that was persisted earlier and identified by
+   * passed `id`.
+   *
+   * @param {string} id - Id of state that was persisted earlier
+   * @return {Promise<{}>} Fragment's state after restore state operation is done.
+   * @throws {TypeError} When arguments aren't valid.
+   */
+  async restoreState(id) {
+    if (!utils.isNonBlankString(id)) {
+      throw new TypeError(
+        `'id' argument must be a non-blank string but it is ${typeOf(id)} (${id})`
+      );
+    }
+
+    const state = this._persistedStates && this._persistedStates[id];
+
+    if (!_.isPlainObject(state)) {
+      throw new TypeError(
+        `State, persisted under id '${id}', is not valid - it must be a plain object but it is ` +
+        `${typeOf(state)} (${state})`
+      );
+    }
+
+    return this.setState(state);
+  }
+
+  /**
+   * Sets state of fragment.
+   *
+   * @param {object|undefined} newState - New state for fragment. Passing `undefined` means "Do nothing and just return current state". Values for read-only parts silently ignored
+   * @param {Options} [options] - Options
+   * @return {Promise<{}>} Fragment's state, that have only updated (writable) parts, after set state operation was done.
+   * @throws {TypeError} When arguments aren't valid.
+   */
+  async setState(newState, options) {
+    if (_.isUndefined(newState)) {
+      return this.getState(options);
+    }
+
+    if (!_.isPlainObject(newState)) {
+      throw new TypeError(
+        `'newState' argument must be a plain object but it is ${typeOf(newState)} (${newState})`
+      );
+    }
+
+    let statePartList = this.getStateParts({onlyWritable: true});
+    const state = {};
+
+    if (!_.isArray(statePartList)) {
+      throw new Error(
+        `'${this.displayName}#getStateParts()' must return an array of state parts but it return ` +
+        `${typeOf(statePartList)} (${statePartList})`
+      );
+    }
+    else {
+      statePartList = _.uniq(statePartList);
+    }
+
+    for (let k of statePartList) {
+      const partOfStateSetterName = `set${pascalCase(k)}PartOfState`;
+
+      if (!_.isFunction(this[partOfStateSetterName])) {
+        throw new TypeError(
+          `'${this.displayName}#${partOfStateSetterName}' must be a function but it is ` +
+          `${typeOf(this[partOfStateSetterName])} (${this[partOfStateSetterName]})`
+        );
+      }
+
+      state[k] = await this[partOfStateSetterName](newState[k], options);
+    }
+
+    return state;
   }
 }
 

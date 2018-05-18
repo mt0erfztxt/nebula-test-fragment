@@ -21,6 +21,7 @@
     "babel-core": "^6.26.3",
     "babel-preset-env": "^1.6.1",
     "change-case": "^3.0.1",
+    "deep-object-diff": "^1.1.0",
     "escape-string-regexp": "^1.0.5",
     "lodash": "^4.17.10",
     "testcafe": "^0.16.2",

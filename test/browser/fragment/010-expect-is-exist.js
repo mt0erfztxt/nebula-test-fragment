@@ -123,7 +123,7 @@ test("070 It should allow to set custom message for error using `options.message
   expect(isThrown, 'to be true');
 });
 
-test("080 It should have complementary method named `expectIsNotExist", async (t) => {
+test("080 It should have complementary method named `expectIsNotExist", async () => {
   const fragment1 = new Fragment(null, {bemBase: 'non-existent'});
   const expectIsExistSpy1 = sinon.spy(fragment1, 'expectIsExist');
   await fragment1.expectIsNotExist();
