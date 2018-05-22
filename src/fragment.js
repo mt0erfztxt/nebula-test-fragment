@@ -374,6 +374,50 @@ class Fragment {
   }
 
   /**
+   * Makes new fragment class by extending provided base class and adding
+   * requested behavior.
+   *
+   * @param {Fragment} BaseFragment - Class of fragment that must be used as base fragment class
+   * @param {Options} [options] - Options
+   * @param {array} [options.stateParts] - Used to add state parts behavior. Must be an array where each item is an array of required state part name and optional state part options - see `statePartName` and `options` arguments [here]{@link Fragment.withPartOfStateMixin} for more details
+   * @return {Fragment}
+   */
+  static makeFragmentClass(BaseFragment, options) {
+    const opts = utils.initializeOptions(options, {
+      defaults: {
+        stateParts: []
+      },
+      validator: ({stateParts}) => {
+        let errMsg = null;
+
+        if (!_.isArray(stateParts)) {
+          errMsg = `'options.stateParts' argument must be an array but it is ${typeOf(stateParts)} (${stateParts})`
+        }
+
+        return errMsg;
+      }
+    });
+
+    let MadeFragment = BaseFragment;
+    const {stateParts} = opts;
+
+    if (!_.isEmpty(stateParts)) {
+      for (const statePart of stateParts) {
+        let statePartName = statePart;
+        let statePartOpts;
+
+        if (_.isArray(statePart)) {
+          [statePartName, statePartOpts] = statePart;
+        }
+
+        MadeFragment = this.withPartOfStateMixin(MadeFragment, statePartName, statePartOpts);
+      }
+    }
+
+    return MadeFragment;
+  }
+
+  /**
    * Returns new fragment class that is a descendant of base fragment class
    * and, additionally, have methods for part of state. See description of
    * available options for more about additionally generated methods.
