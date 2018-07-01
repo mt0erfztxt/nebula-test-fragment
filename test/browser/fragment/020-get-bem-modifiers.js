@@ -2,7 +2,7 @@ import appRootPath from 'app-root-path';
 import unexpected from 'unexpected';
 import unexpectedSinon from 'unexpected-sinon';
 
-import {Fragment} from '../../../src';
+import Fragment from '../../../src/fragment';
 
 const expect = unexpected.clone();
 expect.use(unexpectedSinon);
@@ -13,7 +13,7 @@ fixture `Fragment :: 020 #getBemModifiers()`
 test("010 It should throw error when `modifierName` argument is not a nil or non-blank string", async (t) => {
   let isThrown = false;
   let msg;
-  const fragment = new Fragment(null, {bemBase: 'foobar'});
+  const fragment = new Fragment(null, { bemBase: 'foobar' });
 
   await t.expect(fragment.selector.count).gte(1);
 
@@ -60,7 +60,7 @@ test("010 It should throw error when `modifierName` argument is not a nil or non
 
 test("020 It should throw error when fragment's BEM base already have BEM modifier", async (t) => {
   let isThrown = false;
-  const fragment = new Fragment(null, {bemBase: 'foobar--foo'});
+  const fragment = new Fragment(null, { bemBase: 'foobar--foo' });
 
   await t.expect(fragment.selector.count).gte(1);
 
@@ -78,7 +78,7 @@ test("020 It should throw error when fragment's BEM base already have BEM modifi
 
 test("030 It should throw error when fragment's selector does not return DOM elements", async (t) => {
   let isThrown = false;
-  const fragment = new Fragment(null, {bemBase: 'non-existent'});
+  const fragment = new Fragment(null, { bemBase: 'non-existent' });
 
   await t.expect(fragment.selector.count).eql(0);
 
@@ -96,7 +96,7 @@ test("030 It should throw error when fragment's selector does not return DOM ele
 
 test("040 It should throw error when fragment's selector return more than one DOM element", async (t) => {
   let isThrown = false;
-  const fragment = new Fragment(null, {bemBase: 'multiple'});
+  const fragment = new Fragment(null, { bemBase: 'multiple' });
 
   await t.expect(fragment.selector.count).gte(1);
 
@@ -113,16 +113,27 @@ test("040 It should throw error when fragment's selector return more than one DO
 });
 
 test("050 It should return array that contains all BEM modifiers when `modifierName` argument is nil", async () => {
-  const fragment = new Fragment(null, {bemBase: 'foobar'});
+  const fragment = new Fragment(null, { bemBase: 'foobar' });
   const bemModifiers = await fragment.getBemModifiers();
-  expect(bemModifiers, 'to equal', [['mod1'], ['no-mod2'], ['mod3', 'val']]);
+  expect(bemModifiers, 'to equal', [
+    ['mod1'],
+    ['no-mod2'],
+    ['mod3', 'val']
+  ]);
 });
 
 test("060 It should return array that contains only matching BEM modifiers when `modifierName` argument is not nil", async () => {
-  const fragment1 = new Fragment(null, {bemBase: 'bar1'});
-  expect(await fragment1.getBemModifiers('mod1'), 'to equal', [['mod1']]);
-  expect(await fragment1.getBemModifiers('mod3'), 'to equal', [['mod3', 'val']]);
+  const fragment1 = new Fragment(null, { bemBase: 'bar1' });
+  expect(await fragment1.getBemModifiers('mod1'), 'to equal', [
+    ['mod1']
+  ]);
+  expect(await fragment1.getBemModifiers('mod3'), 'to equal', [
+    ['mod3', 'val']
+  ]);
 
-  const fragment2 = new Fragment(null, {bemBase: 'bar2'});
-  expect(await fragment2.getBemModifiers('mod3'), 'to equal', [['mod3', 'val'], ['mod3', 'foo']]);
+  const fragment2 = new Fragment(null, { bemBase: 'bar2' });
+  expect(await fragment2.getBemModifiers('mod3'), 'to equal', [
+    ['mod3', 'val'],
+    ['mod3', 'foo']
+  ]);
 });

@@ -1,7 +1,7 @@
 import appRootPath from 'app-root-path';
 import unexpected from 'unexpected';
 
-import {Fragment} from '../../../src';
+import Fragment from '../../../src/fragment';
 
 const expect = unexpected.clone();
 
@@ -9,8 +9,7 @@ fixture `Fragment :: 150 .withPartOfStateMixin()`
   .page(appRootPath.path + '/test/fixtures/fragment/150-with-part-of-state-mixin.html');
 
 test("010 It should throw error when 'BaseFragment' argument is not a fragment class", async () => {
-  class NonFragment {
-  }
+  class NonFragment {}
 
   expect(
     () => Fragment.withPartOfStateMixin(NonFragment, 'foo'),
@@ -39,7 +38,7 @@ test("030 It should throw error when name of attribute/BEM modifier that holds v
 
 test("035 It should throw error when 'options.src' argument set to not supported value", async () => {
   expect(
-    () => Fragment.withPartOfStateMixin(Fragment, 'foo', {src: 'notSupported'}),
+    () => Fragment.withPartOfStateMixin(Fragment, 'foo', { src: 'notSupported' }),
     'to throw',
     (e) => {
       expect(e, 'to be a', TypeError);
@@ -56,7 +55,7 @@ test("040 It should generate part of state getter - case of 'options.isBoolean' 
   /**
    * @type {Fragment}
    */
-  const Foo040 = Fragment.withPartOfStateMixin(Fragment, 'disabled', {isBoolean: true});
+  const Foo040 = Fragment.withPartOfStateMixin(Fragment, 'disabled', { isBoolean: true });
 
   /**
    * @extends {Fragment}
@@ -84,13 +83,13 @@ test("040 It should generate part of state getter - case of 'options.isBoolean' 
     }
   });
 
-  const foobar040Cid0 = new Foobar040({cid: '0'});
-  await foobar040Cid0.expectExistsAndConformsRequirements({text: 'foobar040 cid0'});
+  const foobar040Cid0 = new Foobar040({ cid: '0' });
+  await foobar040Cid0.expectExistsAndConformsRequirements({ text: 'foobar040 cid0' });
   expect(foobar040Cid0.getDisabledPartOfState, 'to be a function');
   expect(await foobar040Cid0.getDisabledPartOfState(), 'to be false');
 
-  const foobar040Cid1 = new Foobar040({cid: '1'});
-  await foobar040Cid1.expectExistsAndConformsRequirements({text: 'foobar040 cid1'});
+  const foobar040Cid1 = new Foobar040({ cid: '1' });
+  await foobar040Cid1.expectExistsAndConformsRequirements({ text: 'foobar040 cid1' });
   expect(foobar040Cid1.getDisabledPartOfState, 'to be a function');
   expect(await foobar040Cid1.getDisabledPartOfState(), 'to be true');
 });
@@ -99,7 +98,7 @@ test("050 It should generate part of state getter - case of 'options.isBoolean' 
   /**
    * @type {Fragment}
    */
-  const Foo050 = Fragment.withPartOfStateMixin(Fragment, 'id', {isBoolean: false});
+  const Foo050 = Fragment.withPartOfStateMixin(Fragment, 'id', { isBoolean: false });
 
   /**
    * @extends {Fragment}
@@ -127,13 +126,13 @@ test("050 It should generate part of state getter - case of 'options.isBoolean' 
     }
   });
 
-  const foobar050Cid0 = new Foobar050({cid: '0'});
-  await foobar050Cid0.expectExistsAndConformsRequirements({text: 'foobar050 cid0'});
+  const foobar050Cid0 = new Foobar050({ cid: '0' });
+  await foobar050Cid0.expectExistsAndConformsRequirements({ text: 'foobar050 cid0' });
   expect(foobar050Cid0.getIdPartOfState, 'to be a function');
   expect(await foobar050Cid0.getIdPartOfState(), 'to be undefined');
 
-  const foobar050Cid1 = new Foobar050({cid: '1'});
-  await foobar050Cid1.expectExistsAndConformsRequirements({text: 'foobar050 cid1'});
+  const foobar050Cid1 = new Foobar050({ cid: '1' });
+  await foobar050Cid1.expectExistsAndConformsRequirements({ text: 'foobar050 cid1' });
   expect(foobar050Cid1.getIdPartOfState, 'to be a function');
   expect(await foobar050Cid1.getIdPartOfState(), 'to equal', '42');
 });
@@ -173,13 +172,13 @@ test("060 It should generate part of state getter - case of 'options.isBoolean' 
     }
   });
 
-  const foobar060Cid0 = new Foobar060({cid: '0'});
-  await foobar060Cid0.expectExistsAndConformsRequirements({text: 'foobar060 cid0'});
+  const foobar060Cid0 = new Foobar060({ cid: '0' });
+  await foobar060Cid0.expectExistsAndConformsRequirements({ text: 'foobar060 cid0' });
   expect(foobar060Cid0.getDisabledPartOfState, 'to be a function');
   expect(await foobar060Cid0.getDisabledPartOfState(), 'to be false');
 
-  const foobar060Cid1 = new Foobar060({cid: '1'});
-  await foobar060Cid1.expectExistsAndConformsRequirements({text: 'foobar060 cid1'});
+  const foobar060Cid1 = new Foobar060({ cid: '1' });
+  await foobar060Cid1.expectExistsAndConformsRequirements({ text: 'foobar060 cid1' });
   expect(foobar060Cid1.getDisabledPartOfState, 'to be a function');
   expect(await foobar060Cid1.getDisabledPartOfState(), 'to be true');
 });
@@ -219,13 +218,13 @@ test("070 It should generate part of state getter - case of 'options.isBoolean' 
     }
   });
 
-  const foobar070Cid0 = new Foobar070({cid: '0'});
-  await foobar070Cid0.expectExistsAndConformsRequirements({text: 'foobar070 cid0'});
+  const foobar070Cid0 = new Foobar070({ cid: '0' });
+  await foobar070Cid0.expectExistsAndConformsRequirements({ text: 'foobar070 cid0' });
   expect(foobar070Cid0.getTitlePartOfState, 'to be a function');
   expect(await foobar070Cid0.getTitlePartOfState(), 'to be undefined');
 
-  const foobar070Cid1 = new Foobar070({cid: '1'});
-  await foobar070Cid1.expectExistsAndConformsRequirements({text: 'foobar070 cid1'});
+  const foobar070Cid1 = new Foobar070({ cid: '1' });
+  await foobar070Cid1.expectExistsAndConformsRequirements({ text: 'foobar070 cid1' });
   expect(foobar070Cid1.getTitlePartOfState, 'to be a function');
   expect(await foobar070Cid1.getTitlePartOfState(), 'to equal', 'foo');
 });
@@ -271,14 +270,14 @@ test("080 It should generate part of state setter that simply returns part of fr
     }
   });
 
-  const foobar080Cid0 = new Foobar080({cid: '0'});
-  await foobar080Cid0.expectExistsAndConformsRequirements({text: 'foobar080 cid0'});
+  const foobar080Cid0 = new Foobar080({ cid: '0' });
+  await foobar080Cid0.expectExistsAndConformsRequirements({ text: 'foobar080 cid0' });
   expect(foobar080Cid0.setDisabledPartOfState, 'to be a function');
   expect(await foobar080Cid0.setDisabledPartOfState(true), 'to be false');
   expect(await foobar080Cid0.getDisabledPartOfState(), 'to be false');
 
-  const foobar080Cid1 = new Foobar080({cid: '1'});
-  await foobar080Cid1.expectExistsAndConformsRequirements({text: 'foobar080 cid1'});
+  const foobar080Cid1 = new Foobar080({ cid: '1' });
+  await foobar080Cid1.expectExistsAndConformsRequirements({ text: 'foobar080 cid1' });
   expect(foobar080Cid1.setDisabledPartOfState, 'to be a function');
   expect(await foobar080Cid1.setDisabledPartOfState(false), 'to be true');
   expect(await foobar080Cid1.getDisabledPartOfState(), 'to be true');
@@ -321,19 +320,19 @@ test("090 It should generate assertion method for part of state - case of 'optio
     }
   });
 
-  const foobar090Cid0 = new Foobar090({cid: '0'});
-  await foobar090Cid0.expectExistsAndConformsRequirements({text: 'foobar090 cid0'});
+  const foobar090Cid0 = new Foobar090({ cid: '0' });
+  await foobar090Cid0.expectExistsAndConformsRequirements({ text: 'foobar090 cid0' });
   expect(foobar090Cid0.expectDisabledPartOfStateIs, 'to be a function');
   await foobar090Cid0.expectDisabledPartOfStateIs(false);
 
-  const foobar090Cid1 = new Foobar090({cid: '1'});
-  await foobar090Cid1.expectExistsAndConformsRequirements({text: 'foobar090 cid1'});
+  const foobar090Cid1 = new Foobar090({ cid: '1' });
+  await foobar090Cid1.expectExistsAndConformsRequirements({ text: 'foobar090 cid1' });
   expect(foobar090Cid1.expectDisabledPartOfStateIs, 'to be a function');
   await foobar090Cid1.expectDisabledPartOfStateIs(true);
 
   // Check that `options.isNot` argument is respected.
   try {
-    await foobar090Cid0.expectDisabledPartOfStateIs(false, {isNot: true});
+    await foobar090Cid0.expectDisabledPartOfStateIs(false, { isNot: true });
   }
   catch (e) {
     const errMsgPattern = /.*'Foobar090' fragment must have BEM modifier 'disabled,' \(foobar090--disabled\) but it doesn't.*/;
@@ -350,7 +349,7 @@ test("100 It should generate assertion method for part of state - case of 'optio
   /**
    * @type {Fragment}
    */
-  const Foo100 = Fragment.withPartOfStateMixin(Fragment, 'id', {isBoolean: false});
+  const Foo100 = Fragment.withPartOfStateMixin(Fragment, 'id', { isBoolean: false });
 
   /**
    * @extends {Fragment}
@@ -380,20 +379,20 @@ test("100 It should generate assertion method for part of state - case of 'optio
     }
   });
 
-  const foobar100Cid0 = new Foobar100({cid: '0'});
-  await foobar100Cid0.expectExistsAndConformsRequirements({text: 'foobar100 cid0'});
+  const foobar100Cid0 = new Foobar100({ cid: '0' });
+  await foobar100Cid0.expectExistsAndConformsRequirements({ text: 'foobar100 cid0' });
   expect(foobar100Cid0.expectIdPartOfStateIs, 'to be a function');
   await foobar100Cid0.expectIdPartOfStateIs(18);
 
   // Check that `options.isNot` argument is respected - a successful case.
-  const foobar100Cid1 = new Foobar100({cid: '1'});
-  await foobar100Cid1.expectExistsAndConformsRequirements({text: 'foobar100 cid1'});
+  const foobar100Cid1 = new Foobar100({ cid: '1' });
+  await foobar100Cid1.expectExistsAndConformsRequirements({ text: 'foobar100 cid1' });
   expect(foobar100Cid1.expectIdPartOfStateIs, 'to be a function');
-  await foobar100Cid1.expectIdPartOfStateIs(18, {isNot: true});
+  await foobar100Cid1.expectIdPartOfStateIs(18, { isNot: true });
 
   // Check that `options.isNot` argument is respected - a failing case.
   try {
-    await foobar100Cid1.expectIdPartOfStateIs(42, {isNot: true});
+    await foobar100Cid1.expectIdPartOfStateIs(42, { isNot: true });
   }
   catch (e) {
     const errMsgPattern = /.*'Foobar100' fragment must not have BEM modifier 'id,42' \(foobar100--id_42\) but it does.*/;
@@ -410,7 +409,7 @@ test("110 It should generate assertion method for part of state - case of 'optio
   /**
    * @type {Fragment}
    */
-  const Foo110 = Fragment.withPartOfStateMixin(Fragment, 'disabled', {src: 'attribute'});
+  const Foo110 = Fragment.withPartOfStateMixin(Fragment, 'disabled', { src: 'attribute' });
 
   /**
    * @extends {Fragment}
@@ -441,19 +440,19 @@ test("110 It should generate assertion method for part of state - case of 'optio
     }
   });
 
-  const foobar110Cid0 = new Foobar110({cid: '0'});
-  await foobar110Cid0.expectExistsAndConformsRequirements({text: 'foobar110 cid0'});
+  const foobar110Cid0 = new Foobar110({ cid: '0' });
+  await foobar110Cid0.expectExistsAndConformsRequirements({ text: 'foobar110 cid0' });
   expect(foobar110Cid0.expectDisabledPartOfStateIs, 'to be a function');
   await foobar110Cid0.expectDisabledPartOfStateIs(false);
 
-  const foobar110Cid1 = new Foobar110({cid: '1'});
-  await foobar110Cid1.expectExistsAndConformsRequirements({text: 'foobar110 cid1'});
+  const foobar110Cid1 = new Foobar110({ cid: '1' });
+  await foobar110Cid1.expectExistsAndConformsRequirements({ text: 'foobar110 cid1' });
   expect(foobar110Cid1.expectDisabledPartOfStateIs, 'to be a function');
   await foobar110Cid1.expectDisabledPartOfStateIs(true);
 
   // Check that `options.isNot` argument is respected.
   try {
-    await foobar110Cid1.expectDisabledPartOfStateIs(true, {isNot: true});
+    await foobar110Cid1.expectDisabledPartOfStateIs(true, { isNot: true });
   }
   catch (e) {
     const errMsgPattern = /.*'Foobar110' fragment's selector to not return DOM element with attribute 'disabled'.*/;
@@ -503,20 +502,20 @@ test("120 It should generate assertion method for part of state - case of 'optio
     }
   });
 
-  const foobar120Cid0 = new Foobar120({cid: '0'});
-  await foobar120Cid0.expectExistsAndConformsRequirements({text: 'foobar120 cid0'});
+  const foobar120Cid0 = new Foobar120({ cid: '0' });
+  await foobar120Cid0.expectExistsAndConformsRequirements({ text: 'foobar120 cid0' });
   expect(foobar120Cid0.expectTitlePartOfStateIs, 'to be a function');
   await foobar120Cid0.expectTitlePartOfStateIs('foo');
 
   // Check that `options.isNot` argument is respected - a successful case.
-  const foobar120Cid1 = new Foobar120({cid: '1'});
-  await foobar120Cid1.expectExistsAndConformsRequirements({text: 'foobar120 cid1'});
+  const foobar120Cid1 = new Foobar120({ cid: '1' });
+  await foobar120Cid1.expectExistsAndConformsRequirements({ text: 'foobar120 cid1' });
   expect(foobar120Cid1.expectTitlePartOfStateIs, 'to be a function');
-  await foobar120Cid1.expectTitlePartOfStateIs('foo', {isNot: true});
+  await foobar120Cid1.expectTitlePartOfStateIs('foo', { isNot: true });
 
   // Check that `options.isNot` argument is respected - a failing case.
   try {
-    await foobar120Cid1.expectTitlePartOfStateIs('bar', {isNot: true});
+    await foobar120Cid1.expectTitlePartOfStateIs('bar', { isNot: true });
   }
   catch (e) {
     const errMsgPattern = /.*Expected 'Foobar120' fragment's selector to not return DOM element with attribute 'title' valued 'bar'.*/;
@@ -571,13 +570,13 @@ test("130 It should generate convenience assertion methods for part of state - c
     }
   });
 
-  const foobar130Cid0 = new Foobar130({cid: '0'});
-  await foobar130Cid0.expectExistsAndConformsRequirements({text: 'foobar130 cid0'});
+  const foobar130Cid0 = new Foobar130({ cid: '0' });
+  await foobar130Cid0.expectExistsAndConformsRequirements({ text: 'foobar130 cid0' });
   expect(foobar130Cid0.expectHasBar, 'to be a function');
   await foobar130Cid0.expectHasBar();
 
-  const foobar130Cid1 = new Foobar130({cid: '1'});
-  await foobar130Cid1.expectExistsAndConformsRequirements({text: 'foobar130 cid1'});
+  const foobar130Cid1 = new Foobar130({ cid: '1' });
+  await foobar130Cid1.expectExistsAndConformsRequirements({ text: 'foobar130 cid1' });
   expect(foobar130Cid1.expectHasNoBar, 'to be a function');
   await foobar130Cid1.expectHasNoBar();
 
@@ -638,13 +637,13 @@ test("140 It should generate convenience assertion methods for part of state - c
     }
   });
 
-  const foobar140Cid0 = new Foobar140({cid: '0'});
-  await foobar140Cid0.expectExistsAndConformsRequirements({text: 'foobar140 cid0'});
+  const foobar140Cid0 = new Foobar140({ cid: '0' });
+  await foobar140Cid0.expectExistsAndConformsRequirements({ text: 'foobar140 cid0' });
   expect(foobar140Cid0.expectIsDisabled, 'to be a function');
   await foobar140Cid0.expectIsDisabled();
 
-  const foobar140Cid1 = new Foobar140({cid: '1'});
-  await foobar140Cid1.expectExistsAndConformsRequirements({text: 'foobar140 cid1'});
+  const foobar140Cid1 = new Foobar140({ cid: '1' });
+  await foobar140Cid1.expectExistsAndConformsRequirements({ text: 'foobar140 cid1' });
   expect(foobar140Cid1.expectIsNotDisabled, 'to be a function');
   await foobar140Cid1.expectIsNotDisabled();
 
@@ -736,15 +735,15 @@ test("150 It should generate convenience assertion methods for part of state - c
     }
   });
 
-  const foobar150Cid0 = new Foobar150({cid: '0'});
-  await foobar150Cid0.expectExistsAndConformsRequirements({text: 'foobar150 cid0'});
+  const foobar150Cid0 = new Foobar150({ cid: '0' });
+  await foobar150Cid0.expectExistsAndConformsRequirements({ text: 'foobar150 cid0' });
   expect(foobar150Cid0.expectIsDisabled, 'to be a function');
   expect(foobar150Cid0.expectIsEnabled, 'to be a function');
   await foobar150Cid0.expectIsDisabled();
   await foobar150Cid0.expectIsNotEnabled();
 
-  const foobar150Cid1 = new Foobar150({cid: '1'});
-  await foobar150Cid1.expectExistsAndConformsRequirements({text: 'foobar150 cid1'});
+  const foobar150Cid1 = new Foobar150({ cid: '1' });
+  await foobar150Cid1.expectExistsAndConformsRequirements({ text: 'foobar150 cid1' });
   expect(foobar150Cid1.expectIsNotDisabled, 'to be a function');
   expect(foobar150Cid1.expectIsNotEnabled, 'to be a function');
   await foobar150Cid1.expectIsNotDisabled();
@@ -815,8 +814,8 @@ test("160 It should generate convenience assertion methods for part of state - c
     }
   });
 
-  const foobar160Cid0 = new Foobar160({cid: '0'});
-  await foobar160Cid0.expectExistsAndConformsRequirements({text: 'foobar160 cid0'});
+  const foobar160Cid0 = new Foobar160({ cid: '0' });
+  await foobar160Cid0.expectExistsAndConformsRequirements({ text: 'foobar160 cid0' });
   expect(foobar160Cid0.waitTilFetching, 'to be a function');
   await foobar160Cid0.waitTilFetching();
 
@@ -827,8 +826,8 @@ test("160 It should generate convenience assertion methods for part of state - c
   // expect(t.ctx.waitSpy, 'to have a call satisfying', {args: [300]});
 
   // Check failing case.
-  const foobar160Cid1 = new Foobar160({cid: '1'});
-  await foobar160Cid1.expectExistsAndConformsRequirements({text: 'foobar160 cid1'});
+  const foobar160Cid1 = new Foobar160({ cid: '1' });
+  await foobar160Cid1.expectExistsAndConformsRequirements({ text: 'foobar160 cid1' });
   expect(foobar160Cid1.waitTilFetching, 'to be a function');
 
   try {
@@ -879,14 +878,14 @@ test("170 It should generate convenience assertion methods for part of state - c
     }
   });
 
-  const foobar170Cid0 = new Foobar170({cid: '0'});
-  await foobar170Cid0.expectExistsAndConformsRequirements({text: 'foobar170 cid0'});
+  const foobar170Cid0 = new Foobar170({ cid: '0' });
+  await foobar170Cid0.expectExistsAndConformsRequirements({ text: 'foobar170 cid0' });
   expect(foobar170Cid0.waitTilLoading, 'to be a function');
   await foobar170Cid0.waitTilLoading();
 
   // Check failing case.
-  const foobar170Cid1 = new Foobar170({cid: '1'});
-  await foobar170Cid1.expectExistsAndConformsRequirements({text: 'foobar170 cid1'});
+  const foobar170Cid1 = new Foobar170({ cid: '1' });
+  await foobar170Cid1.expectExistsAndConformsRequirements({ text: 'foobar170 cid1' });
   expect(foobar170Cid1.waitTilLoading, 'to be a function');
 
   try {
@@ -953,8 +952,8 @@ test("180 It should generate convenience assertion methods for part of state - c
     }
   });
 
-  const foobar180Cid0 = new Foobar180({cid: '0'});
-  await foobar180Cid0.expectExistsAndConformsRequirements({text: 'foobar180 cid0'});
+  const foobar180Cid0 = new Foobar180({ cid: '0' });
+  await foobar180Cid0.expectExistsAndConformsRequirements({ text: 'foobar180 cid0' });
   expect(foobar180Cid0.waitUntilFetched, 'to be a function');
   await foobar180Cid0.waitUntilFetched();
 
@@ -965,8 +964,8 @@ test("180 It should generate convenience assertion methods for part of state - c
   // expect(t.ctx.waitSpy, 'to have a call satisfying', {args: [300]});
 
   // Check failing case.
-  const foobar180Cid1 = new Foobar180({cid: '1'});
-  await foobar180Cid1.expectExistsAndConformsRequirements({text: 'foobar180 cid1'});
+  const foobar180Cid1 = new Foobar180({ cid: '1' });
+  await foobar180Cid1.expectExistsAndConformsRequirements({ text: 'foobar180 cid1' });
   expect(foobar180Cid1.waitUntilFetched, 'to be a function');
 
   try {
@@ -1017,14 +1016,14 @@ test("190 It should generate convenience assertion methods for part of state - c
     }
   });
 
-  const foobar190Cid0 = new Foobar190({cid: '0'});
-  await foobar190Cid0.expectExistsAndConformsRequirements({text: 'foobar190 cid0'});
+  const foobar190Cid0 = new Foobar190({ cid: '0' });
+  await foobar190Cid0.expectExistsAndConformsRequirements({ text: 'foobar190 cid0' });
   expect(foobar190Cid0.waitUntilLoaded, 'to be a function');
   await foobar190Cid0.waitUntilLoaded();
 
   // Check failing case.
-  const foobar190Cid1 = new Foobar190({cid: '1'});
-  await foobar190Cid1.expectExistsAndConformsRequirements({text: 'foobar190 cid1'});
+  const foobar190Cid1 = new Foobar190({ cid: '1' });
+  await foobar190Cid1.expectExistsAndConformsRequirements({ text: 'foobar190 cid1' });
   expect(foobar190Cid1.waitUntilLoaded, 'to be a function');
 
   try {
@@ -1076,8 +1075,8 @@ test("200 It should generate convenience assertion methods for part of state - c
     }
   });
 
-  const foobar200Cid0 = new Foobar200({cid: '0'});
-  await foobar200Cid0.expectExistsAndConformsRequirements({text: 'foobar200 cid0'});
+  const foobar200Cid0 = new Foobar200({ cid: '0' });
+  await foobar200Cid0.expectExistsAndConformsRequirements({ text: 'foobar200 cid0' });
   expect(foobar200Cid0.expectBarIs, 'to be a function');
   await foobar200Cid0.expectBarIs(42);
 
@@ -1132,8 +1131,8 @@ test("210 It should generate convenience assertion methods for part of state - c
     }
   });
 
-  const foobar210Cid0 = new Foobar210({cid: '0'});
-  await foobar210Cid0.expectExistsAndConformsRequirements({text: 'foobar210 cid0'});
+  const foobar210Cid0 = new Foobar210({ cid: '0' });
+  await foobar210Cid0.expectExistsAndConformsRequirements({ text: 'foobar210 cid0' });
   expect(foobar210Cid0.expectBarIsNot, 'to be a function');
   await foobar210Cid0.expectBarIsNot(42);
 

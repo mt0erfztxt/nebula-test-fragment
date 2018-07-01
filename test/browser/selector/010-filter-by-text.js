@@ -1,5 +1,5 @@
 import appRootPath from 'app-root-path';
-import {Selector} from 'testcafe';
+import { Selector } from 'testcafe';
 
 import selector from '../../../src/selector';
 

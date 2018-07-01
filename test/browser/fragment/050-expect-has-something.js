@@ -2,13 +2,12 @@ import _ from 'lodash';
 import appRootPath from 'app-root-path';
 import expect from 'unexpected';
 
-import {Fragment} from '../../../src';
+import Fragment from '../../../src/fragment';
 
 fixture `Fragment :: 050 #expectHasSomething()`
   .page(appRootPath.path + '/test/fixtures/fragment/050-expect-has-something.html');
 
-class Bar extends Fragment {
-}
+class Bar extends Fragment {}
 
 Object.defineProperties(Bar, {
   bemBase: {
@@ -30,7 +29,7 @@ class Foo extends Fragment {
    * @param {object} [opts.BarFragmentSpec] - Spec for `Bar` fragment used in this fragment
    */
   constructor(spec, opts) {
-    const {initializedOpts, initializedSpec, isInstance} = Foo.initializeFragmentSpecAndOpts(spec, opts);
+    const { initializedOpts, initializedSpec, isInstance } = Foo.initializeFragmentSpecAndOpts(spec, opts);
 
     if (isInstance === true) {
       return spec;
@@ -64,7 +63,7 @@ class Foo extends Fragment {
   getBar(spec, opts) {
     return this.getSomething(
       this.BarFragment,
-      _.assign({}, this.opts.BarFragmentSpec, {parent: this.selector}, spec),
+      _.assign({}, this.opts.BarFragmentSpec, { parent: this.selector }, spec),
       _.assign({}, this.opts.BarFragmentOpts, opts)
     );
   }
@@ -102,7 +101,7 @@ test("020 It should throw error when fragment of something doesn't exist in frag
   const foo = new Foo();
 
   try {
-    await foo.expectHasSomething('Bar', {cid: '42'}, null);
+    await foo.expectHasSomething('Bar', { cid: '42' }, null);
   }
   catch (e) {
     const msgPattern = /.*'Bar' fragment's selector must return exactly one DOM element but it doesn't: expected 0.*/;
@@ -118,7 +117,7 @@ test("030 It should not throw error when fragment of something does exist in fra
   const foo = new Foo();
 
   try {
-    await foo.expectHasSomething('Bar', {cid: '1'}, null);
+    await foo.expectHasSomething('Bar', { cid: '1' }, null);
   }
   catch (e) {
     isThrown = true;
@@ -132,7 +131,7 @@ test("040 It should throw error when fragment of something does exist in fragmen
   const foo = new Foo();
 
   try {
-    await foo.expectHasSomething('Bar', {cid: '0'}, null, {idx: 1});
+    await foo.expectHasSomething('Bar', { cid: '0' }, null, { idx: 1 });
   }
   catch (e) {
     const msgPattern = /.*expected 'bar 0' to deeply equal 'bar 1'.*/;
@@ -148,7 +147,7 @@ test("050 It should not throw error when fragment of something does exist in fra
   const foo = new Foo();
 
   try {
-    await foo.expectHasSomething('Bar', {cid: '1'}, null, {idx: 1});
+    await foo.expectHasSomething('Bar', { cid: '1' }, null, { idx: 1 });
   }
   catch (e) {
     isThrown = true;

@@ -1,13 +1,12 @@
 import appRootPath from 'app-root-path';
 import expect from 'unexpected';
 
-import {Fragment} from '../../../src';
+import Fragment from '../../../src/fragment';
 
 fixture `Fragment :: 080 #expectExistsAndConformsRequirements()`
   .page(appRootPath.path + '/test/fixtures/fragment/080-expect-exists-and-conforms-requirements.html');
 
-class Foo extends Fragment {
-}
+class Foo extends Fragment {}
 
 Object.defineProperties(Foo, {
   bemBase: {
@@ -20,7 +19,7 @@ Object.defineProperties(Foo, {
 
 test("010 It should throw error when fragment's selector return number of DOM elements other than one", async (t) => {
   let isThrown = false;
-  const foo = new Foo({cid: 'non-existent'});
+  const foo = new Foo({ cid: 'non-existent' });
 
   await t.expect(foo.selector.count).eql(0);
 
@@ -76,7 +75,11 @@ test("040 It should allow to assert that fragment's selector have simple attribu
   await t.expect(foo.selector.count).eql(1);
 
   try {
-    await foo.expectExistsAndConformsRequirements({attributes: [['data-checked']]});
+    await foo.expectExistsAndConformsRequirements({
+      attributes: [
+        ['data-checked']
+      ]
+    });
   }
   catch (e) {
     isThrown = true;
@@ -92,7 +95,11 @@ test("050 It should allow to assert that fragment's selector have no simple attr
   await t.expect(foo.selector.count).eql(1);
 
   try {
-    await foo.expectExistsAndConformsRequirements({attributes: [['data-checked', null, true]]});
+    await foo.expectExistsAndConformsRequirements({
+      attributes: [
+        ['data-checked', null, true]
+      ]
+    });
   }
   catch (e) {
     const errMsg =
@@ -112,7 +119,11 @@ test("060 It should allow to assert that fragment's selector have simple attribu
   await t.expect(foo.selector.count).eql(1);
 
   try {
-    await foo.expectExistsAndConformsRequirements({attributes: [['data-active']]});
+    await foo.expectExistsAndConformsRequirements({
+      attributes: [
+        ['data-active']
+      ]
+    });
   }
   catch (e) {
     const errMsg =
@@ -132,7 +143,11 @@ test("070 It should allow to assert that fragment's selector have no simple attr
   await t.expect(foo.selector.count).eql(1);
 
   try {
-    await foo.expectExistsAndConformsRequirements({attributes: [['data-active', null, true]]});
+    await foo.expectExistsAndConformsRequirements({
+      attributes: [
+        ['data-active', null, true]
+      ]
+    });
   }
   catch (e) {
     isThrown = true;
@@ -148,7 +163,11 @@ test("080 It should allow to assert that fragment's selector have composite attr
   await t.expect(foo.selector.count).eql(1);
 
   try {
-    await foo.expectExistsAndConformsRequirements({attributes: [['data-id', 42]]});
+    await foo.expectExistsAndConformsRequirements({
+      attributes: [
+        ['data-id', 42]
+      ]
+    });
   }
   catch (e) {
     isThrown = true;
@@ -164,7 +183,11 @@ test("090 It should allow to assert that fragment's selector have no composite a
   await t.expect(foo.selector.count).eql(1);
 
   try {
-    await foo.expectExistsAndConformsRequirements({attributes: [['data-id', '42', true]]});
+    await foo.expectExistsAndConformsRequirements({
+      attributes: [
+        ['data-id', '42', true]
+      ]
+    });
   }
   catch (e) {
     const errMsg =
@@ -184,7 +207,11 @@ test("100 It should allow to assert that fragment's selector have composite attr
   await t.expect(foo.selector.count).eql(1);
 
   try {
-    await foo.expectExistsAndConformsRequirements({attributes: [['data-id', 43]]});
+    await foo.expectExistsAndConformsRequirements({
+      attributes: [
+        ['data-id', 43]
+      ]
+    });
   }
   catch (e) {
     const errMsg =
@@ -204,7 +231,11 @@ test("110 It should allow to assert that fragment's selector have no composite a
   await t.expect(foo.selector.count).eql(1);
 
   try {
-    await foo.expectExistsAndConformsRequirements({attributes: [['data-id', 43, true]]});
+    await foo.expectExistsAndConformsRequirements({
+      attributes: [
+        ['data-id', 43, true]
+      ]
+    });
   }
   catch (e) {
     isThrown = true;
@@ -220,7 +251,12 @@ test("120 It should allow to assert that fragment's selector have set of attribu
   await t.expect(foo.selector.count).eql(1);
 
   try {
-    await foo.expectExistsAndConformsRequirements({attributes: [['data-checked'], ['data-id', 42]]});
+    await foo.expectExistsAndConformsRequirements({
+      attributes: [
+        ['data-checked'],
+        ['data-id', 42]
+      ]
+    });
   }
   catch (e) {
     isThrown = true;
@@ -236,7 +272,12 @@ test("130 It should allow to assert that fragment's selector have set of attribu
   await t.expect(foo.selector.count).eql(1);
 
   try {
-    await foo.expectExistsAndConformsRequirements({attributes: [['data-checked'], ['data-id', 43]]});
+    await foo.expectExistsAndConformsRequirements({
+      attributes: [
+        ['data-checked'],
+        ['data-id', 43]
+      ]
+    });
   }
   catch (e) {
     const errMsg =
@@ -256,7 +297,12 @@ test("140 It should allow to assert that fragment's selector have not set of att
   await t.expect(foo.selector.count).eql(1);
 
   try {
-    await foo.expectExistsAndConformsRequirements({attributes: [['data-checked'], ['data-id', 42, true]]});
+    await foo.expectExistsAndConformsRequirements({
+      attributes: [
+        ['data-checked'],
+        ['data-id', 42, true]
+      ]
+    });
   }
   catch (e) {
     const errMsg =
@@ -276,7 +322,12 @@ test("150 It should allow to assert that fragment's selector have not set of att
   await t.expect(foo.selector.count).eql(1);
 
   try {
-    await foo.expectExistsAndConformsRequirements({attributes: [['data-checked'], ['data-id', 43, true]]});
+    await foo.expectExistsAndConformsRequirements({
+      attributes: [
+        ['data-checked'],
+        ['data-id', 43, true]
+      ]
+    });
   }
   catch (e) {
     isThrown = true;
@@ -292,7 +343,7 @@ test("160 It should allow simple attribute to be passed in as string", async (t)
   await t.expect(foo.selector.count).eql(1);
 
   try {
-    await foo.expectExistsAndConformsRequirements({attributes: ['data-checked']});
+    await foo.expectExistsAndConformsRequirements({ attributes: ['data-checked'] });
   }
   catch (e) {
     isThrown = true;
@@ -308,7 +359,13 @@ test("170 It should allow to assert that fragment's selector have simple BEM mod
   await t.expect(foo.selector.count).eql(1);
 
   try {
-    await foo.expectExistsAndConformsRequirements({bemModifiers: [[['checked']]]});
+    await foo.expectExistsAndConformsRequirements({
+      bemModifiers: [
+        [
+          ['checked']
+        ]
+      ]
+    });
   }
   catch (e) {
     isThrown = true;
@@ -324,7 +381,13 @@ test("180 It should allow to assert that fragment's selector have no simple BEM 
   await t.expect(foo.selector.count).eql(1);
 
   try {
-    await foo.expectExistsAndConformsRequirements({bemModifiers: [[['checked', null], true]]});
+    await foo.expectExistsAndConformsRequirements({
+      bemModifiers: [
+        [
+          ['checked', null], true
+        ]
+      ]
+    });
   }
   catch (e) {
     const errMsgPattern = /.*'Foo' fragment must not have BEM modifier 'checked,' \(foo--checked\) but it does.*/;
@@ -342,7 +405,13 @@ test("190 It should allow to assert that fragment's selector have simple BEM mod
   await t.expect(foo.selector.count).eql(1);
 
   try {
-    await foo.expectExistsAndConformsRequirements({bemModifiers: [[['active']]]});
+    await foo.expectExistsAndConformsRequirements({
+      bemModifiers: [
+        [
+          ['active']
+        ]
+      ]
+    });
   }
   catch (e) {
     const errMsgPattern = /.*'Foo' fragment must have BEM modifier 'active' \(foo--active\) but it doesn't.*/;
@@ -360,7 +429,13 @@ test("200 It should allow to assert that fragment's selector have no simple BEM 
   await t.expect(foo.selector.count).eql(1);
 
   try {
-    await foo.expectExistsAndConformsRequirements({bemModifiers: [[['active', null], true]]});
+    await foo.expectExistsAndConformsRequirements({
+      bemModifiers: [
+        [
+          ['active', null], true
+        ]
+      ]
+    });
   }
   catch (e) {
     isThrown = true;
@@ -376,7 +451,13 @@ test("210 It should allow to assert that fragment's selector have composite BEM 
   await t.expect(foo.selector.count).eql(1);
 
   try {
-    await foo.expectExistsAndConformsRequirements({bemModifiers: [[['id', '42']]]});
+    await foo.expectExistsAndConformsRequirements({
+      bemModifiers: [
+        [
+          ['id', '42']
+        ]
+      ]
+    });
   }
   catch (e) {
     isThrown = true;
@@ -392,7 +473,13 @@ test("220 It should allow to assert that fragment's selector have no composite B
   await t.expect(foo.selector.count).eql(1);
 
   try {
-    await foo.expectExistsAndConformsRequirements({bemModifiers: [[['id', '42'], true]]});
+    await foo.expectExistsAndConformsRequirements({
+      bemModifiers: [
+        [
+          ['id', '42'], true
+        ]
+      ]
+    });
   }
   catch (e) {
     const errMsgPattern = /.*'Foo' fragment must not have BEM modifier 'id,42' \(foo--id_42\) but it does.*/;
@@ -410,7 +497,13 @@ test("230 It should allow to assert that fragment's selector have composite BEM 
   await t.expect(foo.selector.count).eql(1);
 
   try {
-    await foo.expectExistsAndConformsRequirements({bemModifiers: [[['id', '43']]]});
+    await foo.expectExistsAndConformsRequirements({
+      bemModifiers: [
+        [
+          ['id', '43']
+        ]
+      ]
+    });
   }
   catch (e) {
     const errMsgPattern = /.*'Foo' fragment must have BEM modifier 'id,43' \(foo--id_43\) but it doesn't.*/;
@@ -428,7 +521,13 @@ test("240 It should allow to assert that fragment's selector have no composite B
   await t.expect(foo.selector.count).eql(1);
 
   try {
-    await foo.expectExistsAndConformsRequirements({bemModifiers: [[['data-id', '43'], true]]});
+    await foo.expectExistsAndConformsRequirements({
+      bemModifiers: [
+        [
+          ['data-id', '43'], true
+        ]
+      ]
+    });
   }
   catch (e) {
     isThrown = true;
@@ -444,7 +543,16 @@ test("250 It should allow to assert that fragment's selector have set of BEM mod
   await t.expect(foo.selector.count).eql(1);
 
   try {
-    await foo.expectExistsAndConformsRequirements({bemModifiers: [[['checked']], [['id', '42']]]});
+    await foo.expectExistsAndConformsRequirements({
+      bemModifiers: [
+        [
+          ['checked']
+        ],
+        [
+          ['id', '42']
+        ]
+      ]
+    });
   }
   catch (e) {
     isThrown = true;
@@ -460,7 +568,16 @@ test("260 It should allow to assert that fragment's selector have set of BEM mod
   await t.expect(foo.selector.count).eql(1);
 
   try {
-    await foo.expectExistsAndConformsRequirements({bemModifiers: [[['checked']], [['id', '43']]]});
+    await foo.expectExistsAndConformsRequirements({
+      bemModifiers: [
+        [
+          ['checked']
+        ],
+        [
+          ['id', '43']
+        ]
+      ]
+    });
   }
   catch (e) {
     const errMsgPattern = /.*'Foo' fragment must have BEM modifier 'id,43' \(foo--id_43\) but it doesn't.*/;
@@ -478,7 +595,16 @@ test("270 It should allow to assert that fragment's selector have not set of BEM
   await t.expect(foo.selector.count).eql(1);
 
   try {
-    await foo.expectExistsAndConformsRequirements({bemModifiers: [[['checked']], [['id', '42'], true]]});
+    await foo.expectExistsAndConformsRequirements({
+      bemModifiers: [
+        [
+          ['checked']
+        ],
+        [
+          ['id', '42'], true
+        ]
+      ]
+    });
   }
   catch (e) {
     const errMsgPattern = /.*'Foo' fragment must not have BEM modifier 'id,42' \(foo--id_42\) but it does.*/;
@@ -496,7 +622,16 @@ test("280 It should allow to assert that fragment's selector have not set of BEM
   await t.expect(foo.selector.count).eql(1);
 
   try {
-    await foo.expectExistsAndConformsRequirements({bemModifiers: [[['checked']], [['id', '43'], true]]});
+    await foo.expectExistsAndConformsRequirements({
+      bemModifiers: [
+        [
+          ['checked']
+        ],
+        [
+          ['id', '43'], true
+        ]
+      ]
+    });
   }
   catch (e) {
     isThrown = true;
@@ -512,7 +647,11 @@ test("290 It should allow simple BEM modifier to be passed in as string", async 
   await t.expect(foo.selector.count).eql(1);
 
   try {
-    await foo.expectExistsAndConformsRequirements({bemModifiers: [['checked']]});
+    await foo.expectExistsAndConformsRequirements({
+      bemModifiers: [
+        ['checked']
+      ]
+    });
   }
   catch (e) {
     isThrown = true;
@@ -528,7 +667,7 @@ test("300 It should throw error when 'requirements.tagName' argument is not nil 
   await t.expect(foo.selector.count).eql(1);
 
   try {
-    await foo.expectExistsAndConformsRequirements({tagName: 42});
+    await foo.expectExistsAndConformsRequirements({ tagName: 42 });
   }
   catch (e) {
     const message = "'requirements.tagName' argument must be a nil or non-blank string but it is Number (42)";
@@ -546,7 +685,7 @@ test("310 It should allow to assert that fragment's selector tag matches specifi
   await t.expect(foo.selector.count).eql(1);
 
   try {
-    await foo.expectExistsAndConformsRequirements({tagName: 'div'});
+    await foo.expectExistsAndConformsRequirements({ tagName: 'div' });
   }
   catch (e) {
     const errMsgPattern = /.*'button' to deeply equal 'div'.*/;
@@ -564,7 +703,7 @@ test("320 It should allow to assert that fragment's selector tag matches specifi
   await t.expect(foo.selector.count).eql(1);
 
   try {
-    await foo.expectExistsAndConformsRequirements({tagName: 'button'});
+    await foo.expectExistsAndConformsRequirements({ tagName: 'button' });
   }
   catch (e) {
     isThrown = true;
@@ -580,7 +719,7 @@ test("330 It should allow to assert that fragment's selector have specified text
   await t.expect(foo.selector.count).eql(1);
 
   try {
-    await foo.expectExistsAndConformsRequirements({text: 'Button 0'});
+    await foo.expectExistsAndConformsRequirements({ text: 'Button 0' });
   }
   catch (e) {
     isThrown = true;
@@ -596,7 +735,7 @@ test("340 It should allow to assert that fragment's selector have specified text
   await t.expect(foo.selector.count).eql(1);
 
   try {
-    await foo.expectExistsAndConformsRequirements({text: ['Button 0', true]});
+    await foo.expectExistsAndConformsRequirements({ text: ['Button 0', true] });
   }
   catch (e) {
     const errMsg =
@@ -616,7 +755,7 @@ test("350 It should allow to assert that fragment's selector have specified text
   await t.expect(foo.selector.count).eql(1);
 
   try {
-    await foo.expectExistsAndConformsRequirements({text: ['Button 42']});
+    await foo.expectExistsAndConformsRequirements({ text: ['Button 42'] });
   }
   catch (e) {
     const errMsg =
@@ -636,7 +775,7 @@ test("360 It should allow to assert that fragment's selector have no specified t
   await t.expect(foo.selector.count).eql(1);
 
   try {
-    await foo.expectExistsAndConformsRequirements({text: ['Button 42', true]});
+    await foo.expectExistsAndConformsRequirements({ text: ['Button 42', true] });
   }
   catch (e) {
     isThrown = true;
@@ -652,7 +791,7 @@ test("370 It should allow to assert that fragment's selector have specified text
   await t.expect(foo.selector.count).eql(1);
 
   try {
-    await foo.expectExistsAndConformsRequirements({text: [/\w{4}on \d/]});
+    await foo.expectExistsAndConformsRequirements({ text: [/\w{4}on \d/] });
   }
   catch (e) {
     isThrown = true;
@@ -668,7 +807,7 @@ test("380 It should allow to assert that fragment's selector have specified text
   await t.expect(foo.selector.count).eql(1);
 
   try {
-    await foo.expectExistsAndConformsRequirements({text: [/\w{4}on \d/, true]});
+    await foo.expectExistsAndConformsRequirements({ text: [/\w{4}on \d/, true] });
   }
   catch (e) {
     const errMsg =
@@ -688,7 +827,7 @@ test("390 It should allow to assert that fragment's selector have specified text
   await t.expect(foo.selector.count).eql(1);
 
   try {
-    await foo.expectExistsAndConformsRequirements({text: [/.utton 42/]});
+    await foo.expectExistsAndConformsRequirements({ text: [/.utton 42/] });
   }
   catch (e) {
     const errMsg =
@@ -708,7 +847,7 @@ test("400 It should allow to assert that fragment's selector have no specified t
   await t.expect(foo.selector.count).eql(1);
 
   try {
-    await foo.expectExistsAndConformsRequirements({text: [/.utton 42/, true]});
+    await foo.expectExistsAndConformsRequirements({ text: [/.utton 42/, true] });
   }
   catch (e) {
     isThrown = true;
@@ -724,7 +863,7 @@ test("405 It should allow text to be a string", async (t) => {
   await t.expect(foo.selector.count).eql(1);
 
   try {
-    await foo.expectExistsAndConformsRequirements({text: 'Button 0'});
+    await foo.expectExistsAndConformsRequirements({ text: 'Button 0' });
   }
   catch (e) {
     isThrown = true;
@@ -740,7 +879,7 @@ test("406 It should allow text to be a regular expression", async (t) => {
   await t.expect(foo.selector.count).eql(1);
 
   try {
-    await foo.expectExistsAndConformsRequirements({text: /.utton 0/});
+    await foo.expectExistsAndConformsRequirements({ text: /.utton 0/ });
   }
   catch (e) {
     isThrown = true;
@@ -756,7 +895,7 @@ test("410 It should allow to assert that fragment's selector have specified text
   await t.expect(foo.selector.count).eql(1);
 
   try {
-    await foo.expectExistsAndConformsRequirements({textContent: 'Button 0'});
+    await foo.expectExistsAndConformsRequirements({ textContent: 'Button 0' });
   }
   catch (e) {
     isThrown = true;
@@ -772,7 +911,7 @@ test("420 It should allow to assert that fragment's selector have specified text
   await t.expect(foo.selector.count).eql(1);
 
   try {
-    await foo.expectExistsAndConformsRequirements({textContent: ['Button 0', true]});
+    await foo.expectExistsAndConformsRequirements({ textContent: ['Button 0', true] });
   }
   catch (e) {
     const errMsg = "AssertionError: expected 'Button 0' to not deeply equal 'Button 0'";
@@ -790,7 +929,7 @@ test("430 It should allow to assert that fragment's selector have specified text
   await t.expect(foo.selector.count).eql(1);
 
   try {
-    await foo.expectExistsAndConformsRequirements({textContent: ['Button 42']});
+    await foo.expectExistsAndConformsRequirements({ textContent: ['Button 42'] });
   }
   catch (e) {
     const errMsg = "AssertionError: expected 'Button 0' to deeply equal 'Button 42'";
@@ -808,7 +947,7 @@ test("440 It should allow to assert that fragment's selector have no specified t
   await t.expect(foo.selector.count).eql(1);
 
   try {
-    await foo.expectExistsAndConformsRequirements({textContent: ['Button 42', true]});
+    await foo.expectExistsAndConformsRequirements({ textContent: ['Button 42', true] });
   }
   catch (e) {
     isThrown = true;
@@ -824,7 +963,7 @@ test("450 It should allow to assert that fragment's selector have specified text
   await t.expect(foo.selector.count).eql(1);
 
   try {
-    await foo.expectExistsAndConformsRequirements({textContent: [/\w{4}on \d/]});
+    await foo.expectExistsAndConformsRequirements({ textContent: [/\w{4}on \d/] });
   }
   catch (e) {
     isThrown = true;
@@ -840,7 +979,7 @@ test("460 It should allow to assert that fragment's selector have specified text
   await t.expect(foo.selector.count).eql(1);
 
   try {
-    await foo.expectExistsAndConformsRequirements({textContent: [/\w{4}on \d/, true]});
+    await foo.expectExistsAndConformsRequirements({ textContent: [/\w{4}on \d/, true] });
   }
   catch (e) {
     const errMsg = "AssertionError: expected 'Button 0' not to match /\\w{4}on \\d/";
@@ -858,7 +997,7 @@ test("470 It should allow to assert that fragment's selector have specified text
   await t.expect(foo.selector.count).eql(1);
 
   try {
-    await foo.expectExistsAndConformsRequirements({textContent: [/.utton 42/]});
+    await foo.expectExistsAndConformsRequirements({ textContent: [/.utton 42/] });
   }
   catch (e) {
     const errMsg = "AssertionError: expected 'Button 0' to match /.utton 42/";
@@ -876,7 +1015,7 @@ test("480 It should allow to assert that fragment's selector have no specified t
   await t.expect(foo.selector.count).eql(1);
 
   try {
-    await foo.expectExistsAndConformsRequirements({textContent: [/.utton 42/, true]});
+    await foo.expectExistsAndConformsRequirements({ textContent: [/.utton 42/, true] });
   }
   catch (e) {
     isThrown = true;
@@ -892,7 +1031,7 @@ test("481 It should allow text content to be a string", async (t) => {
   await t.expect(foo.selector.count).eql(1);
 
   try {
-    await foo.expectExistsAndConformsRequirements({textContent: 'Button 0'});
+    await foo.expectExistsAndConformsRequirements({ textContent: 'Button 0' });
   }
   catch (e) {
     isThrown = true;
@@ -908,7 +1047,7 @@ test("482 It should allow text content to be a regular expression", async (t) =>
   await t.expect(foo.selector.count).eql(1);
 
   try {
-    await foo.expectExistsAndConformsRequirements({textContent: /.utton 0/});
+    await foo.expectExistsAndConformsRequirements({ textContent: /.utton 0/ });
   }
   catch (e) {
     isThrown = true;

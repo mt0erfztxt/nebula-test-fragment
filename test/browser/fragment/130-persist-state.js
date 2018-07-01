@@ -2,7 +2,7 @@ import _ from 'lodash';
 import appRootPath from 'app-root-path';
 import expect from 'unexpected';
 
-import {Fragment} from '../../../src';
+import Fragment from '../../../src/fragment';
 import utils from "../../../src/utils";
 
 fixture `Fragment :: 130 persistState()`
@@ -19,7 +19,7 @@ class TextInput extends Fragment {
    * @param {object} [opts.BarFragmentSpec] - Spec for `TextInput` fragment used in this fragment
    */
   constructor(spec, opts) {
-    const {initializedOpts, initializedSpec, isInstance} = TextInput.initializeFragmentSpecAndOpts(spec, opts);
+    const { initializedOpts, initializedSpec, isInstance } = TextInput.initializeFragmentSpecAndOpts(spec, opts);
 
     if (isInstance === true) {
       return spec;
@@ -60,8 +60,12 @@ class TextInput extends Fragment {
   // ---------------------------------------------------------------------------
 
   getStateParts(options) {
-    const opts = utils.initializeOptions(options, {defaults: {onlyWritable: false}});
-    const {onlyWritable} = opts;
+    const opts = utils.initializeOptions(options, {
+      defaults: {
+        onlyWritable: false
+      }
+    });
+    const { onlyWritable } = opts;
     const parentParts = super.getStateParts(onlyWritable);
     const writableParts = _.concat(parentParts, ['value']);
 
@@ -140,7 +144,7 @@ test("020 It should throw error when 'state' argument is not a nil or plain obje
 test("030 It should persist state as-is when 'state' argument is a plain object", async () => {
   let isThrown = false;
   const textInput = new TextInput();
-  const stateToPersist = {value: 'foo'};
+  const stateToPersist = { value: 'foo' };
 
   try {
     await textInput.persistState('42', stateToPersist);
@@ -151,13 +155,13 @@ test("030 It should persist state as-is when 'state' argument is a plain object"
 
   expect(isThrown, 'to be false');
   expect(textInput._persistedStates['42'] === stateToPersist, 'to be true');
-  expect(textInput._persistedStates['42'], 'to equal', {value: 'foo'});
+  expect(textInput._persistedStates['42'], 'to equal', { value: 'foo' });
 });
 
 test("040 It should persist fragment's current state when 'state' argument is a nil", async () => {
   let isThrown = false;
   const textInput = new TextInput();
-  const currentState = {disabled: true, value: '42'};
+  const currentState = { disabled: true, value: '42' };
 
   await textInput.expectStateIs(currentState);
 

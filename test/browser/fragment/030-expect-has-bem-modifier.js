@@ -1,13 +1,12 @@
 import appRootPath from 'app-root-path';
 import expect from 'unexpected';
 
-import {Fragment} from '../../../src';
+import Fragment from '../../../src/fragment';
 
 fixture `Fragment :: 030 #expectHasBemModifier() and #expectHasNoBemModifier()`
   .page(appRootPath.path + '/test/fixtures/fragment/030-expect-has-bem-modifier.html');
 
-class Foo extends Fragment {
-}
+class Foo extends Fragment {}
 
 Object.defineProperties(Foo, {
   bemBase: {

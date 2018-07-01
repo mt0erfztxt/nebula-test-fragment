@@ -1,6 +1,6 @@
 import appRootPath from 'app-root-path';
 import expect from 'unexpected';
-import {Selector} from 'testcafe';
+import { Selector } from 'testcafe';
 
 import selector from '../../../src/selector';
 
@@ -22,7 +22,7 @@ test("020 It should return selector filtered by absence of attribute", async (t)
   const filteredSel1 = selector.filterByAttribute(sel, ['data-non-existent']);
   await t.expect(filteredSel1.count).eql(0);
 
-  const filteredSel2 = selector.filterByAttribute(sel, ['data-non-existent'], {isNot: true});
+  const filteredSel2 = selector.filterByAttribute(sel, ['data-non-existent'], { isNot: true });
   await t.expect(filteredSel2.count).eql(2);
 });
 
@@ -35,7 +35,7 @@ test("030 It should allow filter selector using only attribute name", async (t) 
   await t.expect(filteredSel1.nth(0).textContent).eql('Test 030 | 1');
   await t.expect(filteredSel1.nth(1).textContent).eql('Test 030 | 2');
 
-  const filteredSel2 = selector.filterByAttribute(sel, ['data-attr2'], {isNot: true});
+  const filteredSel2 = selector.filterByAttribute(sel, ['data-attr2'], { isNot: true });
   await t.expect(filteredSel2.count).eql(1);
   await t.expect(filteredSel2.textContent).eql('Test 030 | 0');
 });
@@ -51,7 +51,7 @@ test("040 It should allow filter selector using both attribute name and value", 
   await t.expect(filteredSel1.nth(1).textContent).eql('Test 040 | 2');
 
   // RegExp value + isNot.
-  const filteredSel2 = selector.filterByAttribute(sel, ['data-attr1', /.*bar$/], {isNot: true});
+  const filteredSel2 = selector.filterByAttribute(sel, ['data-attr1', /.*bar$/], { isNot: true });
   await t.expect(filteredSel2.count).eql(2);
   await t.expect(filteredSel2.nth(0).textContent).eql('Test 040 | 0');
   await t.expect(filteredSel2.nth(1).textContent).eql('Test 040 | 1');
@@ -62,9 +62,8 @@ test("040 It should allow filter selector using both attribute name and value", 
   await t.expect(filteredSel3.textContent).eql('Test 040 | 1');
 
   // Non-RegExp value + isNot.
-  const filteredSel4 = selector.filterByAttribute(sel, ['data-attr1', 'foo'], {isNot: true});
+  const filteredSel4 = selector.filterByAttribute(sel, ['data-attr1', 'foo'], { isNot: true });
   await t.expect(filteredSel4.count).eql(2);
   await t.expect(filteredSel4.nth(0).textContent).eql('Test 040 | 0');
   await t.expect(filteredSel4.nth(1).textContent).eql('Test 040 | 2');
 });
-

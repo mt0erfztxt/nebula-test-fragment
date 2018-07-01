@@ -1,9 +1,8 @@
 import appRootPath from 'app-root-path';
 
-import {Fragment} from '../../../../src';
+import Fragment from '../../../../src/fragment';
 
-class MyFragment extends Fragment {
-}
+class MyFragment extends Fragment {}
 
 Object.defineProperties(MyFragment, {
   bemBase: {
@@ -27,12 +26,12 @@ test("010 It uses `spec.cid` argument to filter fragments by 'cid'", async (t) =
   await t.expect(myFragment.selector.nth(3).textContent).eql('MyFragment, parent, cid 1');
   await t.expect(myFragment.selector.nth(4).textContent).eql('MyFragment, parent, cns foo, cid 1');
 
-  const myFragmentWithCid = new MyFragment({cid: '1'});
+  const myFragmentWithCid = new MyFragment({ cid: '1' });
   await t.expect(myFragmentWithCid.selector.count).eql(4);
 });
 
 test("020 It respects `spec.parent` argument when uses `spec.cid` argument to filter fragments by 'cid'", async (t) => {
-  const myFragment = new MyFragment({parent: '.parent'});
+  const myFragment = new MyFragment({ parent: '.parent' });
   await t.expect(myFragment.selector.exists).ok();
   await t.expect(myFragment.selector.count).eql(2);
   await t.expect(myFragment.selector.nth(0).textContent).eql('MyFragment, parent, cid 1');
@@ -42,7 +41,7 @@ test("020 It respects `spec.parent` argument when uses `spec.cid` argument to fi
 });
 
 test("030 It respects `spec.cns` argument when uses `spec.cid` argument to filter fragments by 'cid'", async (t) => {
-  const myFragment = new MyFragment({cns: 'foo'});
+  const myFragment = new MyFragment({ cns: 'foo' });
   await t.expect(myFragment.selector.exists).ok();
   await t.expect(myFragment.selector.count).eql(2);
   await t.expect(myFragment.selector.nth(0).textContent).eql('MyFragment, cns foo, cid 1');
@@ -52,7 +51,7 @@ test("030 It respects `spec.cns` argument when uses `spec.cid` argument to filte
 });
 
 test("040 It respects both `spec.parent` and `spec.cns` arguments when uses `spec.cid` argument to filter fragments by 'cid'", async (t) => {
-  const myFragment = new MyFragment({cns: 'foo', parent: '.parent'});
+  const myFragment = new MyFragment({ cns: 'foo', parent: '.parent' });
   await t.expect(myFragment.selector.exists).ok();
   await t.expect(myFragment.selector.count).eql(1);
   await t.expect(myFragment.selector.textContent).eql('MyFragment, parent, cns foo, cid 1');

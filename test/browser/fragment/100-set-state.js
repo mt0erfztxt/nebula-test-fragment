@@ -1,9 +1,9 @@
 import _ from 'lodash';
 import appRootPath from 'app-root-path';
 import expect from 'unexpected';
-import {t} from 'testcafe';
+import { t } from 'testcafe';
 
-import {Fragment} from '../../../src';
+import Fragment from '../../../src/fragment';
 import utils from "../../../src/utils";
 
 fixture `Fragment :: 100 #setState()`
@@ -20,7 +20,7 @@ class TextInput extends Fragment {
    * @param {object} [opts.BarFragmentSpec] - Spec for `TextInput` fragment used in this fragment
    */
   constructor(spec, opts) {
-    const {initializedOpts, initializedSpec, isInstance} = TextInput.initializeFragmentSpecAndOpts(spec, opts);
+    const { initializedOpts, initializedSpec, isInstance } = TextInput.initializeFragmentSpecAndOpts(spec, opts);
 
     if (isInstance === true) {
       return spec;
@@ -61,8 +61,12 @@ class TextInput extends Fragment {
   // ---------------------------------------------------------------------------
 
   getStateParts(options) {
-    const opts = utils.initializeOptions(options, {defaults: {onlyWritable: false}});
-    const {onlyWritable} = opts;
+    const opts = utils.initializeOptions(options, {
+      defaults: {
+        onlyWritable: false
+      }
+    });
+    const { onlyWritable } = opts;
     const parentParts = super.getStateParts(onlyWritable);
     const writableParts = _.concat(parentParts, ['value']);
 
@@ -121,7 +125,12 @@ class TextInput extends Fragment {
       return '';
     }
 
-    const opts = utils.initializeOptions(options, {defaults: {paste: true, replace: true}});
+    const opts = utils.initializeOptions(options, {
+      defaults: {
+        paste: true,
+        replace: true
+      }
+    });
     await t.typeText(this.inputElementSelector, value, opts);
 
     return value;
@@ -180,7 +189,7 @@ test("030 It should throw error when fragment's 'getStateParts()' implemented in
   const foo = new Foo();
 
   try {
-    await foo.setState({value: null});
+    await foo.setState({ value: null });
   }
   catch (e) {
     const message = "'Foo#getStateParts()' must return an array of state parts but it return Object ([object Object])";
@@ -194,8 +203,12 @@ test("030 It should throw error when fragment's 'getStateParts()' implemented in
 test("040 It should throw error when setter for specified part of state is not implemented", async () => {
   class Foo extends Fragment {
     getStateParts(options) {
-      const opts = utils.initializeOptions(options, {defaults: {onlyWritable: false}});
-      const {onlyWritable} = opts;
+      const opts = utils.initializeOptions(options, {
+        defaults: {
+          onlyWritable: false
+        }
+      });
+      const { onlyWritable } = opts;
       const parentParts = super.getStateParts(onlyWritable);
       const writableParts = _.concat(parentParts, ['value']);
 
@@ -221,7 +234,7 @@ test("040 It should throw error when setter for specified part of state is not i
   const foo = new Foo();
 
   try {
-    await foo.setState({value: 'foo'});
+    await foo.setState({ value: 'foo' });
   }
   catch (e) {
     const message = "'Foo#setValuePartOfState' must be a function but it is #Undefined (undefined)";
@@ -237,7 +250,7 @@ test("050 It should set new state", async (t) => {
   await t.expect(textInput.inputElementSelector.hasAttribute('disabled')).notOk();
   await t.expect(textInput.inputElementSelector.value).eql('42');
 
-  const newState = await textInput.setState({disabled: true, value: 'foo'});
+  const newState = await textInput.setState({ disabled: true, value: 'foo' });
   await t.expect(textInput.inputElementSelector.hasAttribute('disabled')).notOk();
   await t.expect(textInput.inputElementSelector.value).eql('foo');
   expect(newState, 'to equal', {

@@ -1,30 +1,28 @@
 import unexpected from 'unexpected';
 
-import {Fragment} from '../../../src';
+import Fragment from '../../../src/fragment';
 
 const expect = unexpected.clone();
 
-describe("Fragment", function () {
-  describe(".isFragment getter", function () {
-    it("should return `true`", function () {
-      class MyFragment extends Fragment {
-      }
+describe("Fragment", function() {
+  describe(".isFragment getter", function() {
+    it("should return `true`", function() {
+      class MyFragment extends Fragment {}
 
       expect(Fragment.isFragment, 'to be true');
       expect(MyFragment.isFragment, 'to be true');
     });
   });
 
-  describe("#bemBase getter", function () {
-    it("should return fragment's BEM base instance", function () {
-      const fragment = new Fragment(null, {bemBase: 'foo'});
+  describe("#bemBase getter", function() {
+    it("should return fragment's BEM base instance", function() {
+      const fragment = new Fragment(null, { bemBase: 'foo' });
       expect(fragment.bemBase === fragment._bemBase, 'to be true');
     });
   });
 
-  describe("#displayName getter", function () {
-    class Foo extends Fragment {
-    }
+  describe("#displayName getter", function() {
+    class Foo extends Fragment {}
 
     Object.defineProperties(Foo, {
       bemBase: {
@@ -45,43 +43,43 @@ describe("Fragment", function () {
       }
     });
 
-    it("should return fragment's display name from fragment's class when it set", function () {
+    it("should return fragment's display name from fragment's class when it set", function() {
       const foo = new Foo();
 
       expect(foo.displayName, 'to equal', 'Foo');
     });
 
-    it("should return fragment's display name from fragment's parent class otherwise", function () {
+    it("should return fragment's display name from fragment's parent class otherwise", function() {
       const barFoo = new BarFoo();
 
       expect(barFoo.displayName, 'to equal', 'Foo');
     });
   });
 
-  describe("#opts getter", function () {
-    it("should return fragment's initialized options", function () {
-      const fragment = new Fragment(null, {bemBase: 'foo'});
+  describe("#opts getter", function() {
+    it("should return fragment's initialized options", function() {
+      const fragment = new Fragment(null, { bemBase: 'foo' });
       expect(fragment.opts === fragment._opts, 'to be true');
     });
   });
 
-  describe("#selector getter", function () {
-    it("should return fragment's selector", function () {
-      const fragment = new Fragment(null, {bemBase: 'foo'});
+  describe("#selector getter", function() {
+    it("should return fragment's selector", function() {
+      const fragment = new Fragment(null, { bemBase: 'foo' });
       expect(fragment.selector === fragment._selector, 'to be true');
     });
   });
 
-  describe("#spec getter", function () {
-    it("should return fragment's initialized specification", function () {
-      const fragment = new Fragment({cid: 'bar'}, {bemBase: 'foo'});
+  describe("#spec getter", function() {
+    it("should return fragment's initialized specification", function() {
+      const fragment = new Fragment({ cid: 'bar' }, { bemBase: 'foo' });
       expect(fragment.spec === fragment._spec, 'to be true');
     });
   });
 
-  describe("#cloneBemBase()", function () {
-    it("should return new instance of BEM base initialized with fragment's BEM base", function () {
-      const fragment = new Fragment(null, {bemBase: 'bar'});
+  describe("#cloneBemBase()", function() {
+    it("should return new instance of BEM base initialized with fragment's BEM base", function() {
+      const fragment = new Fragment(null, { bemBase: 'bar' });
       const clonedBemBase = fragment.cloneBemBase();
       expect(clonedBemBase.toString(), 'to equal', 'bar');
       expect(clonedBemBase.isFinal, 'to be false');
@@ -89,9 +87,8 @@ describe("Fragment", function () {
     });
   });
 
-  describe("#getSomething()", function () {
-    class Bar extends Fragment {
-    }
+  describe("#getSomething()", function() {
+    class Bar extends Fragment {}
 
     Object.defineProperties(Bar, {
       bemBase: {
@@ -102,8 +99,7 @@ describe("Fragment", function () {
       }
     });
 
-    class Foo extends Fragment {
-    }
+    class Foo extends Fragment {}
 
     Object.defineProperties(Foo, {
       bemBase: {
@@ -117,10 +113,9 @@ describe("Fragment", function () {
       }
     });
 
-    class NotFragment {
-    }
+    class NotFragment {}
 
-    it("should throw error when `FragmentOfSomething` is not a fragment class", function () {
+    it("should throw error when `FragmentOfSomething` is not a fragment class", function() {
       const foo = new Foo();
 
       expect(
@@ -136,7 +131,7 @@ describe("Fragment", function () {
       );
     });
 
-    it("should throw error when `specOfSomething` already an instance of `Fragment`", function () {
+    it("should throw error when `specOfSomething` already an instance of `Fragment`", function() {
       const bar = new Bar();
       const foo = new Foo();
 
@@ -147,7 +142,7 @@ describe("Fragment", function () {
       );
     });
 
-    it("should return new fragment of something and set parent specification by default to this fragment", function () {
+    it("should return new fragment of something and set parent specification by default to this fragment", function() {
       const barOpts = {};
       const barSpec = {};
 
@@ -163,10 +158,10 @@ describe("Fragment", function () {
       expect(bar.spec.parent === foo.selector, 'to be true');
     });
 
-    it("should allow parent of new fragment to be set in `specOfSomething` argument", function () {
+    it("should allow parent of new fragment to be set in `specOfSomething` argument", function() {
       const barParent = '.parent';
       const barOpts = {};
-      const barSpec = {parent: barParent};
+      const barSpec = { parent: barParent };
 
       const foo = new Foo();
 
@@ -181,9 +176,8 @@ describe("Fragment", function () {
     });
   });
 
-  describe("#getSomethingFragment()", function () {
-    class Fiz extends Fragment {
-    }
+  describe("#getSomethingFragment()", function() {
+    class Fiz extends Fragment {}
 
     Object.defineProperties(Fiz, {
       bemBase: {
@@ -194,8 +188,7 @@ describe("Fragment", function () {
       }
     });
 
-    class Buz1 extends Fragment {
-    }
+    class Buz1 extends Fragment {}
 
     Object.defineProperties(Buz1, {
       bemBase: {
@@ -206,8 +199,7 @@ describe("Fragment", function () {
       }
     });
 
-    class Buz2 extends Fragment {
-    }
+    class Buz2 extends Fragment {}
 
     Object.defineProperties(Buz2, {
       bemBase: {
@@ -218,8 +210,7 @@ describe("Fragment", function () {
       }
     });
 
-    class Das extends Fragment {
-    }
+    class Das extends Fragment {}
 
     Object.defineProperties(Das, {
       bemBase: {
@@ -230,8 +221,7 @@ describe("Fragment", function () {
       }
     });
 
-    class FooParent extends Fragment {
-    }
+    class FooParent extends Fragment {}
 
     Object.defineProperties(FooParent, {
       bemBase: {
@@ -245,8 +235,7 @@ describe("Fragment", function () {
       }
     });
 
-    class Foo extends Fragment {
-    }
+    class Foo extends Fragment {}
 
     Object.defineProperties(Foo, {
       bemBase: {
@@ -260,8 +249,7 @@ describe("Fragment", function () {
       }
     });
 
-    class Bar extends Foo {
-    }
+    class Bar extends Foo {}
 
     Object.defineProperties(Bar, {
       bemBase: {
@@ -275,22 +263,22 @@ describe("Fragment", function () {
       }
     });
 
-    it("should check fragment's `opts` first", function () {
-      const bar = new Bar(null, {BuzFragment: Buz2});
+    it("should check fragment's `opts` first", function() {
+      const bar = new Bar(null, { BuzFragment: Buz2 });
       expect(bar.getSomethingFragment('Buz', Foo) === Buz2, 'to be true');
     });
 
-    it("should check fragment's `constructor` second", function () {
+    it("should check fragment's `constructor` second", function() {
       const bar = new Bar();
       expect(bar.getSomethingFragment('Buz', Foo) === Buz1, 'to be true');
     });
 
-    it("should check fragment's parent third", function () {
+    it("should check fragment's parent third", function() {
       const bar = new Bar();
       expect(bar.getSomethingFragment('Fiz', Foo) === Fiz, 'to be true');
     });
 
-    it("should not bubble up in fragment hierarchy upper than `RootFragmentOfSomething`", function () {
+    it("should not bubble up in fragment hierarchy upper than `RootFragmentOfSomething`", function() {
       const bar = new Bar();
       expect(
         () => bar.getSomethingFragment('Das', Foo),

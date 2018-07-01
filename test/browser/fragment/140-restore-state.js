@@ -1,9 +1,9 @@
 import _ from 'lodash';
 import appRootPath from 'app-root-path';
 import expect from 'unexpected';
-import {t} from 'testcafe';
+import { t } from 'testcafe';
 
-import {Fragment} from '../../../src';
+import Fragment from '../../../src/fragment';
 import utils from "../../../src/utils";
 
 fixture `Fragment :: 140 #restoreState()`
@@ -20,7 +20,7 @@ class TextInput extends Fragment {
    * @param {object} [opts.BarFragmentSpec] - Spec for `TextInput` fragment used in this fragment
    */
   constructor(spec, opts) {
-    const {initializedOpts, initializedSpec, isInstance} = TextInput.initializeFragmentSpecAndOpts(spec, opts);
+    const { initializedOpts, initializedSpec, isInstance } = TextInput.initializeFragmentSpecAndOpts(spec, opts);
 
     if (isInstance === true) {
       return spec;
@@ -61,8 +61,12 @@ class TextInput extends Fragment {
   // ---------------------------------------------------------------------------
 
   getStateParts(options) {
-    const opts = utils.initializeOptions(options, {defaults: {onlyWritable: false}});
-    const {onlyWritable} = opts;
+    const opts = utils.initializeOptions(options, {
+      defaults: {
+        onlyWritable: false
+      }
+    });
+    const { onlyWritable } = opts;
     const parentParts = super.getStateParts(onlyWritable);
     const writableParts = _.concat(parentParts, ['value']);
 
@@ -121,7 +125,12 @@ class TextInput extends Fragment {
       return '';
     }
 
-    const opts = utils.initializeOptions(options, {defaults: {paste: true, replace: true}});
+    const opts = utils.initializeOptions(options, {
+      defaults: {
+        paste: true,
+        replace: true
+      }
+    });
     await t.typeText(this.inputElementSelector, value, opts);
 
     return value;
@@ -174,10 +183,10 @@ test("020 It should throw error when state, persisted under specified id, is not
 test("030 It should restore fragment's state and returns plain object with state parts that were set", async () => {
   const textInput = new TextInput();
   await textInput.persistState('42');
-  await textInput.setState({value: 'foo'});
-  await textInput.expectStateIs({disabled: false, value: 'foo'});
+  await textInput.setState({ value: 'foo' });
+  await textInput.expectStateIs({ disabled: false, value: 'foo' });
 
   const state = await textInput.restoreState('42');
-  await textInput.expectStateIs({disabled: false, value: '42'});
-  expect(state, 'to equal', {value: '42'});
+  await textInput.expectStateIs({ disabled: false, value: '42' });
+  expect(state, 'to equal', { value: '42' });
 });

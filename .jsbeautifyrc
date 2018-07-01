@@ -1,0 +1,7 @@
+{
+  "js": {
+    "brace_style": "end-expand,preserve-inline",
+    "end_with_newline": true,
+    "indent_size": 2
+  }
+}

@@ -1,13 +1,15 @@
 import _ from 'lodash';
-import {detailedDiff} from 'deep-object-diff';
+import { detailedDiff } from 'deep-object-diff';
 import escapeStringRegexp from 'escape-string-regexp';
-import {pascalCase, ucFirst} from 'change-case';
-import {Selector, t} from 'testcafe';
+import { pascalCase, ucFirst } from 'change-case';
+import { Selector, t } from 'testcafe';
 import typeOf from 'typeof--'
 
 import bem from "./bem";
 import selector from "./selector";
 import utils from './utils';
+
+const { BemBase } = bem;
 
 /**
  * Allows to customize fragment's selector.
@@ -89,7 +91,9 @@ class Fragment {
      *
      * @private
      */
-    this._opts = _.assign({}, _opts, {bemBase: new bem.BemBase(chosenBemBase, {isFinal: true})});
+    this._opts = _.assign({}, _opts, {
+      bemBase: new BemBase(chosenBemBase, { isFinal: true })
+    });
 
     /**
      * `spec` argument that was used to create this instance of fragment.
@@ -99,7 +103,7 @@ class Fragment {
      */
     this._spec = _.assign({}, this._originalSpec);
 
-    const {bemBase} = this._opts;
+    const { bemBase } = this._opts;
 
     /**
      * Fragment's BEM base.
@@ -168,7 +172,7 @@ class Fragment {
           );
         }
 
-        this._selector = this._selector.filter(`.${bemBase.setMod(['cns', cnsSpec], {fresh: true})}`);
+        this._selector = this._selector.filter(`.${bemBase.setMod(['cns', cnsSpec], { fresh: true })}`);
       }
 
       // Following spec aren't composable with each other!
@@ -183,7 +187,7 @@ class Fragment {
           );
         }
 
-        this._selector = this._selector.filter(`.${bemBase.setMod(['cid', cidSpec], {fresh: true})}`);
+        this._selector = this._selector.filter(`.${bemBase.setMod(['cid', cidSpec], { fresh: true })}`);
       }
       // 2.3 'idx' often used to get specific fragment by its index in parent.
       // It respects 'cns' and 'parent' specs.
@@ -294,7 +298,11 @@ class Fragment {
    */
   static async expectSomethingsCountIs(somethingSelector, count, options) {
     let assertionName = 'eql';
-    const opts = utils.initializeOptions(options, {defaults: {isNot: false}});
+    const opts = utils.initializeOptions(options, {
+      defaults: {
+        isNot: false
+      }
+    });
 
     if (_.isArray(count)) {
       [assertionName, count] = count;
@@ -319,7 +327,7 @@ class Fragment {
    */
   static initializeFragmentSpecAndOpts(spec, opts, defaults) {
     if (spec instanceof this) {
-      return {isInstance: true};
+      return { isInstance: true };
     }
 
     if (spec instanceof Fragment) {
@@ -370,7 +378,7 @@ class Fragment {
       }
     }
 
-    return {initializedOpts, initializedSpec};
+    return { initializedOpts, initializedSpec };
   }
 
   /**
@@ -387,7 +395,7 @@ class Fragment {
       defaults: {
         stateParts: []
       },
-      validator: ({stateParts}) => {
+      validator: ({ stateParts }) => {
         let errMsg = null;
 
         if (!_.isArray(stateParts)) {
@@ -399,7 +407,7 @@ class Fragment {
     });
 
     let MadeFragment = BaseFragment;
-    const {stateParts} = opts;
+    const { stateParts } = opts;
 
     if (!_.isEmpty(stateParts)) {
       for (const statePart of stateParts) {
@@ -469,7 +477,7 @@ class Fragment {
         isBooleanHas: false,
         src: 'bemModifier'
       },
-      validator: ({src}) => {
+      validator: ({ src }) => {
         let msg = null;
 
         if (!_.includes(['attribute', 'bemModifier'], src)) {
@@ -481,7 +489,7 @@ class Fragment {
         return msg;
       }
     });
-    const {antonym, isBoolean, isBooleanHas, src, waitTil, waitUntil} = opts;
+    const { antonym, isBoolean, isBooleanHas, src, waitTil, waitUntil } = opts;
     const attrName = _attrName || _partName;
     const partName = pascalCase(_partName);
 
@@ -534,8 +542,12 @@ class Fragment {
        * @return {Promise<void>}
        */
       async [`expect${partName}PartOfStateIs`](value, options) {
-        const opts = utils.initializeOptions(options, {defaults: {isNot: false}});
-        const {isNot} = opts;
+        const opts = utils.initializeOptions(options, {
+          defaults: {
+            isNot: false
+          }
+        });
+        const { isNot } = opts;
 
         if (isBoolean) {
           value = !!value;
@@ -545,14 +557,18 @@ class Fragment {
           if (isBoolean) {
             await this.expectExistsAndConformsRequirements({
               bemModifiers: [
-                [[attrName, null], (isNot ? value : !value)]
+                [
+                  [attrName, null], (isNot ? value : !value)
+                ]
               ]
             });
           }
           else {
             await this.expectExistsAndConformsRequirements({
               bemModifiers: [
-                [[attrName, (value + '')], isNot] // TODO Remove casting to string (#5)
+                [
+                  [attrName, (value + '')], isNot
+                ] // TODO Remove casting to string (#5)
               ]
             });
           }
@@ -593,7 +609,7 @@ class Fragment {
            *
            * @return {Promise<void>}
            */
-          value: async function () {
+          value: async function() {
             await this[`expect${partName}PartOfStateIs`](true);
           }
         },
@@ -608,7 +624,7 @@ class Fragment {
            *
            * @return {Promise<void>}
            */
-          value: async function () {
+          value: async function() {
             await this[`expect${partName}PartOfStateIs`](false);
           }
         }
@@ -629,7 +645,7 @@ class Fragment {
             configurable: true,
             enumerable: false,
             writable: true,
-            value: async function () {
+            value: async function() {
               await this[`expectIsNot${partName}`]();
             }
           },
@@ -637,7 +653,7 @@ class Fragment {
             configurable: true,
             enumerable: false,
             writable: true,
-            value: async function () {
+            value: async function() {
               await this[`expectIs${partName}`]();
             }
           }
@@ -678,9 +694,9 @@ class Fragment {
            * @param {number} [options.wait] - Number of milliseconds to wait before assertion
            * @return {Promise<void>}
            */
-          value: async function (options) {
+          value: async function(options) {
             const opts = utils.initializeOptions(options);
-            const {wait} = opts;
+            const { wait } = opts;
 
             if (wait) {
               await t.wait(wait);
@@ -728,9 +744,9 @@ class Fragment {
            * @param {number} [options.wait] - Number of milliseconds to wait before assertion execution
            * @return {Promise<void>}
            */
-          value: async function (options) {
+          value: async function(options) {
             const opts = utils.initializeOptions(options);
-            const {wait} = opts;
+            const { wait } = opts;
 
             if (wait) {
               await t.wait(wait);
@@ -754,8 +770,8 @@ class Fragment {
           /**
            * Asserts that fragment's state part value is equal to `value`.
            */
-          value: async function (value) {
-            await this[`expect${partName}PartOfStateIs`](value, {isNot: false});
+          value: async function(value) {
+            await this[`expect${partName}PartOfStateIs`](value, { isNot: false });
           }
         },
         [`expect${partName}IsNot`]: {
@@ -765,8 +781,8 @@ class Fragment {
           /**
            * Asserts that fragment's state part value is not equal to `value`.
            */
-          value: async function (value) {
-            await this[`expect${partName}PartOfStateIs`](value, {isNot: true});
+          value: async function(value) {
+            await this[`expect${partName}PartOfStateIs`](value, { isNot: true });
           }
         }
       });
@@ -783,7 +799,7 @@ class Fragment {
    * @returns {BemBase}
    */
   cloneBemBase() {
-    return new bem.BemBase(this.bemBase);
+    return new BemBase(this.bemBase);
   }
 
   /**
@@ -799,10 +815,25 @@ class Fragment {
    * @param {string} [requirements.tagName] - Allows to assert that fragment's selector rendered using specified tag
    * @param {array|string|RegExp} [requirements.text] - Allows to assert that fragment selector's text equal or matches specified value. Condition of assertion can be reversing by passing `Array` where first element is a text and second is a flag that specifies whether condition must be negated or not, for example, `'Qwerty'` can be used to assert that text of fragment's selector is equal 'Qwerty' and `['Qwerty', true]'` can be used to assert that text of `selector` isn't equal 'Qwerty'
    * @param {*} [requirements.textContent] - Allows to assert that fragment selector's text content equal or matches specified value. When value is not regular expression it would be coerced to string as `value + ''`. To negate assertion condition pass `Array` with text content and boolean flag, see `requirements.text` for examples
+   * @param {Object} [options] - Options
+   * @param {Selector} [options.selector=this.selector] - TestCafe selector to assert on. Fragment's selector by default
    * @return {Promise<void>}
    */
-  async expectExistsAndConformsRequirements(requirements) {
-    await this.expectIsExist();
+  async expectExistsAndConformsRequirements(requirements, options) {
+    const opts = utils.initializeOptions(options, {
+      defaults: {
+        selector: this.selector
+      }
+    });
+
+    let sel = opts.selector;
+
+    if (options && options.selector) {
+      await t.expect(sel.count).eql(1, "'options.selector' must return one DOM node but it doesn't");
+    }
+    else {
+      await this.expectIsExist();
+    }
 
     if (_.isNil(requirements)) {
       return;
@@ -833,7 +864,7 @@ class Fragment {
         }
 
         let errorMessage = `Expected '${this.displayName}' fragment's selector to `;
-        const sel = selector.filterByAttribute(this.selector, [attrName, attrValue], {isNot});
+        sel = selector.filterByAttribute(sel, [attrName, attrValue], { isNot });
 
         if (isNot) {
           errorMessage += 'not ';
@@ -879,7 +910,7 @@ class Fragment {
         );
       }
 
-      await t.expect(this.selector.tagName).eql(requirements.tagName);
+      await t.expect(sel.tagName).eql(requirements.tagName);
     }
 
     if (_.has(requirements, 'text')) {
@@ -898,7 +929,7 @@ class Fragment {
         expectedValue : new RegExp(`^${escapeStringRegexp(expectedValue + '')}$`);
 
       await t
-        .expect(this.selector.withText(expectedValueAsRegExp).count)
+        .expect(sel.withText(expectedValueAsRegExp).count)
         .eql(
           isNot ? 0 : 1,
           `'${this.displayName}' fragment's selector text must ${isNot ? 'not ' : ''}match ${expectedValueAsRegExp}`
@@ -916,11 +947,11 @@ class Fragment {
 
       if (_.isRegExp(expectedValue)) {
         const assertion = isNot ? 'notMatch' : 'match';
-        await t.expect(this.selector.textContent)[assertion](expectedValue);
+        await t.expect(sel.textContent)[assertion](expectedValue);
       }
       else {
         const assertion = isNot ? 'notEql' : 'eql';
-        await t.expect(this.selector.textContent)[assertion](expectedValue + '');
+        await t.expect(sel.textContent)[assertion](expectedValue + '');
       }
     }
   }
@@ -988,7 +1019,7 @@ class Fragment {
     const something = this[somethingGetterName](somethingSpecification, somethingOptions);
     await something.expectIsExist();
 
-    const {idx} = opts;
+    const { idx } = opts;
 
     if (_.isInteger(idx)) {
       await something.expectIndexInParentIs(this.selector, idx);
@@ -1015,8 +1046,13 @@ class Fragment {
    */
   async expectHasSomethings(somethingName, somethingSpecificationsAndOptions, options) {
     const len = somethingSpecificationsAndOptions.length;
-    const opts = utils.initializeOptions(options, {defaults: {only: false, sameOrder: false}});
-    const {only, sameOrder} = opts;
+    const opts = utils.initializeOptions(options, {
+      defaults: {
+        only: false,
+        sameOrder: false
+      }
+    });
+    const { only, sameOrder } = opts;
 
     if (only === true) {
       const counterMethodName = `expect${ucFirst(somethingName)}sCountIs`;
@@ -1031,12 +1067,12 @@ class Fragment {
     }
 
     for (let i = 0; i < len; i++) {
-      const idx = (only === true && sameOrder === true && i);
+      const expectHasSomethingOptions = { idx: (only === true && sameOrder === true && i) };
       await this.expectHasSomething(
         somethingName,
         somethingSpecificationsAndOptions[i][0],
         somethingSpecificationsAndOptions[i][1],
-        {idx}
+        expectHasSomethingOptions
       );
     }
   }
@@ -1051,7 +1087,7 @@ class Fragment {
   async expectIndexInParentIs(parent, idx) {
     await this.expectIsExist();
 
-    const instAtIndex = new this.constructor({idx, parent});
+    const instAtIndex = new this.constructor({ idx, parent });
     await instAtIndex.expectIsExist();
 
     const srcTextContent = await this.selector.textContent;
@@ -1078,7 +1114,7 @@ class Fragment {
     });
 
     let msg = '';
-    const {allowMultiple, isNot, message} = opts;
+    const { allowMultiple, isNot, message } = opts;
 
     // ---------------------------------------------------------------------------
     // Handling case when selector must not exist
@@ -1169,7 +1205,11 @@ class Fragment {
       );
     }
 
-    const opts = utils.initializeOptions(options, {defaults: {debug: false}});
+    const opts = utils.initializeOptions(options, {
+      defaults: {
+        debug: false
+      }
+    });
     const currentState = await this.getState(_.omit(opts, ['debug']));
 
     if (opts.debug) {
@@ -1212,7 +1252,7 @@ class Fragment {
       );
     }
 
-    await this.expectIsExist({allowMultiple: false});
+    await this.expectIsExist({ allowMultiple: false });
 
     const bemBasePlusModifierName = modifierName ? `${this.bemBase}--${modifierName}` : `${this.bemBase}--`;
     const bemMods = [];
@@ -1220,7 +1260,7 @@ class Fragment {
 
     for (const className of classNames) {
       if (_.startsWith(className, bemBasePlusModifierName)) {
-        const bemBase = new bem.BemBase(className);
+        const bemBase = new BemBase(className);
         bemMods.push(bemBase.mod);
       }
     }
@@ -1279,7 +1319,7 @@ class Fragment {
       );
     }
 
-    const somethingSpec = _.assign({}, {parent: this.selector}, specOfSomething);
+    const somethingSpec = _.assign({}, { parent: this.selector }, specOfSomething);
     return new FragmentOfSomething(somethingSpec, optsOfSomething);
   }
 
@@ -1333,7 +1373,7 @@ class Fragment {
     }
 
     const opts = utils.initializeOptions(options);
-    const {omitParts, onlyParts, waitBefore} = opts;
+    const { omitParts, onlyParts, waitBefore } = opts;
 
     if (waitBefore) {
       await t.wait(waitBefore);
@@ -1484,7 +1524,7 @@ class Fragment {
       );
     }
 
-    let statePartList = this.getStateParts({onlyWritable: true});
+    let statePartList = this.getStateParts({ onlyWritable: true });
     const state = {};
 
     if (!_.isArray(statePartList)) {

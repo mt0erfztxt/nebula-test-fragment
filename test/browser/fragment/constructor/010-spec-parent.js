@@ -1,9 +1,8 @@
 import appRootPath from 'app-root-path';
 
-import {Fragment} from '../../../../src';
+import Fragment from '../../../../src/fragment';
 
-class ParentFragment extends Fragment {
-}
+class ParentFragment extends Fragment {}
 
 Object.defineProperties(ParentFragment, {
   bemBase: {
@@ -14,8 +13,7 @@ Object.defineProperties(ParentFragment, {
   }
 });
 
-class ChildFragment extends Fragment {
-}
+class ChildFragment extends Fragment {}
 
 Object.defineProperties(ChildFragment, {
   bemBase: {
@@ -31,7 +29,7 @@ fixture `Fragment :: Constructor :: 010 Spec Parent`
 
 test("010 It uses selector of `spec.parent` argument as parent selector when it is a fragment", async (t) => {
   const parentFragment = new ParentFragment();
-  const childFragment = new ChildFragment({parent: parentFragment});
+  const childFragment = new ChildFragment({ parent: parentFragment });
 
   // Check that parent fragment found.
   await t.expect(parentFragment.selector.exists).ok();
@@ -57,7 +55,7 @@ test("020 It uses 'BODY' element of page to create parent selector when `spec.pa
 });
 
 test("020 It uses `spec.parent` argument to create parent selector when it is set but not to a fragment", async (t) => {
-  const childFragment = new ChildFragment({parent: '.not-a-fragment'});
+  const childFragment = new ChildFragment({ parent: '.not-a-fragment' });
   await t.expect(childFragment.selector.exists).ok();
   await t.expect(childFragment.selector.count).eql(1);
   await t.expect(childFragment.selector.nth(0).textContent).eql('2');

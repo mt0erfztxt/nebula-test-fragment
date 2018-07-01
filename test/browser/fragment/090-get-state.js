@@ -1,9 +1,9 @@
 import _ from 'lodash';
 import appRootPath from 'app-root-path';
 import expect from 'unexpected';
-import {t} from 'testcafe';
+import { t } from 'testcafe';
 
-import {Fragment} from '../../../src';
+import Fragment from '../../../src/fragment';
 import utils from "../../../src/utils";
 
 fixture `Fragment :: 090 #getState()`
@@ -20,7 +20,7 @@ class TextInput extends Fragment {
    * @param {object} [opts.BarFragmentSpec] - Spec for `TextInput` fragment used in this fragment
    */
   constructor(spec, opts) {
-    const {initializedOpts, initializedSpec, isInstance} = TextInput.initializeFragmentSpecAndOpts(spec, opts);
+    const { initializedOpts, initializedSpec, isInstance } = TextInput.initializeFragmentSpecAndOpts(spec, opts);
 
     if (isInstance === true) {
       return spec;
@@ -61,8 +61,12 @@ class TextInput extends Fragment {
   // ---------------------------------------------------------------------------
 
   getStateParts(options) {
-    const opts = utils.initializeOptions(options, {defaults: {onlyWritable: false}});
-    const {onlyWritable} = opts;
+    const opts = utils.initializeOptions(options, {
+      defaults: {
+        onlyWritable: false
+      }
+    });
+    const { onlyWritable } = opts;
     const parentParts = super.getStateParts(onlyWritable);
     const writableParts = _.concat(parentParts, ['value']);
 
@@ -154,7 +158,7 @@ test("030 It should throw error when 'options.onlyParts' argument is not a nil o
   const textInput = new TextInput();
 
   try {
-    await textInput.getState({omitParts: 'foo'});
+    await textInput.getState({ omitParts: 'foo' });
   }
   catch (e) {
     message = "'options.omitParts' argument must be a nil or array of non-blank strings but it is String (foo)";
@@ -165,7 +169,7 @@ test("030 It should throw error when 'options.onlyParts' argument is not a nil o
   expect(isThrown, 'to be true');
 
   try {
-    await textInput.getState({omitParts: ['foo', 11]});
+    await textInput.getState({ omitParts: ['foo', 11] });
   }
   catch (e) {
     message = "'options.omitParts' argument must be a nil or array of non-blank strings but it is Array (foo,11)";
@@ -182,7 +186,7 @@ test("040 It should throw error when 'options.onlyParts' argument is not a nil o
   const textInput = new TextInput();
 
   try {
-    await textInput.getState({onlyParts: 'foo'});
+    await textInput.getState({ onlyParts: 'foo' });
   }
   catch (e) {
     message = "'options.onlyParts' argument must be a nil or array of non-blank strings but it is String (foo)";
@@ -193,7 +197,7 @@ test("040 It should throw error when 'options.onlyParts' argument is not a nil o
   expect(isThrown, 'to be true');
 
   try {
-    await textInput.getState({onlyParts: ['foo', 11]});
+    await textInput.getState({ onlyParts: ['foo', 11] });
   }
   catch (e) {
     message = "'options.onlyParts' argument must be a nil or array of non-blank strings but it is Array (foo,11)";
@@ -208,7 +212,7 @@ test("050 It should respect 'options.onlyParts' argument", async () => {
   const textInput = new TextInput();
   await t.expect(textInput.inputElementSelector.count).eql(1);
 
-  const currentState = await textInput.getState({onlyParts: ['value']});
+  const currentState = await textInput.getState({ onlyParts: ['value'] });
   expect(currentState, 'to equal', {
     value: '42'
   });
@@ -218,7 +222,7 @@ test("060 It should respect 'options.omitParts' argument", async () => {
   const textInput = new TextInput();
   await t.expect(textInput.inputElementSelector.count).eql(1);
 
-  const currentState = await textInput.getState({omitParts: ['value']});
+  const currentState = await textInput.getState({ omitParts: ['value'] });
   expect(currentState, 'to equal', {
     disabled: true
   });
@@ -228,6 +232,6 @@ test("070 It should allow both 'options.onlyParts' and 'options.omitParts' argum
   const textInput = new TextInput();
   await t.expect(textInput.inputElementSelector.count).eql(1);
 
-  const currentState = await textInput.getState({omitParts: ['value'], onlyParts: ['value']});
+  const currentState = await textInput.getState({ omitParts: ['value'], onlyParts: ['value'] });
   expect(currentState, 'to equal', {});
 });

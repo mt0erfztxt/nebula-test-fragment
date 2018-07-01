@@ -2,13 +2,12 @@ import _ from 'lodash';
 import appRootPath from 'app-root-path';
 import expect from 'unexpected';
 
-import {Fragment} from '../../../src';
+import Fragment from '../../../src/fragment';
 
 fixture `Fragment :: 070 #expectHasSomethings()`
   .page(appRootPath.path + '/test/fixtures/fragment/070-expect-has-somethings.html');
 
-class Bar extends Fragment {
-}
+class Bar extends Fragment {}
 
 Object.defineProperties(Bar, {
   bemBase: {
@@ -30,7 +29,7 @@ class Foo extends Fragment {
    * @param {object} [opts.BarFragmentSpec] - Spec for `Bar` fragment used in this fragment
    */
   constructor(spec, opts) {
-    const {initializedOpts, initializedSpec, isInstance} = Foo.initializeFragmentSpecAndOpts(spec, opts);
+    const { initializedOpts, initializedSpec, isInstance } = Foo.initializeFragmentSpecAndOpts(spec, opts);
 
     if (isInstance === true) {
       return spec;
@@ -102,7 +101,7 @@ class Foo extends Fragment {
   getBar(spec, opts) {
     return this.getSomething(
       this.BarFragment,
-      _.assign({}, this.opts.BarFragmentSpec, {parent: this.selector}, spec),
+      _.assign({}, this.opts.BarFragmentSpec, { parent: this.selector }, spec),
       _.assign({}, this.opts.BarFragmentOpts, opts)
     );
   }
@@ -125,7 +124,10 @@ test("010 It should throw error when fragment doesn't have specified fragments",
   const foo = new Foo();
 
   try {
-    await foo.expectHasSomethings('bar', [[{cid: '0'}], [{cid: '42'}]]);
+    await foo.expectHasSomethings('bar', [
+      [{ cid: '0' }],
+      [{ cid: '42' }]
+    ]);
   }
   catch (e) {
     const msgPattern = /.*'Bar' fragment's selector must return exactly one DOM element but it doesn't: expected 0.*/;
@@ -141,7 +143,10 @@ test("020 It should not throw error when fragment does have specified fragments"
   const foo = new Foo();
 
   try {
-    await foo.expectHasSomethings('bar', [[{cid: '0'}], [{cid: '1'}]]);
+    await foo.expectHasSomethings('bar', [
+      [{ cid: '0' }],
+      [{ cid: '1' }]
+    ]);
   }
   catch (e) {
     isThrown = true;
@@ -155,7 +160,10 @@ test("030 It should respect `options.only` argument (failing case)", async () =>
   const foo = new Foo();
 
   try {
-    await foo.expectHasSomethings('bar', [[{cid: '0'}], [{cid: '1'}]], {only: true});
+    await foo.expectHasSomethings('bar', [
+      [{ cid: '0' }],
+      [{ cid: '1' }]
+    ], { only: true });
   }
   catch (e) {
     const msgPattern = /.*expected 3 to deeply equal 2.*/;
@@ -171,7 +179,11 @@ test("040 It should respect `options.only` argument (successful case)", async ()
   const foo = new Foo();
 
   try {
-    await foo.expectHasSomethings('bar', [[{cid: '0'}], [{cid: '2'}], [{cid: '1'}]], {only: true});
+    await foo.expectHasSomethings('bar', [
+      [{ cid: '0' }],
+      [{ cid: '2' }],
+      [{ cid: '1' }]
+    ], { only: true });
   }
   catch (e) {
     isThrown = true;
@@ -186,9 +198,11 @@ test("050 It should respect `options.sameOrder` argument (failing case)", async 
 
   try {
     await foo.expectHasSomethings(
-      'bar',
-      [[{cid: '2'}], [{cid: '1'}], [{cid: '0'}]],
-      {only: true, sameOrder: true}
+      'bar', [
+        [{ cid: '2' }],
+        [{ cid: '1' }],
+        [{ cid: '0' }]
+      ], { only: true, sameOrder: true }
     );
   }
   catch (e) {
@@ -206,9 +220,11 @@ test("060 It should respect `options.sameOrder` argument (successful case)", asy
 
   try {
     await foo.expectHasSomethings(
-      'bar',
-      [[{cid: '0'}], [{cid: '1'}], [{cid: '2'}]],
-      {only: true, sameOrder: true}
+      'bar', [
+        [{ cid: '0' }],
+        [{ cid: '1' }],
+        [{ cid: '2' }]
+      ], { only: true, sameOrder: true }
     );
   }
   catch (e) {

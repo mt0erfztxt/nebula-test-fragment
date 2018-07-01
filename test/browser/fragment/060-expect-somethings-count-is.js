@@ -1,7 +1,7 @@
 import appRootPath from 'app-root-path';
 import expect from 'unexpected';
 
-import {Fragment} from '../../../src';
+import Fragment from '../../../src/fragment';
 
 fixture `Fragment :: 060 .expectSomethingsCountIs()`
   .page(appRootPath.path + '/test/fixtures/fragment/060-expect-somethings-count-is.html');
@@ -17,7 +17,7 @@ class Foo extends Fragment {
    * @param {object} [opts.BarFragmentSpec] - Spec for `Bar` fragment used in this fragment
    */
   constructor(spec, opts) {
-    const {initializedOpts, initializedSpec, isInstance} = Foo.initializeFragmentSpecAndOpts(spec, opts);
+    const { initializedOpts, initializedSpec, isInstance } = Foo.initializeFragmentSpecAndOpts(spec, opts);
 
     if (isInstance === true) {
       return spec;
@@ -84,7 +84,7 @@ test("020 It should respect `options.isNot` argument", async () => {
   const foo = new Foo();
 
   try {
-    await Foo.expectSomethingsCountIs(foo.itemElementSelector, 3, {isNot: true});
+    await Foo.expectSomethingsCountIs(foo.itemElementSelector, 3, { isNot: true });
   }
   catch (e) {
     const msgPattern = /.*expected 3 to not deeply equal 3.*/;
@@ -114,7 +114,7 @@ test("040 It should respect `options.isNot` argument when `count` argument is ar
   const foo = new Foo();
 
   try {
-    await Foo.expectSomethingsCountIs(foo.itemElementSelector, ['gte', 3], {isNot: true});
+    await Foo.expectSomethingsCountIs(foo.itemElementSelector, ['gte', 3], { isNot: true });
   }
   catch (e) {
     const msgPattern = /.*expected 3 to be below 3.*/;

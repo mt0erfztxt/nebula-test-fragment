@@ -1,9 +1,9 @@
 import _ from 'lodash';
 import appRootPath from 'app-root-path';
 import expect from 'unexpected';
-import {t} from 'testcafe';
+import { t } from 'testcafe';
 
-import {Fragment} from '../../../src';
+import Fragment from '../../../src/fragment';
 import utils from "../../../src/utils";
 
 fixture `Fragment :: 120 #expectStateIs()`
@@ -20,7 +20,7 @@ class TextInput extends Fragment {
    * @param {object} [opts.BarFragmentSpec] - Spec for `TextInput` fragment used in this fragment
    */
   constructor(spec, opts) {
-    const {initializedOpts, initializedSpec, isInstance} = TextInput.initializeFragmentSpecAndOpts(spec, opts);
+    const { initializedOpts, initializedSpec, isInstance } = TextInput.initializeFragmentSpecAndOpts(spec, opts);
 
     if (isInstance === true) {
       return spec;
@@ -61,8 +61,12 @@ class TextInput extends Fragment {
   // ---------------------------------------------------------------------------
 
   getStateParts(options) {
-    const opts = utils.initializeOptions(options, {defaults: {onlyWritable: false}});
-    const {onlyWritable} = opts;
+    const opts = utils.initializeOptions(options, {
+      defaults: {
+        onlyWritable: false
+      }
+    });
+    const { onlyWritable } = opts;
     const parentParts = super.getStateParts(onlyWritable);
     const writableParts = _.concat(parentParts, ['value']);
 
@@ -121,7 +125,7 @@ class TextInput extends Fragment {
       return '';
     }
 
-    const opts = utils.initializeOptions(options, {defaults: {paste: true, replace: true}});
+    const opts = utils.initializeOptions(options, { defaults: { paste: true, replace: true } });
     await t.typeText(this.inputElementSelector, value, opts);
 
     return value;
@@ -176,7 +180,7 @@ test("030 It should throw error when fragment's current state does not match spe
   const textInput = new TextInput();
 
   try {
-    await textInput.expectStateIs({value: 'foo'});
+    await textInput.expectStateIs({ value: 'foo' });
   }
   catch (e) {
     const errMsgPattern = /.*'TextInput' fragment's current state doesn't match expected.*/;
@@ -191,7 +195,7 @@ test("040 It should throw error when fragment's current state does not match spe
   let isThrown = false;
   const textInput = new TextInput();
 
-  textInput._persistedStates['42'] = {value: '42'};
+  textInput._persistedStates['42'] = { value: '42' };
 
   try {
     await textInput.expectStateIs('42');
@@ -210,7 +214,7 @@ test("050 It should not throw error when fragment's current state does match spe
   const textInput = new TextInput();
 
   try {
-    await textInput.expectStateIs({disabled: true, value: '42'});
+    await textInput.expectStateIs({ disabled: true, value: '42' });
   }
   catch (e) {
     isThrown = true;
@@ -223,7 +227,7 @@ test("060 It should not throw error when fragment's current state does match spe
   let isThrown = false;
   const textInput = new TextInput();
 
-  textInput._persistedStates['42'] = {disabled: true, value: '42'};
+  textInput._persistedStates['42'] = { disabled: true, value: '42' };
 
   try {
     await textInput.expectStateIs('42');

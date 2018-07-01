@@ -1,9 +1,8 @@
 import appRootPath from 'app-root-path';
 
-import {Fragment} from '../../../../src';
+import Fragment from '../../../../src/fragment';
 
-class MyFragment extends Fragment {
-}
+class MyFragment extends Fragment {}
 
 Object.defineProperties(MyFragment, {
   bemBase: {
@@ -25,7 +24,7 @@ test("010 It uses `spec.cns` argument to filter fragments by 'cns'", async (t) =
   await t.expect(myFragmentWithoutCns.selector.nth(1).textContent).eql('MyFragment, cns foo');
   await t.expect(myFragmentWithoutCns.selector.nth(2).textContent).eql('MyFragment, parent, cns foo');
 
-  const myFragmentWithCns = new MyFragment({cns: 'foo'});
+  const myFragmentWithCns = new MyFragment({ cns: 'foo' });
   await t.expect(myFragmentWithCns.selector.exists).ok();
   await t.expect(myFragmentWithCns.selector.count).eql(2);
   await t.expect(myFragmentWithCns.selector.nth(0).textContent).eql('MyFragment, cns foo');
@@ -33,7 +32,7 @@ test("010 It uses `spec.cns` argument to filter fragments by 'cns'", async (t) =
 });
 
 test("020 It respects `spec.parent` argument when uses `spec.cns` argument to filter fragments by 'cns'", async (t) => {
-  const myFragment = new MyFragment({parent: '.parent', cns: 'foo'});
+  const myFragment = new MyFragment({ parent: '.parent', cns: 'foo' });
   await t.expect(myFragment.selector.exists).ok();
   await t.expect(myFragment.selector.count).eql(1);
   await t.expect(myFragment.selector.textContent).eql('MyFragment, parent, cns foo');

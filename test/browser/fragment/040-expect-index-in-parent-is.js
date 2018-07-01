@@ -1,13 +1,12 @@
 import appRootPath from 'app-root-path';
 import expect from 'unexpected';
 
-import {Fragment} from '../../../src';
+import Fragment from '../../../src/fragment';
 
 fixture `Fragment :: 040 #expectIndexInParentIs()`
   .page(appRootPath.path + '/test/fixtures/fragment/040-expect-index-in-parent-is.html');
 
-class Foo extends Fragment {
-}
+class Foo extends Fragment {}
 
 Object.defineProperties(Foo, {
   bemBase: {
@@ -18,8 +17,7 @@ Object.defineProperties(Foo, {
   }
 });
 
-class Bar extends Fragment {
-}
+class Bar extends Fragment {}
 
 Object.defineProperties(Bar, {
   bemBase: {
@@ -34,7 +32,7 @@ test("010 It should throw error when fragment doesn't exist", async (t) => {
   let isThrown = false;
 
   const foo = new Foo();
-  const bar = new Bar({cid: '42'});
+  const bar = new Bar({ cid: '42' });
   await t.expect(bar.selector.count).eql(0);
 
   try {
@@ -53,7 +51,7 @@ test("020 It should throw error when fragment in parent under specified index do
   let isThrown = false;
 
   const foo = new Foo();
-  const bar = new Bar({cid: '1'});
+  const bar = new Bar({ cid: '1' });
   await t.expect(bar.selector.count).eql(1);
 
   try {
@@ -72,7 +70,7 @@ test("030 It should throw error when fragment and fragment in parent under speci
   let isThrown = false;
 
   const foo = new Foo();
-  const bar = new Bar({cid: '1'});
+  const bar = new Bar({ cid: '1' });
   await t.expect(bar.selector.count).eql(1);
 
   try {
@@ -91,7 +89,7 @@ test("040 It should not throw error when fragment and fragment in parent under s
   let isThrown = false;
 
   const foo = new Foo();
-  const bar = new Bar({cid: '1'});
+  const bar = new Bar({ cid: '1' });
   await t.expect(bar.selector.count).eql(1);
 
   try {

@@ -3,7 +3,7 @@ import sinon from 'sinon';
 import unexpected from 'unexpected';
 import unexpectedSinon from 'unexpected-sinon';
 
-import {Fragment} from '../../../src';
+import Fragment from '../../../src/fragment';
 
 const expect = unexpected.clone();
 expect.use(unexpectedSinon);
@@ -15,7 +15,7 @@ test("010 It should throw error when 'options.stateParts' argument is not an arr
   let isThrown = false;
 
   try {
-    Fragment.makeFragmentClass(Fragment, {stateParts: 'foo'});
+    Fragment.makeFragmentClass(Fragment, { stateParts: 'foo' });
   }
   catch (e) {
     const messagePattern = /.*'options.stateParts' argument must be an array but it is String \(foo\).*/;
@@ -36,7 +36,7 @@ test
   ("020 It should mix in state parts behavior using 'options.stateParts' argument as specification", async (t) => {
     const MyFragment = Fragment.makeFragmentClass(Fragment, {
       stateParts: [
-        ['disabled', {antonym: 'enabled'}],
+        ['disabled', { antonym: 'enabled' }],
         ['fetched'],
         'fetching'
       ]
@@ -65,12 +65,11 @@ test
 
     expect(MyFragment, 'to be a function');
     expect(t.ctx.withPartOfStateMixinSpy, 'was called times', 3);
-    expect(t.ctx.withPartOfStateMixinSpy, 'to have calls satisfying', [
-      {
+    expect(t.ctx.withPartOfStateMixinSpy, 'to have calls satisfying', [{
         args: [
           expect.it('to be a function'),
           'disabled',
-          {antonym: 'enabled'}
+          { antonym: 'enabled' }
         ]
       },
       {

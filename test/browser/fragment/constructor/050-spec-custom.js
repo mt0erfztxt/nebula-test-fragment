@@ -1,6 +1,6 @@
 import appRootPath from 'app-root-path';
 
-import {Fragment} from '../../../../src';
+import Fragment from '../../../../src/fragment';
 import selector from '../../../../src/selector';
 
 class MyFragment extends Fragment {

@@ -1,7 +1,7 @@
 import appRootPath from 'app-root-path';
 import unexpected from 'unexpected';
 import unexpectedSinon from 'unexpected-sinon';
-import {Selector} from 'testcafe';
+import { Selector } from 'testcafe';
 
 import selector from '../../../src/selector';
 
@@ -205,7 +205,9 @@ test("070 It should throw error when `classNames` argument item's first element 
 
   // 1
   try {
-    await selector.expectHasClassNames('.b', [[null]]);
+    await selector.expectHasClassNames('.b', [
+      [null]
+    ]);
   }
   catch (e) {
     expect(
@@ -222,7 +224,9 @@ test("070 It should throw error when `classNames` argument item's first element 
   isThrown = false;
 
   try {
-    await selector.expectHasClassNames('.b', [['']]);
+    await selector.expectHasClassNames('.b', [
+      ['']
+    ]);
   }
   catch (e) {
     expect(
@@ -239,7 +243,9 @@ test("070 It should throw error when `classNames` argument item's first element 
   isThrown = false;
 
   try {
-    await selector.expectHasClassNames('.b', [['  ']]);
+    await selector.expectHasClassNames('.b', [
+      ['  ']
+    ]);
   }
   catch (e) {
     expect(
@@ -256,7 +262,9 @@ test("070 It should throw error when `classNames` argument item's first element 
   isThrown = false;
 
   try {
-    await selector.expectHasClassNames('.b', [[101]]);
+    await selector.expectHasClassNames('.b', [
+      [101]
+    ]);
   }
   catch (e) {
     expect(
@@ -275,7 +283,9 @@ test("080 It should throw error when `classNames` argument item's second element
 
   // 1
   try {
-    await selector.expectHasClassNames('.b', [['b', '']]);
+    await selector.expectHasClassNames('.b', [
+      ['b', '']
+    ]);
   }
   catch (e) {
     expect(
@@ -292,7 +302,9 @@ test("080 It should throw error when `classNames` argument item's second element
   isThrown = false;
 
   try {
-    await selector.expectHasClassNames('.b', [['b', 1]]);
+    await selector.expectHasClassNames('.b', [
+      ['b', 1]
+    ]);
   }
   catch (e) {
     expect(
@@ -325,7 +337,9 @@ test("100 It should throw error when selector must not have (CSS) class name but
   let isThrown = false;
 
   try {
-    await selector.expectHasClassNames('.b', [['bar1', true]]);
+    await selector.expectHasClassNames('.b', [
+      ['bar1', true]
+    ]);
   }
   catch (e) {
     const msgPattern = /.*Selector must not have 'bar1' \(CSS\) class name but it does.*/;
@@ -366,7 +380,7 @@ test("130 It should throw error when selector must have (CSS) class name but it 
   let isThrown = false;
 
   try {
-    await selector.expectHasClassNames('.b', ['b', 'bar', 'bar0', 'bar1'], {only: true});
+    await selector.expectHasClassNames('.b', ['b', 'bar', 'bar0', 'bar1'], { only: true });
   }
   catch (e) {
     const msgPattern = /.*Selector must have only 'b, bar, bar0, bar1' \(CSS\) class names but it have 'b, bar, bar0, bar1, bar2'.*/;
@@ -382,7 +396,7 @@ test("140 It should not throw error when selector must have (CSS) class name and
 
   // 1
   try {
-    await selector.expectHasClassNames('.b', ['b', 'bar', 'bar0', 'bar1', 'bar2'], {only: true});
+    await selector.expectHasClassNames('.b', ['b', 'bar', 'bar0', 'bar1', 'bar2'], { only: true });
   }
   catch (e) {
     isThrown = true;
@@ -395,7 +409,7 @@ test("140 It should not throw error when selector must have (CSS) class name and
   isThrown = false;
 
   try {
-    await selector.expectHasClassNames('.b', ['b', 'bar', 'bar0', 'bar1', 'bar2', ['foo', true]], {only: true});
+    await selector.expectHasClassNames('.b', ['b', 'bar', 'bar0', 'bar1', 'bar2', ['foo', true]], { only: true });
   }
   catch (e) {
     isThrown = true;
