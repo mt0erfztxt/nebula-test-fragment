@@ -1,12 +1,8 @@
 import _ from 'lodash';
-import {lcFirst, ucFirst} from 'change-case';
+import { lcFirst, ucFirst } from 'change-case';
 import typeOf from 'typeof--';
 
-/**
- * Options - just a plain object.
- *
- * @typedef {object} Options
- */
+import Options from './options';
 
 const testCafeAssertionNames = [
   'eql',
@@ -35,7 +31,8 @@ const utils = {
   isNonEmptyString,
   isOptions,
   isString,
-  maybeOptions
+  maybeOptions,
+  Options
 };
 
 /**
@@ -51,8 +48,8 @@ const utils = {
  * @throws {TypeError} When arguments aren't valid.
  */
 function buildTestCafeAssertionName(assertionName, options) {
-  const opts = initializeOptions(options, {defaults: {isNot: false}});
-  const {isNot} = opts;
+  const opts = initializeOptions(options, { defaults: { isNot: false } });
+  const { isNot } = opts;
 
   if (!isNonBlankString(assertionName)) {
     throw new TypeError(
@@ -112,7 +109,7 @@ function initializeOptions(value, options) {
   }
 
   const opts = options || {};
-  const {defaults, validator} = opts;
+  const { defaults, validator } = opts;
 
   if (!maybeOptions(value)) {
     throw new TypeError(

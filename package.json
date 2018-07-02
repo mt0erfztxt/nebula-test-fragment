@@ -12,6 +12,7 @@
   "scripts": {
     "ci-tests": "npm run test-node && npm run test-browser_browserstack",
     "local-tests": "npm run test-node && npm run test-browser_local",
+    "mocha": "mocha --require babel-core/register",
     "test": "npm run ci-tests",
     "test-browser_browserstack": "testcafe 'browserstack:Chrome@53.0:Windows 10' test/browser",
     "test-browser_local": "testcafe chrome test/browser",
