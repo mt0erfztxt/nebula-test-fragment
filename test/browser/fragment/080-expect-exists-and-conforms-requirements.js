@@ -61,7 +61,7 @@ test("030 It should throw error when 'requirements' argument is not a plain obje
     await foo.expectExistsAndConformsRequirements('foo');
   }
   catch (e) {
-    expect(e.message, 'to equal', "'requirements' argument must be a nil or plain object but it is String (foo)");
+    expect(e.message, 'to equal', "'requirements' argument must be a nil or a plain object but it is String (foo)");
     isThrown = true;
   }
 
@@ -660,7 +660,7 @@ test("290 It should allow simple BEM modifier to be passed in as string", async 
   expect(isThrown, 'to be false');
 });
 
-test("300 It should throw error when 'requirements.tagName' argument is not nil and is not non-blank string", async (t) => {
+test("300 It should throw error when 'requirements.tagName' argument is not a nil and is not a non-blank string", async (t) => {
   let isThrown = false;
   const foo = new Foo();
 
@@ -670,7 +670,7 @@ test("300 It should throw error when 'requirements.tagName' argument is not nil 
     await foo.expectExistsAndConformsRequirements({ tagName: 42 });
   }
   catch (e) {
-    const message = "'requirements.tagName' argument must be a nil or non-blank string but it is Number (42)";
+    const message = "'requirements.tagName' argument must be a nil or a non-blank string but it is Number (42)";
     expect(e.message, 'to equal', message);
     isThrown = true;
   }

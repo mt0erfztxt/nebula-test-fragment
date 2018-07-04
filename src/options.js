@@ -22,7 +22,7 @@ class Options {
 
     if (!(_.isNil(initializer) || _.isPlainObject(initializer))) {
       throw new TypeError(
-        `'initializer' argument must be a nil, a plain object, or an instance of Options but it is ` +
+        `'initializer' argument must be a nil, a plain object, or of type Options but it is ` +
         `${typeOf(initializer)} (${initializer})`
       );
     }

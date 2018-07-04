@@ -1,8 +1,9 @@
 import _ from 'lodash';
 import escapeStringRegexp from 'escape-string-regexp';
-import {Selector, t} from 'testcafe';
+import { Selector, t } from 'testcafe';
 import typeOf from 'typeof--';
 
+import Options from "./options";
 import utils from './utils';
 
 /**
@@ -23,8 +24,8 @@ async function expectHasClassNames(selectorInitializer, classNames, options) {
     );
   }
 
-  const opts = utils.initializeOptions(options, {defaults: {only: false}});
-  const {only} = opts;
+  const opts = new Options(options, { defaults: { only: false } });
+  const { only } = opts;
 
   const sel = Selector(selectorInitializer);
   await t.expect(sel.count).eql(1, "Selector must return only one DOM element but it doesn't");
@@ -83,7 +84,7 @@ async function expectHasClassNames(selectorInitializer, classNames, options) {
       classNamesMustPresent.push(className);
     }
 
-    const assertionName = utils.buildTestCafeAssertionName('ok', {isNot});
+    const assertionName = utils.buildTestCafeAssertionName('ok', { isNot });
     const message =
       `Selector must ${isNot ? 'not have' : 'have'} '${className}' (CSS) class name ` +
       `but it ${isNot ? 'does' : "doesn't"}`;
@@ -116,8 +117,8 @@ async function expectHasClassNames(selectorInitializer, classNames, options) {
  * @returns {Selector}
  */
 function filterByAttribute(selectorInitializer, attribute, options) {
-  const opts = utils.initializeOptions(options, {defaults: {isNot: false}});
-  const {isNot} = opts;
+  const opts = new Options(options, { defaults: { isNot: false } });
+  const { isNot } = opts;
 
   let attrName = attribute;
   let attrValue = null;
@@ -152,7 +153,7 @@ function filterByAttribute(selectorInitializer, attribute, options) {
       else {
         return isNot ? (attr !== (attrValue + '')) : (attr === (attrValue + ''));
       }
-    }, {attrName, attrValue, isNot} // dependencies
+    }, { attrName, attrValue, isNot } // dependencies
   );
 }
 
@@ -169,8 +170,8 @@ function filterByAttribute(selectorInitializer, attribute, options) {
  * @returns {object} Returns TestCafe selector.
  */
 function filterByText(selectorInitializer, text, options) {
-  const opts = utils.initializeOptions(options, {defaults: {isNot: false}});
-  const {isNot} = opts;
+  const opts = new Options(options, { defaults: { isNot: false } });
+  const { isNot } = opts;
 
   if (isNot) {
     throw new Error(

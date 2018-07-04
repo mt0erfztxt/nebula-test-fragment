@@ -6,20 +6,11 @@ import { Selector, t } from 'testcafe';
 import typeOf from 'typeof--'
 
 import bem from "./bem";
+import Options from "./options";
 import selector from "./selector";
 import utils from './utils';
 
 const { BemBase } = bem;
-
-/**
- * Allows to customize fragment's selector.
- *
- * @typedef {function} selectorCustomizerFn
- * @param {Selector} selector - Fragment's selector
- * @param {?object} [spec] - `spec` argument passed to fragment's constructor
- * @param {?Options} [opts] - `opts` argument passed to fragment's constructor
- * @return {Selector} New selector for fragment.
- */
 
 /**
  * Class that represent fragment.
@@ -29,27 +20,17 @@ class Fragment {
   /**
    * Creates fragment.
    *
-   * @param {?object} [spec] - Object that contains specs used to initialize TestCafe `Selector` used in fragment. `opts.bemBase` scoped into default `parent` spec would be used when `nil` passed in
-   * @param {string} [spec.cid] - Component id. Would be scoped into `parent` spec. Respects `cns` spec (if any)
-   * @param {string} [spec.cns] - Component ns. Would be scoped into `parent` spec. Can be used in conjunction with `cid` or `idx` spec
+   * @param {?Object} [spec] - Plain object that contains specifications used to initialize TestCafe `Selector` used in fragment. `opts.bemBase` scoped into default `parent` spec would be used when `nil` passed in
+   * @param {String} [spec.cid] - Component id. Would be scoped into `parent` spec. Respects `cns` spec (if any)
+   * @param {String} [spec.cns] - Component ns. Would be scoped into `parent` spec. Can be used in conjunction with `cid` or `idx` spec
    * @param {function} [spec.custom] - Some custom spec. Likewise `cid` and `idx` spec and in contrast to `handler` spec it respects `parent` and `cns` specs. Accepts current selector and BEM base as arguments, where current selector already scoped into `parent` and/or `cns` specs
-   * @param {number} [spec.idx] - Component index. Would be scoped into `parent` spec. Respects `cns` spec (if any). Must be an integer greater or equal zero
+   * @param {Number} [spec.idx] - Component index. Would be scoped into `parent` spec. Respects `cns` spec (if any). Must be an integer greater or equal zero
    * @param {*} [spec.parent='body'] - Parent scope for fragment's selector. Can be anything that TestCafe `Selector` accepts
-   * @param {?Options} [opts] - Options
-   * @param {string} [opts.bemBase] - BEM base of component, may be omitted when `handler` or `selector` spec is used
+   * @param {?Options|Object} [opts] - Options
+   * @param {String} [opts.bemBase] - BEM base of component
    * @throws {TypeError} When constructor arguments are not valid.
    */
   constructor(spec, opts) {
-
-    // Ensure that `opts` argument is valid.
-    if (!(_.isNil(opts) || utils.isOptions(opts))) {
-      throw new TypeError(
-        `${this.displayName}.constructor(): 'opts' argument must be a nil or of type Options but it is ` +
-        `${typeOf(opts)} (${opts})`
-      );
-    }
-
-    // Ensure that `spec` argument is valid.
     if (!(_.isNil(spec) || _.isPlainObject(spec))) {
       throw new TypeError(
         `${this.displayName}.constructor(): 'spec' argument must be a nil or a plain object but it is ` +
@@ -58,23 +39,33 @@ class Fragment {
     }
 
     /**
-     * Reference to `opts` object passed to fragment's constructor.
-     *
-     * @private
-     */
-    this._originalOpts = opts;
-
-    /**
-     * Reference to `spec` object passed to fragment's constructor.
+     * Reference to `spec` argument passed to fragment's constructor.
      *
      * @private
      */
     this._originalSpec = spec;
 
+    /**
+     * Reference to `opts` argument passed to fragment's constructor.
+     *
+     * @private
+     */
+    this._originalOpts = opts;
+
+    // Wrapped in try/catch just to augment error message.
+    let _opts;
+    try {
+      _opts = new Options(this._originalOpts);
+    }
+    catch (err) {
+      throw new TypeError(
+        `${this.displayName}.constructor(): invalid 'opts' argument - ${err.message}`
+      );
+    }
+
     // We allow BEM base for new fragment to be set explicitly as
     // `opts.bemBase` or implicitly as `bemBase` property of fragment's class,
     // otherwise it would be populated using parent fragment's BEM base.
-    const _opts = this._originalOpts || {};
     const chosenBemBase = (_opts.bemBase || this.constructor.bemBase || super.bemBase);
     const chosenBemBaseAsStr = chosenBemBase + '';
 
@@ -90,14 +81,15 @@ class Fragment {
      * values are already in place.
      *
      * @private
+     * @type {Options}
      */
-    this._opts = _.assign({}, _opts, {
+    this._opts = _.assign(_opts, {
       bemBase: new BemBase(chosenBemBase, { isFinal: true })
     });
 
     /**
      * `spec` argument that was used to create this instance of fragment.
-     * Currently it's just a reference to original `spec` argument.
+     * Currently it's just a copy of original `spec` argument.
      *
      * @private
      */
@@ -235,7 +227,7 @@ class Fragment {
   /**
    * Just a simple check that class is a Fragment or its descendant.
    *
-   * @return {boolean}
+   * @returns {Boolean}
    */
   static get isFragment() {
     return true;
@@ -253,7 +245,7 @@ class Fragment {
   /**
    * Display name of fragment.
    *
-   * @return {string}
+   * @return {String}
    */
   get displayName() {
     return (this.constructor.displayName || super.displayName);
@@ -280,7 +272,7 @@ class Fragment {
   /**
    * Initialized fragment specification.
    *
-   * @return {Options}
+   * @return {Object}
    */
   get spec() {
     return this._spec;
@@ -291,14 +283,14 @@ class Fragment {
    * `count`.
    *
    * @param {*} somethingSelector - TestCafe selector for something
-   * @param {array|number} count - Fragment must have that number of somethings to pass assertion. When you need more flexibility than just equality pass an `Array` with TestCafe assertion name (default to 'eql') as first element and expected value for assertion as second, for example, `['gte', 3]`
+   * @param {Number|Array} count - Fragment must have that number of somethings to pass assertion. When you need more flexibility than just equality pass an `Array` with TestCafe assertion name (default to 'eql') as first element and expected value for assertion as second, for example, `['gte', 3]`
    * @param {Options} [options] - Options
-   * @param {boolean} [options.isNot=false] - When `true` assertion would be negated
+   * @param {Boolean} [options.isNot=false] - When `true` assertion would be negated
    * @return {Promise<void>}
    */
   static async expectSomethingsCountIs(somethingSelector, count, options) {
     let assertionName = 'eql';
-    const opts = utils.initializeOptions(options, {
+    const opts = new Options(options, {
       defaults: {
         isNot: false
       }
@@ -317,12 +309,12 @@ class Fragment {
    * to fragment's constructor.
    *
    * @static
-   * @param {?object} spec - `spec` argument passed in to fragment's constructor. See `Fragment`'s constructor
-   * @param {?Options} opts - `opts` argument passed in to fragment's constructor. See `Fragment`'s constructor
-   * @param {?object} [defaults] - Defaults for `spec` and `opts`
-   * @param {?object} [defaults.opts] - Object of default values for attributes of `opts` argument. Default value would be used when `opts` attribute value is `null`, `undefined` or `NaN`
-   * @param {?object} [defaults.spec] - Object of default values for attributes of `spec` argument. Default value would be used when `spec` attribute value is `null`, `undefined` or `NaN`
-   * @returns {object} Returns plain object with `isInstance` attribute set to `true` when `spec` argument is already an instance of non-base fragment, or plain object that have `spec` and `opts` attributes that contains `spec` and `opts` populated with defaults when `spec` is a specification object or nil.
+   * @param {?Object} spec - `spec` argument passed in to fragment's constructor. See `Fragment`'s constructor
+   * @param {?Options|Object} opts - `opts` argument passed in to fragment's constructor. See `Fragment`'s constructor
+   * @param {?Object} [defaults] - Defaults for `spec` and `opts`
+   * @param {?Options|Object} [defaults.opts] - Object of default values for attributes of `opts` argument. Default value would be used when `opts` attribute value is `null`, `undefined` or `NaN`
+   * @param {?Object} [defaults.spec] - Object of default values for attributes of `spec` argument. Default value would be used when `spec` attribute value is `null`, `undefined` or `NaN`
+   * @returns {Object} Returns plain object with `isInstance` attribute set to `true` when `spec` argument is already an instance of non-base fragment, or plain object that have `spec` and `opts` attributes that contains `spec` and `opts` populated with defaults when `spec` is a specification object or nil.
    * @throws {TypeError} When passed in arguments aren't valid.
    */
   static initializeFragmentSpecAndOpts(spec, opts, defaults) {
@@ -332,47 +324,43 @@ class Fragment {
 
     if (spec instanceof Fragment) {
       throw new TypeError(
-        `'spec' argument can not be instance of fragment other than ${this.displayName}`
+        `'spec' argument can not be an instance of fragment other than ${this.displayName}`
       );
     }
 
-    if (!_.isNil(opts)) {
-      utils.isOptions(opts, true);
-    }
-
-    const initializedOpts = _.assign({}, opts);
     const initializedSpec = _.assign({}, spec);
+    const initializedOpts = new Options(opts);
 
     if (!(_.isNil(defaults) || _.isPlainObject(defaults))) {
       throw new TypeError(
-        `'defaults' argument must be a nil or plain object but it is ${typeOf(defaults)} (${defaults})`
+        `'defaults' argument must be a nil or a plain object but it is ${typeOf(defaults)} (${defaults})`
       );
     }
 
     if (defaults) {
-      const defaultsOpts = defaults.opts;
-      const defaultsSpec = defaults.spec;
+      const optsDefaults = defaults.opts;
+      const specDefaults = defaults.spec;
 
-      if (!(_.isNil(defaultsSpec) || _.isPlainObject(defaultsSpec))) {
+      if (!(_.isNil(specDefaults) || _.isPlainObject(specDefaults))) {
         throw new TypeError(
-          `'defaults.spec' argument must be a nil or plain object but it is ${typeOf(defaultsSpec)} (${defaultsSpec})`
+          `'defaults.spec' argument must be a nil or a plain object but it is ${typeOf(specDefaults)} (${specDefaults})`
         );
       }
 
-      if (!(_.isNil(defaultsOpts) || _.isPlainObject(defaultsOpts))) {
+      if (!(_.isNil(optsDefaults) || _.isPlainObject(optsDefaults))) {
         throw new TypeError(
-          `'defaults.opts' argument must be a nil or plain object but it is ${typeOf(defaultsOpts)} (${defaultsOpts})`
+          `'defaults.opts' argument must be a nil or a plain object but it is ${typeOf(optsDefaults)} (${optsDefaults})`
         );
       }
 
-      if (!_.isEmpty(defaultsSpec)) {
-        _.forOwn(defaultsSpec, (v, k) => {
+      if (!_.isEmpty(specDefaults)) {
+        _.forOwn(specDefaults, (v, k) => {
           initializedSpec[k] = _.defaultTo(initializedSpec[k], v);
         });
       }
 
-      if (!_.isEmpty(defaultsOpts)) {
-        _.forOwn(defaultsOpts, (v, k) => {
+      if (!_.isEmpty(optsDefaults)) {
+        _.forOwn(optsDefaults, (v, k) => {
           initializedOpts[k] = _.defaultTo(initializedOpts[k], v);
         });
       }
@@ -386,12 +374,12 @@ class Fragment {
    * requested behavior.
    *
    * @param {Fragment} BaseFragment - Class of fragment that must be used as base fragment class
-   * @param {Options} [options] - Options
-   * @param {array} [options.stateParts] - Used to add state parts behavior. Must be an array where each item is an array of required state part name and optional state part options - see `statePartName` and `options` arguments [here]{@link Fragment.withPartOfStateMixin} for more details
+   * @param {Options|Object} [options] - Options
+   * @param {Array} [options.stateParts] - Used to add state parts behavior. Must be an array where each item is an array of required state part name and optional state part options - see `statePartName` and `options` arguments [here]{@link Fragment.withPartOfStateMixin} for more details
    * @return {Fragment}
    */
   static makeFragmentClass(BaseFragment, options) {
-    const opts = utils.initializeOptions(options, {
+    const opts = new Options(options, {
       defaults: {
         stateParts: []
       },
@@ -434,14 +422,14 @@ class Fragment {
    *
    * @static
    * @param {*} BaseFragment - Fragment class to extend from
-   * @param {array|string} statePartName - Name of state part. When it's a string then it would be used as state part name and also as name of attribute/BEM modifier that holds that part in fragment's selector DOM element. When names differ, for example a case of data attribute, an array of two non-blank strings - a state part name and attribute/BEM modifier name, can be passed
-   * @param {Options} [options] - Options
-   * @param {string} [options.antonym] - Name of other side of state part. For example, for 'Disabled' part of state other side would be 'Enabled'. Used to generate additional assertion methods, but only when `options.isBoolean` is truthy and `options.isBooleanHas` is falsey. For example, when `options.antonym` is 'Enabled' `expectIsEnabled` and `expectIsNotEnabled` methods would be generated
-   * @param {boolean} [options.isBoolean=true] - When truthy additional assertion methods would be generated. For example, when name is 'Disabled' and `options.isBoolean` is truthy `expectIsDisabled` and `expectIsNotDisabled` methods would be generated
-   * @param {boolean} [options.isBooleanHas=false] - When truthy then assertion methods would be named with 'Has' instead of 'Is'. For example, `expectHasSomething` and `expectHasNoSomething`
-   * @param {string} [options.src='bemModifier'] - Where state part holds it's value. Must be one of 'attribute', or 'bemModifier'
-   * @param {boolean|string} [options.waitTil] - Same as `options.waitUntil` but reversed - allows to wait til attribute/BEM modifier exists (boolean) or have specified value. When value is a boolean then state part name would be used to generate name of method, when it's a string then it would be used in method name generation. For example, for part of state named 'Fetched' they would be `waitTilFetched` in case of boolean and `waitTilSomething` in case of string 'something'
-   * @param {boolean|string} [options.waitUntil] - When truthy and `options.isBoolean` also truthy fragment's class would have `waitUntil[NameOfStatePart]` method, that is a convenience alias for `expectIs[NameOfStatePart]` method, that can be used to wait until fragment's part of state doesn't have specified value. For example, for part of state named 'Fetched' we can wait if fragment's state part doesn't have specified value
+   * @param {Array|String} statePartName - Name of state part. When it's a string then it would be used as state part name and also as name of attribute/BEM modifier that holds that part in fragment's selector DOM element. When names differ, for example a case of data attribute, an array of two non-blank strings - a state part name and attribute/BEM modifier name, can be passed
+   * @param {Options|Object} [options] - Options
+   * @param {String} [options.antonym] - Name of other side of state part. For example, for 'Disabled' part of state other side would be 'Enabled'. Used to generate additional assertion methods, but only when `options.isBoolean` is truthy and `options.isBooleanHas` is falsey. For example, when `options.antonym` is 'Enabled' `expectIsEnabled` and `expectIsNotEnabled` methods would be generated
+   * @param {Boolean} [options.isBoolean=true] - When truthy additional assertion methods would be generated. For example, when name is 'Disabled' and `options.isBoolean` is truthy `expectIsDisabled` and `expectIsNotDisabled` methods would be generated
+   * @param {Boolean} [options.isBooleanHas=false] - When truthy then assertion methods would be named with 'Has' instead of 'Is'. For example, `expectHasSomething` and `expectHasNoSomething`
+   * @param {String} [options.src='bemModifier'] - Where state part holds it's value. Must be one of 'attribute', or 'bemModifier'
+   * @param {Boolean|String} [options.waitTil] - Same as `options.waitUntil` but reversed - allows to wait til attribute/BEM modifier exists (boolean) or have specified value. When value is a boolean then state part name would be used to generate name of method, when it's a string then it would be used in method name generation. For example, for part of state named 'Fetched' they would be `waitTilFetched` in case of boolean and `waitTilSomething` in case of string 'something'
+   * @param {Boolean|String} [options.waitUntil] - When truthy and `options.isBoolean` also truthy fragment's class would have `waitUntil[NameOfStatePart]` method, that is a convenience alias for `expectIs[NameOfStatePart]` method, that can be used to wait until fragment's part of state doesn't have specified value. For example, for part of state named 'Fetched' we can wait if fragment's state part doesn't have specified value
    * @returns {Fragment}
    */
   static withPartOfStateMixin(BaseFragment, statePartName, options) {
@@ -471,7 +459,7 @@ class Fragment {
       );
     }
 
-    const opts = utils.initializeOptions(options, {
+    const opts = new Options(options, {
       defaults: {
         isBoolean: true,
         isBooleanHas: false,
@@ -501,7 +489,7 @@ class Fragment {
       /**
        * Obtains value of state's part and returns it.
        *
-       * @param {Options} [options] - Options
+       * @param {Options|Object} [options] - Options
        * @returns {*} Returns value of state's part.
        */
       async [`get${partName}PartOfState`](options) {
@@ -526,7 +514,7 @@ class Fragment {
        * Does nothing because this part of state is read only.
        *
        * @param {*} value - Doesn't matter
-       * @param {Options} [options] - Options
+       * @param {Options|Object} [options] - Options
        * @return {Promise<*>} Current value of part of fragment's state after set state operation is done.
        */
       async [`set${partName}PartOfState`](value, options) {
@@ -537,12 +525,12 @@ class Fragment {
        * Asserts that fragment's state part is equal specified value.
        *
        * @param {*} value - Part of state must match that value to pass assertion
-       * @param {Options} [options] - Options
-       * @param {boolean} [options.isNot=false] - When truthy assertion would be inverted
+       * @param {Options|Object} [options] - Options
+       * @param {Boolean} [options.isNot=false] - When truthy assertion would be inverted
        * @return {Promise<void>}
        */
       async [`expect${partName}PartOfStateIs`](value, options) {
-        const opts = utils.initializeOptions(options, {
+        const opts = new Options(options, {
           defaults: {
             isNot: false
           }
@@ -663,7 +651,7 @@ class Fragment {
       // Handle `options.waitTil`.
       if (!(_.isNil(waitTil) || _.isBoolean(waitTil) || utils.isNonBlankString(waitTil))) {
         throw new TypeError(
-          `'options.waitTil' argument must be a boolean or non-blank string but it is ${typeOf(waitTil)} (${waitTil})`
+          `'options.waitTil' argument must be a boolean or a non-blank string but it is ${typeOf(waitTil)} (${waitTil})`
         );
       }
 
@@ -695,7 +683,7 @@ class Fragment {
            * @return {Promise<void>}
            */
           value: async function(options) {
-            const opts = utils.initializeOptions(options);
+            const opts = new Options(options);
             const { wait } = opts;
 
             if (wait) {
@@ -710,7 +698,7 @@ class Fragment {
       // Handle `options.waitUntil`.
       if (!(_.isNil(waitUntil) || _.isBoolean(waitUntil) || utils.isNonBlankString(waitUntil))) {
         throw new TypeError(
-          `'options.waitUntil' argument must be a boolean or non-blank string but it is ` +
+          `'options.waitUntil' argument must be a boolean or a non-blank string but it is ` +
           `${typeOf(waitUntil)} (${waitUntil})`
         );
       }
@@ -740,12 +728,12 @@ class Fragment {
            * specified using 'options.wait' argument and that delay would be
            * issued before assertion.
            *
-           * @param {Options} [options] - Options
-           * @param {number} [options.wait] - Number of milliseconds to wait before assertion execution
+           * @param {Options}Object [options] - Options
+           * @param {Number} [options.wait] - Number of milliseconds to wait before assertion execution
            * @return {Promise<void>}
            */
           value: async function(options) {
-            const opts = utils.initializeOptions(options);
+            const opts = new Options(options);
             const { wait } = opts;
 
             if (wait) {
@@ -805,22 +793,22 @@ class Fragment {
   /**
    * Asserts that fragment's selector conforms specified requirements.
    *
-   * @param {object} [requirements] - Requirements. Nil means assert only for existence
-   * @param {array} [requirements.attributes] - Allows to assert that fragment's selector have or have no specified attribute(-s). Each element of array is:
+   * @param {Object} [requirements] - Requirements. Nil means assert only for existence
+   * @param {Array} [requirements.attributes] - Allows to assert that fragment's selector have or have no specified attribute(-s). Each element of array is:
    - First element is an attribute name which is a string. `RegExp` attribute name is not supported.
    - Second optional element is an attribute value and when it's a `nil` then assertion would be just for presence of attribute with specified name, when it's a `RegExp` then value of attribute must match that value to pass assertion, otherwise attribute value must be equal stringified version of that value to pass assertion.
    - Third optional element can be used to specify that assertion condition must be negated, for example, `['value', 123]` requirement can be used to assert that fragment's selector has 'value' attribute equal to '123' and `['value', 123, true]` requirement can be used to assert that fragment's selector has no 'value' attribute with value equal '123'.
    Because second and third elements are optional we can pass just attribute name to assert that fragment's selector has that attribute, for example, `['disabled']` can be simplified to just `'disabled'`
-   * @param {object} [requirements.bemModifiers] - Allows to assert that fragment's selector have or have no specified BEM modifier(-s). Same as for `requirements.attributes` but instead of attribute name and value pass BEM modifier name and value
-   * @param {string} [requirements.tagName] - Allows to assert that fragment's selector rendered using specified tag
-   * @param {array|string|RegExp} [requirements.text] - Allows to assert that fragment selector's text equal or matches specified value. Condition of assertion can be reversing by passing `Array` where first element is a text and second is a flag that specifies whether condition must be negated or not, for example, `'Qwerty'` can be used to assert that text of fragment's selector is equal 'Qwerty' and `['Qwerty', true]'` can be used to assert that text of `selector` isn't equal 'Qwerty'
+   * @param {Object} [requirements.bemModifiers] - Allows to assert that fragment's selector have or have no specified BEM modifier(-s). Same as for `requirements.attributes` but instead of attribute name and value pass BEM modifier name and value
+   * @param {String} [requirements.tagName] - Allows to assert that fragment's selector rendered using specified tag
+   * @param {String|RegExp|Array} [requirements.text] - Allows to assert that fragment selector's text equal or matches specified value. Condition of assertion can be reversing by passing `Array` where first element is a text and second is a flag that specifies whether condition must be negated or not, for example, `'Qwerty'` can be used to assert that text of fragment's selector is equal 'Qwerty' and `['Qwerty', true]'` can be used to assert that text of `selector` isn't equal 'Qwerty'
    * @param {*} [requirements.textContent] - Allows to assert that fragment selector's text content equal or matches specified value. When value is not regular expression it would be coerced to string as `value + ''`. To negate assertion condition pass `Array` with text content and boolean flag, see `requirements.text` for examples
-   * @param {Object} [options] - Options
+   * @param {Options|Object} [options] - Options
    * @param {Selector} [options.selector=this.selector] - TestCafe selector to assert on. Fragment's selector by default
    * @return {Promise<void>}
    */
   async expectExistsAndConformsRequirements(requirements, options) {
-    const opts = utils.initializeOptions(options, {
+    const opts = new Options(options, {
       defaults: {
         selector: this.selector
       }
@@ -841,7 +829,7 @@ class Fragment {
 
     if (!_.isPlainObject(requirements)) {
       throw new TypeError(
-        `'requirements' argument must be a nil or plain object but it is ${typeOf(requirements)} (${requirements})`
+        `'requirements' argument must be a nil or a plain object but it is ${typeOf(requirements)} (${requirements})`
       );
     }
 
@@ -905,7 +893,7 @@ class Fragment {
     if (requirements.tagName) {
       if (!utils.isNonBlankString(requirements.tagName)) {
         throw new TypeError(
-          `'requirements.tagName' argument must be a nil or non-blank string but it is ` +
+          `'requirements.tagName' argument must be a nil or a non-blank string but it is ` +
           `${typeOf(requirements.tagName)} (${requirements.tagName})`
         );
       }
@@ -959,7 +947,7 @@ class Fragment {
   /**
    * Asserts that fragment's selector has specified BEM modifier.
    *
-   * @param {BemModifier|*[]|string} bemModifier - BEM modifier. Examples: ['foo'], ['foo', null], ['foo', 'bar'], 'foo'
+   * @param {String|BemModifier|Array} bemModifier - BEM modifier. Examples: 'foo', ['foo'] or ['foo', null], ['foo', 'bar']
    * @return {Promise<void>}
    */
   async expectHasBemModifier(bemModifier) {
@@ -976,7 +964,7 @@ class Fragment {
   /**
    * Asserts that fragment's selector has no specified BEM modifier.
    *
-   * @param {BemModifier|*[]|string} bemModifier - BEM modifier. Examples: ['foo'], ['foo', null], ['foo', 'bar'], 'foo'
+   * @param {String|BemModifier|Array} bemModifier - BEM modifier. Examples: 'foo', ['foo'] or ['foo', null], ['foo', 'bar']
    * @return {Promise<void>}
    */
   async expectHasNoBemModifier(bemModifier) {
@@ -998,16 +986,16 @@ class Fragment {
    *
    * It requires that fragment has `#get[somethingName]()` method implemented.
    *
-   * @param {string} somethingName - Name of something. For example, in Dialog it can be an Action
+   * @param {String} somethingName - Name of something. For example, in Dialog it can be an Action
    * @param {*} somethingSpecification - See `spec` parameter of Something's constructor
    * @param {*} somethingOptions - See `opts` parameter of Something's constructor
-   * @param {Options} [options] - Options
-   * @param {number} [options.idx] - Position at which other fragment must be found to pass assertion. Must be an integer greater than or equal zero
+   * @param {Options|Object} [options] - Options
+   * @param {Number} [options.idx] - Position at which other fragment must be found to pass assertion. Must be an integer greater than or equal zero
    * @return {Promise<void>}
    * @throws {TypeError} When argument aren't valid.
    */
   async expectHasSomething(somethingName, somethingSpecification, somethingOptions, options) {
-    const opts = utils.initializeOptions(options);
+    const opts = new Options(options);
     const somethingGetterName = `get${ucFirst(somethingName)}`;
 
     if (!_.isFunction(this[somethingGetterName])) {
@@ -1036,17 +1024,17 @@ class Fragment {
    * It requires that fragment has `#expect[somethingName]sCountIs()` and
    * `#expectHas[somethingName]()` methods.
    *
-   * @param {string} somethingName - Name of something. For example, in Dialog it can be an Action
-   * @param {array} somethingSpecificationsAndOptions - An array where each element is an array of two elements - something's specification and something's options. See `spec` and `opts` arguments of something's constructor
-   * @param {Options} [options] - Options
-   * @param {boolean} [options.only=false] - When `true` fragment must have only specified other fragments to pass assertion
-   * @param {boolean} [options.sameOrder=false] - When `true` other fragments must be found in fragment in same order as in `somethingSpecificationsAndOptions` to pass assertion. Work only in conjunction with `only` parameter
+   * @param {String} somethingName - Name of something. For example, in Dialog it can be an Action
+   * @param {Array} somethingSpecificationsAndOptions - An array where each element is an array of two elements - something's specification and something's options. See `spec` and `opts` arguments of something's constructor
+   * @param {Options|Object} [options] - Options
+   * @param {Boolean} [options.only=false] - When `true` fragment must have only specified other fragments to pass assertion
+   * @param {Boolean} [options.sameOrder=false] - When `true` other fragments must be found in fragment in same order as in `somethingSpecificationsAndOptions` to pass assertion. Work only in conjunction with `only` parameter
    * @return {Promise<void>}
    * @throws {TypeError} When requirements failed.
    */
   async expectHasSomethings(somethingName, somethingSpecificationsAndOptions, options) {
     const len = somethingSpecificationsAndOptions.length;
-    const opts = utils.initializeOptions(options, {
+    const opts = new Options(options, {
       defaults: {
         only: false,
         sameOrder: false
@@ -1081,7 +1069,7 @@ class Fragment {
    * Asserts that fragment is exist and found in parent at specified index.
    *
    * @param {*} parent - Same as `Fragment` constructor's `spec.parent` argument
-   * @param {number} idx - Position at which fragment must be found in parent to pass assertion. Must be an integer greater or equal zero
+   * @param {Number} idx - Position at which fragment must be found in parent to pass assertion. Must be an integer greater or equal zero
    * @return {Promise<void>}
    */
   async expectIndexInParentIs(parent, idx) {
@@ -1099,14 +1087,14 @@ class Fragment {
    * Asserts that fragment is exist - its selector returns one or more DOM
    * elements.
    *
-   * @param {?Options} [options] - Options
-   * @param {boolean} [options.allowMultiple=false] - When falsey then fragment's selector must return only one DOM element to pass assertion
-   * @param {boolean} [options.isNot=false] - When truthy fragment's selector must not exist (return zero DOM elements) to pass assertion
-   * @param {string} [options.message] - Custom message for error
+   * @param {Options|Object} [options] - Options
+   * @param {Boolean} [options.allowMultiple=false] - When falsey then fragment's selector must return only one DOM element to pass assertion
+   * @param {Boolean} [options.isNot=false] - When truthy fragment's selector must not exist (return zero DOM elements) to pass assertion
+   * @param {String} [options.message] - Custom message for error
    * @return {Promise<void>}
    */
   async expectIsExist(options) {
-    const opts = utils.initializeOptions(options, {
+    const opts = new Options(options, {
       defaults: {
         allowMultiple: false,
         isNot: false
@@ -1161,14 +1149,14 @@ class Fragment {
    * Asserts that fragment is not exist - its selector returns zero DOM
    * elements.
    *
-   * @param {?Options} [options] - Options
-   * @param {boolean} [options.allowMultiple=false] - When falsey then fragment's selector must return only one DOM element to pass assertion
-   * @param {boolean} [options.isNot=false] - When truthy fragment's selector must exist (return one or more DOM elements) to pass assertion
-   * @param {string} [options.message] - Custom message for error
+   * @param {Options|Object} [options] - Options
+   * @param {Boolean} [options.allowMultiple=false] - When falsey then fragment's selector must return only one DOM element to pass assertion
+   * @param {Boolean} [options.isNot=false] - When truthy fragment's selector must exist (return one or more DOM elements) to pass assertion
+   * @param {String} [options.message] - Custom message for error
    * @return {Promise<void>}
    */
   async expectIsNotExist(options) {
-    const opts = utils.initializeOptions(options, {
+    const opts = new Options(options, {
       defaults: {
         allowMultiple: false,
         isNot: false
@@ -1183,16 +1171,16 @@ class Fragment {
    * Asserts that fragment's current state is equal state specified by
    * `stateOrId`.
    *
-   * @param {object|string} stateOrId - When it's an object than fragment's current state must be deeply equal it to pass assertion, otherwise it must be a string - id of persisted state to which fragment's current state must be deeply equal to pass assertion
-   * @param {Options} [options] - Options. Same as in `#getState()` plus following ones
-   * @param {boolean} [options.debug=false] - When truthy then detailed diff would be logged to console on assertion failure
+   * @param {String|Object} stateOrId - When it's an object than fragment's current state must be deeply equal it to pass assertion, otherwise it must be a string - id of persisted state to which fragment's current state must be deeply equal to pass assertion
+   * @param {Options|Object} [options] - Options. Same as in `#getState()` plus following ones
+   * @param {Boolean} [options.debug=false] - When truthy then detailed diff would be logged to console on assertion failure
    * @return {Promise<void>}
    * @throws {TypeError} When arguments aren't valid.
    */
   async expectStateIs(stateOrId, options) {
     if (!(_.isPlainObject(stateOrId) || utils.isNonBlankString(stateOrId))) {
       throw new TypeError(
-        `'stateOrId' argument must be a plain object or non-blank string but it is ` +
+        `'stateOrId' argument must be a plain object or a non-blank string but it is ` +
         `${typeOf(stateOrId)} (${stateOrId})`
       );
     }
@@ -1205,7 +1193,7 @@ class Fragment {
       );
     }
 
-    const opts = utils.initializeOptions(options, {
+    const opts = new Options(options, {
       defaults: {
         debug: false
       }
@@ -1236,13 +1224,14 @@ class Fragment {
    * as name of BEM modifier. When `name` is nil array would contain all CSS
    * class names that have (any) BEM modifier.
    *
-   * @param {?string} [modifierName] - BEM modifier name
+   * @param {String} [modifierName] - BEM modifier name
    * @return {Promise<BemModifier[]>}
    */
   async getBemModifiers(modifierName) {
     if (!(_.isNil(modifierName) || utils.isNonBlankString(modifierName))) {
       throw new TypeError(
-        `'modifierName' argument must be a nil or non-blank string but it is ${typeOf(modifierName)} (${modifierName})`
+        `'modifierName' argument must be a nil or a non-blank string but it is ` +
+        `${typeOf(modifierName)} (${modifierName})`
       );
     }
 
@@ -1271,8 +1260,8 @@ class Fragment {
   /**
    * Returns fragment's state that was persisted earlier under specified `id`.
    *
-   * @param {string} id - Id of state that was persisted earlier
-   * @returns {object|null} Persisted state.
+   * @param {String} id - Id of state that was persisted earlier
+   * @returns {Object|null} Persisted state.
    * @throws {TypeError} When argument isn't valid or persisted state identified by `id` not exists.
    */
   getPersistedState(id) {
@@ -1299,8 +1288,8 @@ class Fragment {
    * needed.
    *
    * @param {*} FragmentOfSomething - Fragment class of something, must be descendant of `Fragment` class
-   * @param {object} [specOfSomething] - See `spec` parameter of `FragmentOfSomething` constructor
-   * @param {object} [optsOfSomething] - See `opts` parameter of `FragmentOfSomething` constructor
+   * @param {Object} [specOfSomething] - See `spec` parameter of `FragmentOfSomething` constructor
+   * @param {Options|Object} [optsOfSomething] - See `opts` parameter of `FragmentOfSomething` constructor
    * @returns {*}
    * @throws {TypeError} When argument aren't valid.
    */
@@ -1327,9 +1316,9 @@ class Fragment {
    * Returns class of named fragment that exists as property of fragment, its
    * class or in fragments hierarchy up to `RootFragmentOfSomething`.
    *
-   * @param {string} name - Name (without 'Fragment' suffix) of fragment's class to return
-   * @param {class} RootFragmentOfSomething - Root of fragments hierarchy
-   * @return {class}
+   * @param {String} name - Name (without 'Fragment' suffix) of fragment's class to return
+   * @param {Class} RootFragmentOfSomething - Root of fragments hierarchy
+   * @return {Class}
    * @throws {TypeError} When matching fragment class not found.
    */
   getSomethingFragment(name, RootFragmentOfSomething) {
@@ -1353,10 +1342,10 @@ class Fragment {
   /**
    * Returns fragment's state (all parts).
    *
-   * @param {Options} [options] - Options
-   * @param {string[]} [options.omitParts] - Only parts of state that not found in that list would be in returned state. Applied after `options.onlyParts`
-   * @param {string[]} [options.onlyParts] - Only parts of state that found in that list would be in returned state. Applied before `options.omitParts`
-   * @return {Promise<{}>}
+   * @param {Options|Object} [options] - Options
+   * @param {String[]} [options.omitParts] - Only parts of state that not found in that list would be in returned state. Applied after `options.onlyParts`
+   * @param {String[]} [options.onlyParts] - Only parts of state that found in that list would be in returned state. Applied before `options.omitParts`
+   * @return {Promise<Object>}
    * @throws {TypeError} When arguments aren't valid.
    */
   async getState(options) {
@@ -1372,7 +1361,7 @@ class Fragment {
       statePartList = _.uniq(statePartList);
     }
 
-    const opts = utils.initializeOptions(options);
+    const opts = new Options(options);
     const { omitParts, onlyParts, waitBefore } = opts;
 
     if (waitBefore) {
@@ -1440,9 +1429,9 @@ class Fragment {
   /**
    * Returns list of fragment's state parts.
    *
-   * @param {Options} [options] - Options
-   * @param {boolean} [options.onlyWritable=false] - When truthy then only writable state parts would be returned
-   * @return {Array} List of parts of fragment's state.
+   * @param {Options|Object} [options] - Options
+   * @param {Boolean} [options.onlyWritable=false] - When truthy then only writable state parts would be returned
+   * @return {String[]} List of parts of fragment's state.
    */
   getStateParts(options) {
     return [];
@@ -1453,10 +1442,10 @@ class Fragment {
    * optional `state` argument is `nil` then fragment's current state would be
    * persisted.
    *
-   * @param {string} id - Id that would be used to identify persisted state
-   * @param {object} [state] - Optional, state that must be persisted. Pass `nil` to persist fragment's current state
-   * @param {Options} [options] - Options. Same as for `#getState()`
-   * @return {Promise<{}>} State that was persisted.
+   * @param {String} id - Id that would be used to identify persisted state
+   * @param {Object} [state] - Optional, state that must be persisted. Pass `nil` to persist fragment's current state
+   * @param {Options|Object} [options] - Options. Same as for `#getState()`
+   * @return {Promise<Object>} State that was persisted.
    * @throws {TypeError} When arguments aren't valid.
    */
   async persistState(id, state, options) {
@@ -1471,7 +1460,7 @@ class Fragment {
     }
     else if (!_.isPlainObject(state)) {
       throw new TypeError(
-        `'state' argument must be a nil or plain object but it is ${typeOf(state)} (${state})`
+        `'state' argument must be a nil or a plain object but it is ${typeOf(state)} (${state})`
       );
     }
 
@@ -1482,8 +1471,8 @@ class Fragment {
    * Sets fragment's state to one that was persisted earlier and identified by
    * passed `id`.
    *
-   * @param {string} id - Id of state that was persisted earlier
-   * @return {Promise<{}>} Fragment's state after restore state operation is done.
+   * @param {String} id - Id of state that was persisted earlier
+   * @return {Promise<Object>} Fragment's state after restore state operation is done.
    * @throws {TypeError} When arguments aren't valid.
    */
   async restoreState(id) {
@@ -1508,9 +1497,9 @@ class Fragment {
   /**
    * Sets state of fragment.
    *
-   * @param {object|undefined} newState - New state for fragment. Passing `undefined` means "Do nothing and just return current state". Values for read-only parts silently ignored
-   * @param {Options} [options] - Options
-   * @return {Promise<{}>} Fragment's state, that have only updated (writable) parts, after set state operation was done.
+   * @param {Object|undefined} newState - New state for fragment. Passing `undefined` means "Do nothing and just return current state". Values for read-only parts silently ignored
+   * @param {Options|Object} [options] - Options
+   * @return {Promise<Object>} Fragment's state, that have only updated (writable) parts, after set state operation was done.
    * @throws {TypeError} When arguments aren't valid.
    */
   async setState(newState, options) {

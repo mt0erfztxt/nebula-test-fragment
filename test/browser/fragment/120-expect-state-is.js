@@ -4,6 +4,7 @@ import expect from 'unexpected';
 import { t } from 'testcafe';
 
 import Fragment from '../../../src/fragment';
+import Options from "../../../src/options";
 import utils from "../../../src/utils";
 
 fixture `Fragment :: 120 #expectStateIs()`
@@ -61,7 +62,7 @@ class TextInput extends Fragment {
   // ---------------------------------------------------------------------------
 
   getStateParts(options) {
-    const opts = utils.initializeOptions(options, {
+    const opts = new Options(options, {
       defaults: {
         onlyWritable: false
       }
@@ -125,7 +126,7 @@ class TextInput extends Fragment {
       return '';
     }
 
-    const opts = utils.initializeOptions(options, { defaults: { paste: true, replace: true } });
+    const opts = new Options(options, { defaults: { paste: true, replace: true } });
     await t.typeText(this.inputElementSelector, value, opts);
 
     return value;
@@ -141,7 +142,7 @@ Object.defineProperties(TextInput, {
   }
 });
 
-test("010 It should throw error when 'stateOrId' argument is not a plain object or non-blank string", async () => {
+test("010 It should throw error when 'stateOrId' argument is not a plain object or a non-blank string", async () => {
   let isThrown = false;
   const textInput = new TextInput();
 
@@ -149,7 +150,7 @@ test("010 It should throw error when 'stateOrId' argument is not a plain object 
     await textInput.expectStateIs(42);
   }
   catch (e) {
-    const message = "'stateOrId' argument must be a plain object or non-blank string but it is Number (42)";
+    const message = "'stateOrId' argument must be a plain object or a non-blank string but it is Number (42)";
     expect(e.message, 'to equal', message);
     isThrown = true;
   }

@@ -775,7 +775,7 @@ test("160 It should generate convenience assertion methods for part of state - c
     },
     'to throw',
     new TypeError(
-      "'options.waitTil' argument must be a boolean or non-blank string but it is Number (42)"
+      "'options.waitTil' argument must be a boolean or a non-blank string but it is Number (42)"
     )
   );
 
@@ -913,7 +913,7 @@ test("180 It should generate convenience assertion methods for part of state - c
     },
     'to throw',
     new TypeError(
-      "'options.waitUntil' argument must be a boolean or non-blank string but it is Number (42)"
+      "'options.waitUntil' argument must be a boolean or a non-blank string but it is Number (42)"
     )
   );
 

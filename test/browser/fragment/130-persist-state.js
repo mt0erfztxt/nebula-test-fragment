@@ -3,6 +3,7 @@ import appRootPath from 'app-root-path';
 import expect from 'unexpected';
 
 import Fragment from '../../../src/fragment';
+import Options from "../../../src/options";
 import utils from "../../../src/utils";
 
 fixture `Fragment :: 130 persistState()`
@@ -60,7 +61,7 @@ class TextInput extends Fragment {
   // ---------------------------------------------------------------------------
 
   getStateParts(options) {
-    const opts = utils.initializeOptions(options, {
+    const opts = new Options(options, {
       defaults: {
         onlyWritable: false
       }
@@ -125,7 +126,7 @@ test("010 It should throw error when 'id' argument is not a non-blank string", a
   expect(isThrown, 'to be true');
 });
 
-test("020 It should throw error when 'state' argument is not a nil or plain object", async () => {
+test("020 It should throw error when 'state' argument is not a nil or a plain object", async () => {
   let isThrown = false;
   const textInput = new TextInput();
 
@@ -133,7 +134,7 @@ test("020 It should throw error when 'state' argument is not a nil or plain obje
     await textInput.persistState('42', 'foo');
   }
   catch (e) {
-    const message = "'state' argument must be a nil or plain object but it is String (foo)";
+    const message = "'state' argument must be a nil or a plain object but it is String (foo)";
     expect(e.message, 'to equal', message);
     isThrown = true;
   }

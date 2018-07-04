@@ -1,6 +1,7 @@
 import _ from 'lodash';
 import typeOf from 'typeof--';
 
+import Options from "./options";
 import utils from "./utils";
 
 /**
@@ -160,7 +161,7 @@ function checkIsBemObject(value) {
     );
   }
 
-  const {blk, elt, mod} = value;
+  const { blk, elt, mod } = value;
 
   // BEM block is required and must be valid BEM name.
   if (!isBemName(blk)) {
@@ -517,7 +518,7 @@ function toBemObject(value) {
   }
   else if (_.isArray(value)) {
     const [blk, elt, mod] = value;
-    obj = {blk, elt, mod};
+    obj = { blk, elt, mod };
   }
   // This part is not reachable because `checkIsBemStructure()` doesn't allow invalid
   // value to pass through.
@@ -542,7 +543,7 @@ function toBemString(value) {
 
   if (_.isArray(value)) {
     const [blk, elt, mod] = value;
-    value = {blk, elt, mod};
+    value = { blk, elt, mod };
   }
 
   let str;
@@ -554,7 +555,7 @@ function toBemString(value) {
     str = value;
   }
   else if (_.isPlainObject(value)) {
-    const {blk, elt, mod} = value;
+    const { blk, elt, mod } = value;
 
     str = blk;
 
@@ -604,7 +605,7 @@ function toBemVector(value) {
     vec = value;
   }
   else if (_.isString(value) || _.isPlainObject(value)) {
-    const {blk, elt, mod} = toBemObject(value);
+    const { blk, elt, mod } = toBemObject(value);
     vec = [blk, elt, mod];
   }
   // This part is not reachable because `checkIsBemStructure()` doesn't allow invalid
@@ -632,8 +633,8 @@ class BemBase {
    * @param {boolean} [options.isFrozen] - When truthy newly created BEM base would be frozen and can't be changed
    */
   constructor(initializer, options) {
-    const opts = utils.initializeOptions(options, {defaults: {isFinal: false, isFrozen: false}});
-    const {blk, elt, mod} = toBemObject(initializer);
+    const opts = new Options(options, { defaults: { isFinal: false, isFrozen: false } });
+    const { blk, elt, mod } = toBemObject(initializer);
 
     opts['isFinal'] = !!opts.isFinal;
     opts['isFrozen'] = !!opts.isFrozen;
@@ -838,8 +839,8 @@ class BemBase {
    * @return {BemBase}
    */
   setBlk(value, options) {
-    const opts = utils.initializeOptions(options);
-    const {fresh} = opts;
+    const opts = new Options(options);
+    const { fresh } = opts;
 
     if (!fresh) {
       this._throwWhenIsFrozen();
@@ -866,8 +867,8 @@ class BemBase {
    * @return {BemBase}
    */
   setElt(value, options) {
-    const opts = utils.initializeOptions(options);
-    const {fresh} = opts;
+    const opts = new Options(options);
+    const { fresh } = opts;
 
     if (!fresh) {
       this._throwWhenIsFrozen();
@@ -894,8 +895,8 @@ class BemBase {
    * @return {BemBase}
    */
   setMod(value, options) {
-    const opts = utils.initializeOptions(options);
-    const {fresh} = opts;
+    const opts = new Options(options);
+    const { fresh } = opts;
 
     if (!fresh) {
       this._throwWhenIsFrozen();
@@ -918,7 +919,7 @@ class BemBase {
    * @return {BemObject}
    */
   toBemObject() {
-    return {blk: this.blk, elt: this.elt, mod: this.mod};
+    return { blk: this.blk, elt: this.elt, mod: this.mod };
   }
 
   /**

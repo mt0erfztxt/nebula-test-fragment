@@ -10,7 +10,7 @@ expect.use(unexpectedSinon);
 fixture `Fragment :: 020 #getBemModifiers()`
   .page(appRootPath.path + '/test/fixtures/fragment/020-get-bem-modifiers.html');
 
-test("010 It should throw error when `modifierName` argument is not a nil or non-blank string", async (t) => {
+test("010 It should throw error when `modifierName` argument is not a nil or a non-blank string", async (t) => {
   let isThrown = false;
   let msg;
   const fragment = new Fragment(null, { bemBase: 'foobar' });
@@ -22,7 +22,7 @@ test("010 It should throw error when `modifierName` argument is not a nil or non
     await fragment.getBemModifiers('');
   }
   catch (e) {
-    msg = "'modifierName' argument must be a nil or non-blank string but it is String ()";
+    msg = "'modifierName' argument must be a nil or a non-blank string but it is String ()";
     expect(e.message, 'to equal', msg);
     isThrown = true;
   }
@@ -36,7 +36,7 @@ test("010 It should throw error when `modifierName` argument is not a nil or non
     await fragment.getBemModifiers('  ');
   }
   catch (e) {
-    msg = "'modifierName' argument must be a nil or non-blank string but it is String (  )";
+    msg = "'modifierName' argument must be a nil or a non-blank string but it is String (  )";
     expect(e.message, 'to equal', msg);
     isThrown = true;
   }
@@ -50,7 +50,7 @@ test("010 It should throw error when `modifierName` argument is not a nil or non
     await fragment.getBemModifiers(1);
   }
   catch (e) {
-    msg = "'modifierName' argument must be a nil or non-blank string but it is Number (1)";
+    msg = "'modifierName' argument must be a nil or a non-blank string but it is Number (1)";
     expect(e.message, 'to equal', msg);
     isThrown = true;
   }

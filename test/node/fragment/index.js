@@ -3,13 +3,14 @@ import unexpected from 'unexpected';
 import unexpectedSinon from 'unexpected-sinon';
 
 import Fragment from '../../../src/fragment';
+import Options from '../../../src/options';
 
 const expect = unexpected.clone();
 expect.use(unexpectedSinon);
 
 describe("Fragment", function() {
   describe("constructor()", function() {
-    it("should throw error when `spec` argument is not a nil or plain object", function() {
+    it("010 should throw error when `spec` argument is not a nil or plain object", function() {
       expect(
         () => new Fragment('foo'),
         'to throw',
@@ -19,29 +20,30 @@ describe("Fragment", function() {
       );
     });
 
-    it("should throw error when `opts` argument is not a nil or of type Options", function() {
+    it("020 should throw error when `opts` argument is not a nil or of type Options", function() {
       expect(
         () => new Fragment(null, 42),
         'to throw',
         new TypeError(
-          "Fragment.constructor(): 'opts' argument must be a nil or of type Options but it is Number (42)"
+          "Fragment.constructor(): invalid 'opts' argument - 'initializer' argument must be a nil, a plain object, " +
+          "or of type Options but it is Number (42)"
         )
       );
     });
 
-    it("should save `opts` argument under `_originalOpts` instance property", function() {
+    it("030 should save `opts` argument under `_originalOpts` instance property", function() {
       const opts = { bemBase: 'a-widget' };
       const fragment = new Fragment(null, opts);
       expect(fragment._originalOpts === opts, 'to be true');
     });
 
-    it("should save `spec` argument under `_originalSpec` instance property", function() {
+    it("040 should save `spec` argument under `_originalSpec` instance property", function() {
       const spec = { cid: 'foo' };
       const fragment = new Fragment(spec, { bemBase: 'a-widget' });
       expect(fragment._originalSpec === spec, 'to be true');
     });
 
-    it("should throw error when fragment is created from base fragment class and without BEM base passed in `opts.bemBase`", function() {
+    it("050 should throw error when fragment is created from base fragment class and without BEM base passed in `opts.bemBase`", function() {
       expect(
         () => new Fragment(),
         'to throw',
@@ -51,10 +53,8 @@ describe("Fragment", function() {
       );
     });
 
-    it("should throw error when fragment is created from derived fragment class and without BEM base set on derived fragment class or passed in `opts.bemBase`", function() {
-      class MyFragment extends Fragment {
-        // My fragment.
-      }
+    it("060 should throw error when fragment is created from derived fragment class and without BEM base set on derived fragment class or passed in `opts.bemBase`", function() {
+      class MyFragment extends Fragment {}
 
       Object.defineProperties(MyFragment, {
         displayName: {
@@ -71,31 +71,31 @@ describe("Fragment", function() {
       );
     });
 
-    it("should save initialized version of `opts` argument under `_opts` instance property", function() {
+    it("070 should save initialized version of `opts` argument under `_opts` instance property", function() {
       const opts = { bemBase: 'a-widget' };
       const fragment = new Fragment(null, opts);
       expect(fragment._opts, 'to only have keys', ['bemBase']);
       expect(fragment._opts.bemBase.toBemObject(), 'to equal', { blk: 'a-widget', elt: null, mod: null });
     });
 
-    it("should save initialized version of `spec` argument under `_spec` instance property", function() {
+    it("080 should save initialized version of `spec` argument under `_spec` instance property", function() {
       const spec = { idx: 42 };
       const fragment = new Fragment(spec, { bemBase: 'a-widget' });
       expect(fragment._spec !== spec, 'to be true');
       expect(fragment._spec, 'to equal', spec);
     });
 
-    it("should have instance of BemBase initialized with BEM base saved under `_bemBase` instance property", function() {
+    it("090 should have instance of BemBase initialized with BEM base saved under `_bemBase` instance property", function() {
       const fragment = new Fragment(null, { bemBase: 'a-widget' });
       expect(fragment._bemBase.toBemString(), 'to equal', 'a-widget');
     });
 
-    it("should have store for persisted states saved under `_persistedStates` instance property and initialized with empty plain object", function() {
+    it("100 should have store for persisted states saved under `_persistedStates` instance property and initialized with empty plain object", function() {
       const fragment = new Fragment(null, { bemBase: 'a-widget' });
       expect(fragment._persistedStates, 'to equal', {});
     });
 
-    it("should throw error when `spec.cns` argument is set to value other then non-empty string", function() {
+    it("110 should throw error when `spec.cns` argument is set to value other then non-empty string", function() {
       expect(
         () => new Fragment({ cns: 42 }, { bemBase: 'a-widget' }),
         'to throw',
@@ -105,7 +105,7 @@ describe("Fragment", function() {
       );
     });
 
-    it("should throw error when `spec.cid` argument is set to value other then non-empty string", function() {
+    it("120 should throw error when `spec.cid` argument is set to value other then non-empty string", function() {
       expect(
         () => new Fragment({ cid: 42 }, { bemBase: 'a-widget' }),
         'to throw',
@@ -115,7 +115,7 @@ describe("Fragment", function() {
       );
     });
 
-    it("should throw error when `spec.cid` argument is set to value other then non-empty string", function() {
+    it("130 should throw error when `spec.cid` argument is set to value other then non-empty string", function() {
       expect(
         () => new Fragment({ cid: 42 }, { bemBase: 'a-widget' }),
         'to throw',
@@ -125,7 +125,7 @@ describe("Fragment", function() {
       );
     });
 
-    it("should throw error when `spec.idx` argument is set to value other then integer", function() {
+    it("140 should throw error when `spec.idx` argument is set to value other then integer", function() {
       expect(
         () => new Fragment({ idx: '1' }, { bemBase: 'a-widget' }),
         'to throw',
@@ -142,7 +142,7 @@ describe("Fragment", function() {
       );
     });
 
-    it("should throw error when `spec.custom` argument is set to value other then function", function() {
+    it("150 should throw error when `spec.custom` argument is set to value other then function", function() {
       expect(
         () => new Fragment({ custom: 42 }, { bemBase: 'a-widget' }),
         'to throw',
@@ -152,7 +152,7 @@ describe("Fragment", function() {
       );
     });
 
-    it("should call `spec.custom` argument, when it is a function, with selector, initialized spec and initialized opts, and use its return value as new selector", function() {
+    it("160 should call `spec.custom` argument, when it is a function, with selector, initialized spec and initialized opts, and use its return value as new selector", function() {
       const customSpecResult = {};
       const opts = { bemBase: 'a-widget', option1: 1 };
       const spec = {};
@@ -171,7 +171,7 @@ describe("Fragment", function() {
       expect(inst.selector === customSpecResult, 'to be true');
     });
 
-    it("should throw error when `spec` argument has not supported specs defined", function() {
+    it("170 should throw error when `spec` argument has not supported specs defined", function() {
       expect(
         () => new Fragment({ some: 'thing', other: 'thing' }, { bemBase: 'a-widget' }),
         'to throw',
@@ -181,7 +181,7 @@ describe("Fragment", function() {
       );
     });
 
-    it("should have initialized TestCafe selector saved under `selector` instance property", function() {
+    it("180 should have initialized TestCafe selector saved under `selector` instance property", function() {
       const fragment = new Fragment(null, { bemBase: 'a-widget' });
       expect(fragment.selector, 'to be ok');
     });
@@ -221,78 +221,78 @@ describe("Fragment", function() {
       }
     });
 
-    it("should return plain object with `isInstance` attribute set to `true` when 'spec' argument is already an instance of fragment that must be constructed", function() {
+    it("010 should return plain object with `isInstance` attribute set to `true` when 'spec' argument is already an instance of fragment that must be constructed", function() {
       const instOfB = new FragmentB();
       expect(FragmentB.initializeFragmentSpecAndOpts(instOfB, null), 'to equal', { isInstance: true });
     });
 
-    it("should throw error when 'spec' argument is already an instance of fragment but other than that must be constructed", function() {
+    it("020 should throw error when 'spec' argument is already an instance of fragment but other than that must be constructed", function() {
       const instOfA = new FragmentA();
       expect(
         () => FragmentB.initializeFragmentSpecAndOpts(instOfA, null),
         'to throw',
         new TypeError(
-          "'spec' argument can not be instance of fragment other than FragmentB"
+          "'spec' argument can not be an instance of fragment other than FragmentB"
         )
       );
     });
 
-    it("should throw error when 'opts' argument is not nil or of type Options", function() {
+    it("030 should throw error when 'opts' argument is not nil or of type Options", function() {
       expect(
         () => FragmentB.initializeFragmentSpecAndOpts(null, 'opts'),
         'to throw',
         new TypeError(
-          "'value' argument must be of type Options but it is String (opts)"
+          "'initializer' argument must be a nil, a plain object, or of type Options but it is String (opts)"
         )
       );
     });
 
-    it("should throw error when 'defaults' argument is not a nil or plain object", function() {
+    it("040 should throw error when 'defaults' argument is not a nil or plain object", function() {
       expect(
         () => FragmentB.initializeFragmentSpecAndOpts(null, null, 'defaults'),
         'to throw',
         new TypeError(
-          "'defaults' argument must be a nil or plain object but it is String (defaults)"
+          "'defaults' argument must be a nil or a plain object but it is String (defaults)"
         )
       );
     });
 
-    it("should throw error when 'defaults.spec' argument is not a nil or plain object", function() {
+    it("050 should throw error when 'defaults.spec' argument is not a nil or plain object", function() {
       expect(
         () => FragmentB.initializeFragmentSpecAndOpts(null, null, { spec: 'spec' }),
         'to throw',
         new TypeError(
-          "'defaults.spec' argument must be a nil or plain object but it is String (spec)"
+          "'defaults.spec' argument must be a nil or a plain object but it is String (spec)"
         )
       );
     });
 
-    it("should throw error when 'defaults.opts' argument is not a nil or plain object", function() {
+    it("060 should throw error when 'defaults.opts' argument is not a nil or plain object", function() {
       expect(
         () => FragmentB.initializeFragmentSpecAndOpts(null, null, { opts: 'opts' }),
         'to throw',
         new TypeError(
-          "'defaults.opts' argument must be a nil or plain object but it is String (opts)"
+          "'defaults.opts' argument must be a nil or a plain object but it is String (opts)"
         )
       );
     });
 
-    it("should apply spec defaults", function() {
+    it("070 should apply spec defaults", function() {
       const spec = { cid: 'qwerty' };
       const defaults = { spec: { cns: 'foo', cid: 'foobar' } };
       const result = FragmentB.initializeFragmentSpecAndOpts(spec, void(0), defaults);
-      expect(result, 'to equal', { initializedSpec: { cid: 'qwerty', cns: 'foo' }, initializedOpts: {} });
+      expect(result, 'to equal', { initializedSpec: { cid: 'qwerty', cns: 'foo' }, initializedOpts: new Options({}) });
       expect(result.initializedSpec !== spec, 'to be true');
     });
 
-    it("should apply opts defaults", function() {
+    it("080 should apply opts defaults", function() {
       const opts = { option1: 1 };
       const spec = { cid: 'qwerty' };
       const defaults = { opts: { bemBase: 'my-widget', option1: 2 } };
       const result = FragmentB.initializeFragmentSpecAndOpts(spec, opts, defaults);
       expect(result, 'to equal', {
         initializedSpec: { cid: 'qwerty' },
-        initializedOpts: { bemBase: 'my-widget', option1: 1 }
+        initializedOpts: new Options({ bemBase: 'my-widget', option1: 1 })
       });
       expect(result.initializedOpts !== opts, 'to be true');
       expect(result.initializedSpec !== spec, 'to be true');

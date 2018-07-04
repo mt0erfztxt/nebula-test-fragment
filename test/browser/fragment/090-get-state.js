@@ -4,6 +4,7 @@ import expect from 'unexpected';
 import { t } from 'testcafe';
 
 import Fragment from '../../../src/fragment';
+import Options from "../../../src/options";
 import utils from "../../../src/utils";
 
 fixture `Fragment :: 090 #getState()`
@@ -61,7 +62,7 @@ class TextInput extends Fragment {
   // ---------------------------------------------------------------------------
 
   getStateParts(options) {
-    const opts = utils.initializeOptions(options, {
+    const opts = new Options(options, {
       defaults: {
         onlyWritable: false
       }
