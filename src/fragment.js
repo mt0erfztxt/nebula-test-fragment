@@ -182,24 +182,24 @@ class Fragment {
 
       // 2.3 'idx' often used to get specific fragment by its index in parent.
       // It respects 'cns' and 'parent' specs.
-        if (!_.isNil(idxSpec)) {
-            if (_.isInteger(idxSpec)) {
-                /*
-                 * NOTE Don't use `Selector.nth()` because it doesn't work properly,
-                 * namely, when you try to call `nth()` later, for example, in
-                 * 'custom' spec, selector would be reseted to state before `nth()`
-                 * call in 'idx' spec. Perhaps this is a bug, but tested only in
-                 * TestCafe '0.16.2'. This misbehavior was discovered first time in
-                 * '060-specs-composition' tests.
-                 *
-                 * THIS WOULD NOT WORK PROPERLY!!!
-                 * this._selector = this._selector.nth(idxSpec);
-                 */
-                this._selector = this._selector.filter((node, idx) => {
-                    return idx === idxSpec
-                }, {idxSpec});
-            }
-            else {
+      if (!_.isNil(idxSpec)) {
+        if (_.isInteger(idxSpec)) {
+          /*
+           * NOTE Don't use `Selector.nth()` because it doesn't work properly,
+           * namely, when you try to call `nth()` later, for example, in
+           * 'custom' spec, selector would be reseted to state before `nth()`
+           * call in 'idx' spec. Perhaps this is a bug, but tested only in
+           * TestCafe '0.16.2'. This misbehavior was discovered first time in
+           * '060-specs-composition' tests.
+           *
+           * THIS WOULD NOT WORK PROPERLY!!!
+           * this._selector = this._selector.nth(idxSpec);
+           */
+          this._selector = this._selector.filter((node, idx) => {
+            return idx === idxSpec
+          }, { idxSpec });
+        }
+        else {
           throw new TypeError(
             `${this.displayName}.constructor(): Built-in 'idx' spec must be an integer greater than or equal zero ` +
             `but it is ${typeOf(idxSpec)} (${idxSpec})`
@@ -208,9 +208,9 @@ class Fragment {
       }
 
       // 2.4 'custom' spec is used to allow derived fragments to have their own
-        // built-in specs. Selector passed to function already scoped into
-        // 'parent' spec and filtered by 'cid', 'cns', 'idx' spec(-s) (if any).
-        if (customSpec) {
+      // built-in specs. Selector passed to function already scoped into
+      // 'parent' spec and filtered by 'cid', 'cns', 'idx' spec(-s) (if any).
+      if (customSpec) {
         if (!_.isFunction(customSpec)) {
           throw new TypeError(
             `${this.displayName}.constructor(): Built-in 'custom' spec must be a function but it is ` +
@@ -294,7 +294,7 @@ class Fragment {
       [assertionName, count] = count;
     }
 
-      assertionName = utils.buildTestCafeAssertionName(assertionName, options);
+    assertionName = utils.buildTestCafeAssertionName(assertionName, options);
     await t.expect(somethingSelector.count)[assertionName](count);
   }
 
@@ -998,10 +998,10 @@ class Fragment {
       );
     }
 
-      /**
-       * @type {Fragment}
-       */
-      const something = this[somethingGetterName](somethingSpecification, somethingOptions);
+    /**
+     * @type {Fragment}
+     */
+    const something = this[somethingGetterName](somethingSpecification, somethingOptions);
 
     await something.expectIsExist();
 
@@ -1011,7 +1011,7 @@ class Fragment {
       await something.expectIndexInParentIs(this.selector, idx);
     }
 
-      return something;
+    return something;
   }
 
   /**
@@ -1045,31 +1045,31 @@ class Fragment {
     if (only === true) {
       const counterMethodName = `expect${ucFirst(somethingName)}sCountIs`;
 
-        if (_.isFunction(this[counterMethodName])) {
-            await this[counterMethodName](len);
-        }
-        else {
+      if (_.isFunction(this[counterMethodName])) {
+        await this[counterMethodName](len);
+      }
+      else {
         throw new TypeError(
           `'${this.displayName}' fragment must have '${counterMethodName}' method but it doesn't`
         );
       }
     }
 
-      const somethings = [];
+    const somethings = [];
 
     for (let i = 0; i < len; i++) {
       const expectHasSomethingOptions = { idx: (only === true && sameOrder === true && i) };
-        const something = await this.expectHasSomething(
+      const something = await this.expectHasSomething(
         somethingName,
         somethingSpecificationsAndOptions[i][0],
         somethingSpecificationsAndOptions[i][1],
         expectHasSomethingOptions
       );
 
-        somethings.push(something);
+      somethings.push(something);
     }
 
-      return somethings;
+    return somethings;
   }
 
   /**
