@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Fragment :: Constructor :: 060 Specs Composition</title>
+</head>
+
+<body>
+<div class="myFragment">MyFragment</div>
+
+<div class="parentFragment">
+    <div class="myFragment">MyFragment, parent</div>
+    <div class="myFragment myFragment--cns_foo">MyFragment, parent, cns foo</div>
+    <div class="myFragment myFragment--cns_foo myFragment--cid_bar">MyFragment, parent, cns foo, cid bar</div>
+    <div class="myFragment myFragment--cns_foo myFragment--cid_bar">MyFragment, parent, cns foo, cid bar, idx 1</div>
+    <div class="myFragment myFragment--cns_foo myFragment--cid_buz">MyFragment, parent, cns foo, cid buz</div>
+    <div class="myFragment myFragment--cns_foo myFragment--cid_buz">MyFragment, parent, cns foo, cid buz, idx 1, custom
+        text 42
+    </div>
+    <div class="myFragment myFragment--cns_foo myFragment--cid_buz">MyFragment, parent, cns foo, cid buz, idx 2, custom
+        text 420
+    </div>
+</div>
+</body>
+
+</html>

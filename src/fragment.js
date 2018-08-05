@@ -167,8 +167,6 @@ class Fragment {
         this._selector = this._selector.filter(`.${bemBase.setMod(['cns', cnsSpec], { fresh: true })}`);
       }
 
-      // Following spec aren't composable with each other!
-
       // 2.2 'cid' (component id) often used to get specific fragment. It
       // respects 'cns' and 'parent' specs.
       if (cidSpec) {
@@ -181,21 +179,38 @@ class Fragment {
 
         this._selector = this._selector.filter(`.${bemBase.setMod(['cid', cidSpec], { fresh: true })}`);
       }
+
       // 2.3 'idx' often used to get specific fragment by its index in parent.
       // It respects 'cns' and 'parent' specs.
-      else if (_.has(this._spec, 'idx')) {
-        if (!(_.isInteger(idxSpec))) {
+        if (!_.isNil(idxSpec)) {
+            if (_.isInteger(idxSpec)) {
+                /*
+                 * NOTE Don't use `Selector.nth()` because it doesn't work properly,
+                 * namely, when you try to call `nth()` later, for example, in
+                 * 'custom' spec, selector would be reseted to state before `nth()`
+                 * call in 'idx' spec. Perhaps this is a bug, but tested only in
+                 * TestCafe '0.16.2'. This misbehavior was discovered first time in
+                 * '060-specs-composition' tests.
+                 *
+                 * THIS WOULD NOT WORK PROPERLY!!!
+                 * this._selector = this._selector.nth(idxSpec);
+                 */
+                this._selector = this._selector.filter((node, idx) => {
+                    return idx === idxSpec
+                }, {idxSpec});
+            }
+            else {
           throw new TypeError(
             `${this.displayName}.constructor(): Built-in 'idx' spec must be an integer greater than or equal zero ` +
             `but it is ${typeOf(idxSpec)} (${idxSpec})`
           );
         }
-
-        this._selector = this._selector.nth(idxSpec);
       }
+
       // 2.4 'custom' spec is used to allow derived fragments to have their own
-      // built-in specs. It respects 'cns' and 'parent' specs.
-      else if (customSpec) {
+        // built-in specs. Selector passed to function already scoped into
+        // 'parent' spec and filtered by 'cid', 'cns', 'idx' spec(-s) (if any).
+        if (customSpec) {
         if (!_.isFunction(customSpec)) {
           throw new TypeError(
             `${this.displayName}.constructor(): Built-in 'custom' spec must be a function but it is ` +
@@ -204,22 +219,6 @@ class Fragment {
         }
 
         this._selector = customSpec(this._selector, this._spec, this._opts);
-      }
-      // To simplify debugging we throw error when unsupported spec found. Note
-      // that 'cns' and 'parent' specs were added earlier and must be excluded
-      // explicitly.
-      else {
-        const unknownSpecs = _
-          .chain(this._spec)
-          .keys()
-          .remove((s) => !_.includes(['cns', 'parent'], s))
-          .value();
-
-        if (!_.isEmpty(unknownSpecs)) {
-          throw new TypeError(
-            `${this.displayName}.constructor(): Not supported spec(-s) given: ${_.join(unknownSpecs, ', ')}`
-          );
-        }
       }
     }
   }

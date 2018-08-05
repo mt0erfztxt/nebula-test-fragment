@@ -171,16 +171,6 @@ describe("Fragment", function() {
       expect(inst.selector === customSpecResult, 'to be true');
     });
 
-    it("170 should throw error when `spec` argument has not supported specs defined", function() {
-      expect(
-        () => new Fragment({ some: 'thing', other: 'thing' }, { bemBase: 'a-widget' }),
-        'to throw',
-        new TypeError(
-          "Fragment.constructor(): Not supported spec(-s) given: some, other"
-        )
-      );
-    });
-
     it("180 should have initialized TestCafe selector saved under `selector` instance property", function() {
       const fragment = new Fragment(null, { bemBase: 'a-widget' });
       expect(fragment.selector, 'to be ok');
