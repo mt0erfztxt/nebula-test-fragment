@@ -125,7 +125,7 @@ describe("Fragment", function() {
       );
     });
 
-    it("140 should throw error when `spec.idx` argument is set to value other then integer", function() {
+    it("140 should throw error when `spec.idx` argument is set to value other then integer gte 0", function() {
       expect(
         () => new Fragment({ idx: '1' }, { bemBase: 'a-widget' }),
         'to throw',
@@ -138,6 +138,13 @@ describe("Fragment", function() {
         'to throw',
         new TypeError(
           "Fragment.constructor(): Built-in 'idx' spec must be an integer greater than or equal zero but it is Number (2.5)"
+        )
+      );
+      expect(
+        () => new Fragment({ idx: -1 }, { bemBase: 'a-widget' }),
+        'to throw',
+        new TypeError(
+          "Fragment.constructor(): Built-in 'idx' spec must be an integer greater than or equal zero but it is Number (-1)"
         )
       );
     });

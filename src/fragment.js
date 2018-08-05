@@ -183,7 +183,7 @@ class Fragment {
       // 2.3 'idx' often used to get specific fragment by its index in parent.
       // It respects 'cns' and 'parent' specs.
       if (!_.isNil(idxSpec)) {
-        if (_.isInteger(idxSpec)) {
+        if (_.isInteger(idxSpec) && idxSpec >= 0) {
           /*
            * NOTE Don't use `Selector.nth()` because it doesn't work properly,
            * namely, when you try to call `nth()` later, for example, in
