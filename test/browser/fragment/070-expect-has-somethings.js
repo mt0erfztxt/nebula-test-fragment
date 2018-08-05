@@ -233,3 +233,20 @@ test("060 It should respect `options.sameOrder` argument (successful case)", asy
 
   expect(isThrown, 'to be false');
 });
+
+test("070 It should return specified somethings", async (t) => {
+    const foo = new Foo();
+
+    const bars = await foo.expectHasSomethings(
+        'bar', [
+            [{cid: '0'}],
+            [{cid: '2'}]
+        ]
+    );
+
+    expect(bars, 'to have length', 2);
+    expect(bars[0], 'to be a', Bar);
+    expect(bars[1], 'to be a', Bar);
+    await t.expect(bars[0].selector.textContent).eql('Bar 0');
+    await t.expect(bars[1].selector.textContent).eql('Bar 2');
+});

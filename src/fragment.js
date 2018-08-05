@@ -985,7 +985,7 @@ class Fragment {
    * @param {*} somethingOptions - See `opts` parameter of Something's constructor
    * @param {Options|Object} [options] - Options
    * @param {Number} [options.idx] - Position at which other fragment must be found to pass assertion. Must be an integer greater than or equal zero
-   * @return {Promise<void>}
+   * @returns {Promise<Object>} Found something.
    * @throws {TypeError} When argument aren't valid.
    */
   async expectHasSomething(somethingName, somethingSpecification, somethingOptions, options) {
@@ -998,7 +998,11 @@ class Fragment {
       );
     }
 
-    const something = this[somethingGetterName](somethingSpecification, somethingOptions);
+      /**
+       * @type {Fragment}
+       */
+      const something = this[somethingGetterName](somethingSpecification, somethingOptions);
+
     await something.expectIsExist();
 
     const { idx } = opts;
@@ -1006,6 +1010,8 @@ class Fragment {
     if (_.isInteger(idx)) {
       await something.expectIndexInParentIs(this.selector, idx);
     }
+
+      return something;
   }
 
   /**
@@ -1023,7 +1029,7 @@ class Fragment {
    * @param {Options|Object} [options] - Options
    * @param {Boolean} [options.only=false] - When `true` fragment must have only specified other fragments to pass assertion
    * @param {Boolean} [options.sameOrder=false] - When `true` other fragments must be found in fragment in same order as in `somethingSpecificationsAndOptions` to pass assertion. Work only in conjunction with `only` parameter
-   * @return {Promise<void>}
+   * @returns {Promise<Array<Object>>} Found somethings.
    * @throws {TypeError} When requirements failed.
    */
   async expectHasSomethings(somethingName, somethingSpecificationsAndOptions, options) {
@@ -1039,24 +1045,31 @@ class Fragment {
     if (only === true) {
       const counterMethodName = `expect${ucFirst(somethingName)}sCountIs`;
 
-      if (!_.isFunction(this[counterMethodName])) {
+        if (_.isFunction(this[counterMethodName])) {
+            await this[counterMethodName](len);
+        }
+        else {
         throw new TypeError(
           `'${this.displayName}' fragment must have '${counterMethodName}' method but it doesn't`
         );
       }
-
-      await this[counterMethodName](len);
     }
+
+      const somethings = [];
 
     for (let i = 0; i < len; i++) {
       const expectHasSomethingOptions = { idx: (only === true && sameOrder === true && i) };
-      await this.expectHasSomething(
+        const something = await this.expectHasSomething(
         somethingName,
         somethingSpecificationsAndOptions[i][0],
         somethingSpecificationsAndOptions[i][1],
         expectHasSomethingOptions
       );
+
+        somethings.push(something);
     }
+
+      return somethings;
   }
 
   /**

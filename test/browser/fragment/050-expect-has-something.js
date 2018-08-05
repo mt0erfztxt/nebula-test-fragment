@@ -155,3 +155,15 @@ test("050 It should not throw error when fragment of something does exist in fra
 
   expect(isThrown, 'to be false');
 });
+
+test("060 It should return specified something", async (t) => {
+    const foo = new Foo();
+
+    const barCid0 = await foo.expectHasSomething('Bar', {cid: '0'}, null);
+    expect(barCid0, 'to be a', Bar);
+    await t.expect(barCid0.selector.textContent).eql('bar 0');
+
+    const barCid2Idx2 = await foo.expectHasSomething('Bar', {cid: '2'}, null, {idx: 2});
+    expect(barCid2Idx2, 'to be a', Bar);
+    await t.expect(barCid2Idx2.selector.textContent).eql('bar 2');
+});
