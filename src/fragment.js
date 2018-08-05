@@ -283,23 +283,18 @@ class Fragment {
    *
    * @param {*} somethingSelector - TestCafe selector for something
    * @param {Number|Array} count - Fragment must have that number of somethings to pass assertion. When you need more flexibility than just equality pass an `Array` with TestCafe assertion name (default to 'eql') as first element and expected value for assertion as second, for example, `['gte', 3]`
-   * @param {Options} [options] - Options
-   * @param {Boolean} [options.isNot=false] - When `true` assertion would be negated
+   * @param {Options|Object} [options] - Options
+   * @param {Boolean} [options.isNot=false] - When truthy assertion would be negated
    * @return {Promise<void>}
    */
   static async expectSomethingsCountIs(somethingSelector, count, options) {
     let assertionName = 'eql';
-    const opts = new Options(options, {
-      defaults: {
-        isNot: false
-      }
-    });
 
     if (_.isArray(count)) {
       [assertionName, count] = count;
     }
 
-    assertionName = utils.buildTestCafeAssertionName(assertionName, opts);
+      assertionName = utils.buildTestCafeAssertionName(assertionName, options);
     await t.expect(somethingSelector.count)[assertionName](count);
   }
 
