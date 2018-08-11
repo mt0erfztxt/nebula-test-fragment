@@ -1,8 +1,13 @@
 import _ from 'lodash';
 import appRootPath from 'app-root-path';
-import expect from 'unexpected';
+import sinon from 'sinon';
+import unexpected from 'unexpected';
+import unexpectedSinon from 'unexpected-sinon';
 
 import Fragment from '../../../src/fragment';
+
+const expect = unexpected.clone();
+expect.use(unexpectedSinon);
 
 fixture `Fragment :: 050 #expectHasSomething()`
   .page(appRootPath.path + '/test/fixtures/fragment/050-expect-has-something.html');
@@ -81,7 +86,7 @@ Object.defineProperties(Foo, {
   }
 });
 
-test("010 It should throw error when fragment class doesn't have corresponding getter", async () => {
+test("010 It should throw error when `options.getSomething` argument is not set and fragment class doesn't have corresponding getter", async () => {
   let isThrown = false;
   const foo = new Foo();
 
@@ -89,7 +94,11 @@ test("010 It should throw error when fragment class doesn't have corresponding g
     await foo.expectHasSomething('Buz', null, null);
   }
   catch (e) {
-    expect(e.message, 'to equal', "'Foo' fragment must have 'getBuz' method but it doesn't");
+    expect(
+      e.message,
+      'to equal',
+      "'Foo' fragment must have 'getBuz' method or 'getSomething' option set but it doesn't"
+    );
     isThrown = true;
   }
 
@@ -157,13 +166,115 @@ test("050 It should not throw error when fragment of something does exist in fra
 });
 
 test("060 It should return specified something", async (t) => {
-    const foo = new Foo();
+  const foo = new Foo();
 
-    const barCid0 = await foo.expectHasSomething('Bar', {cid: '0'}, null);
-    expect(barCid0, 'to be a', Bar);
-    await t.expect(barCid0.selector.textContent).eql('bar 0');
+  const barCid0 = await foo.expectHasSomething('Bar', { cid: '0' }, null);
+  expect(barCid0, 'to be a', Bar);
+  await t.expect(barCid0.selector.textContent).eql('bar 0');
 
-    const barCid2Idx2 = await foo.expectHasSomething('Bar', {cid: '2'}, null, {idx: 2});
-    expect(barCid2Idx2, 'to be a', Bar);
-    await t.expect(barCid2Idx2.selector.textContent).eql('bar 2');
+  const barCid2Idx2 = await foo.expectHasSomething('Bar', { cid: '2' }, null, { idx: 2 });
+  expect(barCid2Idx2, 'to be a', Bar);
+  await t.expect(barCid2Idx2.selector.textContent).eql('bar 2');
+});
+
+test("070 It should throw error when `options.getSomething` is set but not a function", async () => {
+  let isThrown = false;
+  const foo = new Foo();
+
+  try {
+    await foo.expectHasSomething('Bar', null, null, { getSomething: 42 });
+  }
+  catch (e) {
+    expect(
+      e.message,
+      'to equal',
+      "options validation failed with error: 'getSomething' option must be a function or a non-blank string but it is Number (42)"
+    );
+    isThrown = true;
+  }
+
+  expect(isThrown, 'to be true');
+});
+
+test("080 It should respect `options.getSomething` argument - case of function", async () => {
+  const foo = new Foo();
+  const specForBar = {};
+  const optsForBar = {};
+
+  /**
+   * Returns bar fragment with 'cid' set to 2.
+   *
+   * @param {*} [spec]
+   * @param {*} [opts]
+   * @returns {Bar}
+   */
+  const getBarCid2 = function(spec, opts) {
+    // Check this is not bound.
+    expect(this, 'to be', void(0));
+
+    // Check arguments.
+    expect(spec, 'to equal', specForBar);
+    expect(opts, 'to equal', optsForBar);
+
+    return foo.getSomething(foo.BarFragment, { cid: '2' }, null);
+  }
+
+  const getBarCid2Spy = sinon.spy(getBarCid2);
+
+  /**
+   * @type {Bar}
+   */
+  const barCid2 = await foo.expectHasSomething('Bar', specForBar, optsForBar, {
+    getSomething: getBarCid2Spy
+  });
+
+  // Check that `options.getSomething` is really called. For arguments check
+  // see `getBarCid2` function.
+  expect(getBarCid2Spy, 'was called times', 1);
+
+  // Check that returned bar fragment is expected one. This is no more than
+  // 'Just to be sure' check :)
+  await barCid2.expectExistsAndConformsRequirements({ text: 'bar 2' });
+});
+
+test("090 It should respect `options.getSomething` argument - case of string", async () => {
+  const foo = new Foo();
+  const specForBar = {};
+  const optsForBar = {};
+
+  /**
+   * Returns bar fragment with 'cid' set to 1.
+   *
+   * @method
+   * @param {*} [spec]
+   * @param {*} [opts]
+   * @returns {Bar}
+   */
+  foo.getBarCid1 = (function(spec, opts) {
+    // Check this is bound because it's a case of foo's method call.
+    expect(this, 'to be', foo);
+
+    // Check arguments.
+    expect(spec, 'to equal', specForBar);
+    expect(opts, 'to equal', optsForBar);
+
+    return foo.getSomething(foo.BarFragment, { cid: '1' }, null);
+  }).bind(foo);
+
+  const getBarCid1Spy = sinon.spy(foo, 'getBarCid1');
+
+  /**
+   * @type {Bar}
+   */
+  const barCid1 = await foo.expectHasSomething('Bar', specForBar, optsForBar, {
+    getSomething: 'getBarCid1'
+  });
+
+  // Check that method with name passed in `options.getSomething` is really
+  // called. For arguments check see `getBarCid1` function.
+  expect(getBarCid1Spy, 'was called times', 1);
+
+  // Check that returned bar fragment is expected one. This is no more than
+  // 'Just to be sure' check :)
+  await barCid1.expectExistsAndConformsRequirements({ text: 'bar 1' });
 });

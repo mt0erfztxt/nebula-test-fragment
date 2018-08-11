@@ -974,38 +974,61 @@ class Fragment {
 
   /**
    * Asserts that fragment has other fragment, named `somethingName`, and that
-   * other fragment must be obtained using `somethingSpecification` and
-   * `somethingOptions`, and optionally, asserts that other fragment found at
-   * position specified by `idx`.
+   * other fragment must be obtained using `somethingSpec` and `somethingOpts`,
+   * and optionally, asserts that other fragment found at position specified
+   * by `idx`.
    *
-   * It requires that fragment has `#get[somethingName]()` method implemented.
-   *
-   * @param {String} somethingName - Name of something. For example, in Dialog it can be an Action
-   * @param {*} somethingSpecification - See `spec` parameter of Something's constructor
-   * @param {*} somethingOptions - See `opts` parameter of Something's constructor
-   * @param {Options|Object} [options] - Options
-   * @param {Number} [options.idx] - Position at which other fragment must be found to pass assertion. Must be an integer greater than or equal zero
+   * @param {String} somethingName Name of something. For example, in Dialog it can be an Action
+   * @param {*} somethingSpec See `spec` parameter of Something's constructor
+   * @param {*} somethingOpts See `opts` parameter of Something's constructor
+   * @param {Options|Object} [options] Options
+   * @param {Function|String} [options.getSomething] When it's a function then it would be used to get something, note that no `this` binding provided. When it's a string then it's must be a name of method of something that must be used to get something. When nil then instance's method named `#getSomething`, where 'Something' part equal to upercased version of `somethingName` argument would be used
+   * @param {Number} [options.idx] Position at which other fragment must be found to pass assertion. Must be an integer greater than or equal zero
    * @returns {Promise<Object>} Found something.
-   * @throws {TypeError} When argument aren't valid.
+   * @throws {AssertionError} When something fragment specified by `somethingSpec` and `somethingOpts` doesn't exists.
+   * @throws {TypeError} When arguments aren't valid.
    */
-  async expectHasSomething(somethingName, somethingSpecification, somethingOptions, options) {
-    const opts = new Options(options);
-    const somethingGetterName = `get${ucFirst(somethingName)}`;
+  async expectHasSomething(somethingName, somethingSpec, somethingOpts, options) {
+    const { getSomething, idx } = new Options(options, {
+      validator: ({ getSomething }) => {
+        if (!(_.isNil(getSomething) || _.isFunction(getSomething) || utils.isNonBlankString(getSomething))) {
+          return `'getSomething' option must be a function or a non-blank string but it is ${typeOf(getSomething)} (${getSomething})`;
+        }
+        else {
+          return null;
+        }
+      }
+    });
 
-    if (!_.isFunction(this[somethingGetterName])) {
+    if (_.isString(getSomething) && !_.isFunction(this[getSomething])) {
       throw new TypeError(
-        `'${this.displayName}' fragment must have '${somethingGetterName}' method but it doesn't`
+        `'${this.displayName}' fragment must have '${getSomething}' method specified in ` +
+        `'getSomething' option but it doesn't`
+      );
+    }
+
+    const getSomethingMethodName = `get${ucFirst(somethingName)}`;
+
+    if (_.isNil(getSomething) && !_.isFunction(this[getSomethingMethodName])) {
+      throw new TypeError(
+        `'${this.displayName}' fragment must have '${getSomethingMethodName}' method or ` +
+        `'getSomething' option set but it doesn't`
       );
     }
 
     /**
      * @type {Fragment}
      */
-    const something = this[somethingGetterName](somethingSpecification, somethingOptions);
+    let something;
+
+    if (_.isFunction(getSomething)) {
+      something = getSomething(somethingSpec, somethingOpts);
+    }
+    else {
+      something = this[(getSomething || getSomethingMethodName)](somethingSpec, somethingOpts);
+    }
 
     await something.expectIsExist();
-
-    const { idx } = opts;
 
     if (_.isInteger(idx)) {
       await something.expectIndexInParentIs(this.selector, idx);
