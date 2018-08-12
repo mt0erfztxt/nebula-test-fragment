@@ -842,7 +842,7 @@ describe("bem", function () {
         expect(
           () => new bem.BemBase('foo').setBlk('bar', false),
           'to throw',
-          new TypeError("'initializer' argument must be a nil, a plain object, or of type Options but it is Boolean (false)")
+          new TypeError("'Options.constructor()': 'initializer' argument must be a nil, a plain object, or of type Options but it is Boolean (false)")
         );
       });
 
@@ -876,7 +876,7 @@ describe("bem", function () {
         expect(
           () => new bem.BemBase('foo').setElt('bar', false),
           'to throw',
-          new TypeError("'initializer' argument must be a nil, a plain object, or of type Options but it is Boolean (false)")
+          new TypeError("'Options.constructor()': 'initializer' argument must be a nil, a plain object, or of type Options but it is Boolean (false)")
         );
       });
 
@@ -910,7 +910,7 @@ describe("bem", function () {
         expect(
           () => new bem.BemBase('foo').setMod(['buzzed'], false),
           'to throw',
-          new TypeError("'initializer' argument must be a nil, a plain object, or of type Options but it is Boolean (false)")
+          new TypeError("'Options.constructor()': 'initializer' argument must be a nil, a plain object, or of type Options but it is Boolean (false)")
         );
       });
 

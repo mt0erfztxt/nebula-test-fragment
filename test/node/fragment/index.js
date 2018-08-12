@@ -25,8 +25,8 @@ describe("Fragment", function() {
         () => new Fragment(null, 42),
         'to throw',
         new TypeError(
-          "Fragment.constructor(): invalid 'opts' argument - 'initializer' argument must be a nil, a plain object, " +
-          "or of type Options but it is Number (42)"
+          "Fragment.constructor(): invalid 'opts' argument - 'Options.constructor()': 'initializer' " +
+          "argument must be a nil, a plain object, or of type Options but it is Number (42)"
         )
       );
     });
@@ -239,7 +239,8 @@ describe("Fragment", function() {
         () => FragmentB.initializeFragmentSpecAndOpts(null, 'opts'),
         'to throw',
         new TypeError(
-          "'initializer' argument must be a nil, a plain object, or of type Options but it is String (opts)"
+          "'Options.constructor()': 'initializer' argument must be a nil, a plain object, or of " +
+          "type Options but it is String (opts)"
         )
       );
     });

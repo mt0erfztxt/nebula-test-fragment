@@ -22,14 +22,15 @@ class Options {
 
     if (!(_.isNil(initializer) || _.isPlainObject(initializer))) {
       throw new TypeError(
-        `'initializer' argument must be a nil, a plain object, or of type Options but it is ` +
-        `${typeOf(initializer)} (${initializer})`
+        `'Options.constructor()': 'initializer' argument must be a nil, a plain object, or ` +
+        `of type Options but it is ${typeOf(initializer)} (${initializer})`
       );
     }
 
     if (!(_.isNil(options) || _.isPlainObject(options))) {
       throw new TypeError(
-        `'options' argument must be a nil or a plain object but it is ${typeOf(options)} (${options})`
+        `'Options.constructor()': 'options' argument must be a nil or a plain object but ` +
+        `it is ${typeOf(options)} (${options})`
       );
     }
 
@@ -38,8 +39,8 @@ class Options {
 
     if (!(_.isNil(defaults) || _.isPlainObject(defaults) || _.isFunction(defaults))) {
       throw new TypeError(
-        `'options.defaults' argument must be a nil, a function or a plain object but it is ` +
-        `${typeOf(defaults)} (${defaults})`
+        `'Options.constructor()': 'options.defaults' argument must be a nil, a function or ` +
+        `a plain object but it is ${typeOf(defaults)} (${defaults})`
       );
     }
 
@@ -49,7 +50,8 @@ class Options {
     if (validator) {
       if (!_.isFunction(validator)) {
         throw new TypeError(
-          `'options.validator' argument must be a nil or a function but it is ${typeOf(validator)} (${validator})`
+          `'Options.constructor()': 'options.validator' argument must be a nil or a function ` +
+          `but it is ${typeOf(validator)} (${validator})`
         );
       }
 
@@ -57,7 +59,7 @@ class Options {
 
       if (!_.isNull(validationMessage)) {
         throw new TypeError(
-          `options validation failed with error: ${validationMessage}`
+          `'Options.constructor()': validation failed with error: ${validationMessage}`
         );
       }
     }

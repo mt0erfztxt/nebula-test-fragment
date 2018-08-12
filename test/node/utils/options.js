@@ -13,7 +13,7 @@ describe("utils.Options", function() {
       expect(
         () => new Options(42),
         'to throw',
-        "'initializer' argument must be a nil, a plain object, or of type Options but it is Number (42)"
+        "'Options.constructor()': 'initializer' argument must be a nil, a plain object, or of type Options but it is Number (42)"
       );
     });
 
@@ -21,7 +21,7 @@ describe("utils.Options", function() {
       expect(
         () => new Options({}, false),
         'to throw',
-        "'options' argument must be a nil or a plain object but it is Boolean (false)"
+        "'Options.constructor()': 'options' argument must be a nil or a plain object but it is Boolean (false)"
       );
     });
 
@@ -29,7 +29,7 @@ describe("utils.Options", function() {
       expect(
         () => new Options({}, { defaults: "foo" }),
         'to throw',
-        "'options.defaults' argument must be a nil, a function or a plain object but it is String (foo)"
+        "'Options.constructor()': 'options.defaults' argument must be a nil, a function or a plain object but it is String (foo)"
       );
     });
 
@@ -86,7 +86,7 @@ describe("utils.Options", function() {
       expect(
         () => new Options({}, { validator: true }),
         'to throw',
-        new TypeError("'options.validator' argument must be a nil or a function but it is Boolean (true)")
+        new TypeError("'Options.constructor()': 'options.validator' argument must be a nil or a function but it is Boolean (true)")
       );
     });
 
@@ -102,7 +102,7 @@ describe("utils.Options", function() {
           validator
         }),
         'to throw',
-        new TypeError("options validation failed with error: A validation error message")
+        new TypeError("'Options.constructor()': validation failed with error: A validation error message")
       );
     });
 

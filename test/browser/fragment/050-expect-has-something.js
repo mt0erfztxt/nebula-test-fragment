@@ -188,7 +188,7 @@ test("070 It should throw error when `options.getSomething` is set but not a fun
     expect(
       e.message,
       'to equal',
-      "options validation failed with error: 'getSomething' option must be a function or a non-blank string but it is Number (42)"
+      "'Options.constructor()': validation failed with error: 'getSomething' option must be a function or a non-blank string but it is Number (42)"
     );
     isThrown = true;
   }
