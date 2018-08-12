@@ -1,4 +1,8 @@
 {
+  "html": {
+    "end_with_newline": true
+  },
+
   "js": {
     "brace_style": "end-expand,preserve-inline",
     "end_with_newline": true,
