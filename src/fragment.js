@@ -1112,16 +1112,12 @@ class Fragment {
 
   // TODO: Add option to easily swap default implementation of equality check
   //       to equlity by BEM modifier, attribute.
-  // NOTE: Main purpose of `options.equalityCheck` is to not duplicate logic
-  //       for input checking by allowing to simply call
-  //       `super(that, { custom: true })` and add custom logic for equality
-  //       check.
   /**
    * Asserts that `this` fragment is equal `that` fragment.
    * 
    * @param {*} that A fragment to which `this` fragment must be equal to pass assertion
    * @param {Options|Object} [options] Options
-   * @param {Boolean} [options.equalityCheck=true] When truthy a default implementation, that asserts on equality of `this` and `that` text content, would be used. Set it to falsey value and override in descendant to get custom equality check logic
+   * @param {Boolean|Function} [options.equalityCheck=true] When it is `true` a default implementation, that asserts on equality of `this` and `that` text content, would be used. When it is a (async) function then it would be called with `this` and `that` fragments and it must throw when fragments aren't equal, note that no `this` binding is provided. Set it to falsey value and override in descendant to get custom equality check logic
    * @throws {AssertionError} When `this` or `that` fragment doesn't exist or they doesn't equal.
    * @throws {TypeError} When `that` is not a fragment of same class as `this`.
    */
@@ -1149,12 +1145,21 @@ class Fragment {
     await this.expectIsExist({ message: `'${this.displayName}#expectIsEqual()': 'this' fragment must exist but it doesn't` });
     await that.expectIsExist({ message: `'${that.displayName}#expectIsEqual()': fragment passed in as 'that' argument must exist but it doesn't` });
 
-    if (equalityCheck) {
+    if (equalityCheck === true) {
       const thisTextContent = await this.selector.textContent;
       const thatTextContent = await that.selector.textContent;
       await t
         .expect(thisTextContent)
         .eql(thatTextContent, `'${this.displayName}#expectIsEqual()': fragments text content doesn't match`);
+    }
+    else if (_.isFunction(equalityCheck)) {
+      await equalityCheck(this, that);
+    }
+    else if (!(_.isNil(equalityCheck) || equalityCheck === false)) {
+      throw new TypeError(
+        `'${this.displayName}#expectIsEqual()': 'equalityCheck' option must be a boolean or a ` +
+        `function but it is ${typeOf(equalityCheck)} (${equalityCheck})`
+      );
     }
   }
 

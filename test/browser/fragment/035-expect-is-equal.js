@@ -1,10 +1,15 @@
 import _ from 'lodash';
 import appRootPath from 'app-root-path';
-import expect from 'unexpected';
+import sinon from 'sinon';
+import unexpected from 'unexpected';
+import unexpectedSinon from 'unexpected-sinon';
 import { t } from 'testcafe';
 
 import Fragment from '../../../src/fragment';
 import Options from '../../../src/options';
+
+const expect = unexpected.clone();
+expect.use(unexpectedSinon);
 
 fixture `Fragment :: 035 #expectIsEqual()`
   .page(appRootPath.path + '/test/fixtures/fragment/035-expect-is-equal.html');
@@ -185,7 +190,7 @@ test("050 It should throw error when `that` fragment not exists", async () => {
   expect(isThrown, 'to be true');
 });
 
-test("060 It should check equality using default implementation", async () => {
+test("060 It should check equality using default implementation when `options.equalityCheck` is a nil or `true`", async () => {
   let isThrown = false;
 
   const fooCid1 = new Foo({ cid: '1' });
@@ -215,7 +220,25 @@ test("060 It should check equality using default implementation", async () => {
   expect(isThrown, 'to be true');
 });
 
-test("070 It should allow for custom equality check when `options.equalityCheck` is falsey", async () => {
+test("065 It should allow for custom equality check when `options.equalityCheck` is a function", async () => {
+  const fooCid1 = new Foo({ cid: '1' });
+  const fooCid2 = new Foo({ cid: '2' });
+
+  await fooCid1.expectIsExist();
+  await fooCid2.expectIsExist();
+
+  const equalityCheck = function(thisFragment, thatFragment) {
+    expect(this, 'to be undefined'); // check that `this` is not bound
+  };
+  const equalityCheckSpy = sinon.spy(equalityCheck);
+
+  await fooCid1.expectIsEqual(fooCid2, { equalityCheck: equalityCheckSpy });
+
+  expect(equalityCheckSpy, 'was called times', 1);
+  expect(equalityCheckSpy, 'to have a call satisfying', { args: [fooCid1, fooCid2] });
+});
+
+test("070 It should allow for custom equality check when `options.equalityCheck` is `false`", async () => {
   let isThrown = false;
 
   const barCid1 = new Bar({ cid: '1' });
@@ -231,13 +254,37 @@ test("070 It should allow for custom equality check when `options.equalityCheck`
 
   // Case of failure.
   try {
-    await barCid1.expectIsEqual(barCid2);
+    await barCid1.expectIsEqual(barCid2, { equalityCheck: false });
   }
   catch (e) {
     expect(
       e.errMsg,
       'to equal',
       "AssertionError: 'Bar#expectIsEqual()': fragments must have same 'fiz' but they doesn't (one !== two): expected 'one' to deeply equal 'two'"
+    );
+    isThrown = true;
+  }
+
+  expect(isThrown, 'to be true');
+});
+
+test("080 It should throw error when `options.equalityCheck` is not valid", async () => {
+  let isThrown = false;
+
+  const fooCid1 = new Foo({ cid: '1' });
+  const fooCid2 = new Foo({ cid: '2' });
+
+  await fooCid1.expectIsExist();
+  await fooCid2.expectIsExist();
+
+  try {
+    await fooCid1.expectIsEqual(fooCid2, { equalityCheck: 0 });
+  }
+  catch (e) {
+    expect(
+      e.message,
+      'to equal',
+      "'Foo#expectIsEqual()': 'equalityCheck' option must be a boolean or a function but it is Number (0)"
     );
     isThrown = true;
   }
