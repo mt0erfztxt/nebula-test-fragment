@@ -1117,7 +1117,7 @@ class Fragment {
    * 
    * @param {*} that A fragment to which `this` fragment must be equal to pass assertion
    * @param {Options|Object} [options] Options
-   * @param {Boolean|Function} [options.equalityCheck=true] When it is `true` a default implementation, that asserts on equality of `this` and `that` text content, would be used. When it is a (async) function then it would be called with `this` and `that` fragments and it must throw when fragments aren't equal, note that no `this` binding is provided. Set it to falsey value and override in descendant to get custom equality check logic
+   * @param {Boolean|Function} [options.equalityCheck=true] When it is a nil or `true` a default implementation, that asserts on equality of `this` and `that` text content, would be used. When it is a (async) function then it would be called with `this` and `that` fragments and it must throw when fragments aren't equal, note that no `this` binding is provided. Set it to falsey value and override in descendant to get custom equality check logic
    * @throws {AssertionError} When `this` or `that` fragment doesn't exist or they doesn't equal.
    * @throws {TypeError} When `that` is not a fragment of same class as `this`.
    */
@@ -1136,11 +1136,10 @@ class Fragment {
       );
     }
 
-    const { equalityCheck } = new Options(options, {
-      defaults: {
-        equalityCheck: true
-      }
-    });
+    const { equalityCheck } = _
+      .chain(new Options(options, { defaults: { equalityCheck: true } }))
+      .update('equalityCheck', (v) => (_.isNil(v) || v === true) ? true : v)
+      .value();
 
     await this.expectIsExist({ message: `'${this.displayName}#expectIsEqual()': 'this' fragment must exist but it doesn't` });
     await that.expectIsExist({ message: `'${that.displayName}#expectIsEqual()': fragment passed in as 'that' argument must exist but it doesn't` });
