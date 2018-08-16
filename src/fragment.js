@@ -982,6 +982,7 @@ class Fragment {
    * @param {*} somethingSpec See `spec` parameter of Something's constructor
    * @param {*} somethingOpts See `opts` parameter of Something's constructor
    * @param {Options|Object} [options] Options
+   * @param {Boolean} [options.equalityCheck] Same as in `Fragment#expectIsEqual`. Usable only with `options.idx`
    * @param {Function|String} [options.getSomething] When it's a function then it would be used to get something, note that no `this` binding provided. When it's a string then it's must be a name of method of something that must be used to get something. When nil then instance's method named `#getSomething`, where 'Something' part equal to upercased version of `somethingName` argument would be used
    * @param {Number} [options.idx] Position at which other fragment must be found to pass assertion. Must be an integer greater than or equal zero
    * @returns {Promise<Object>} Found something.
@@ -989,7 +990,7 @@ class Fragment {
    * @throws {TypeError} When arguments aren't valid.
    */
   async expectHasSomething(somethingName, somethingSpec, somethingOpts, options) {
-    const { getSomething, idx } = new Options(options, {
+    const { equalityCheck, getSomething, idx } = new Options(options, {
       validator: ({ getSomething }) => {
         if (!(_.isNil(getSomething) || _.isFunction(getSomething) || utils.isNonBlankString(getSomething))) {
           return `'getSomething' option must be a function or a non-blank string but it is ${typeOf(getSomething)} (${getSomething})`;
@@ -1028,10 +1029,11 @@ class Fragment {
       something = this[(getSomething || getSomethingMethodName)](somethingSpec, somethingOpts);
     }
 
-    await something.expectIsExist();
-
     if (_.isInteger(idx)) {
-      await something.expectIndexInParentIs(this.selector, idx);
+      await something.expectIndexInParentIs(this.selector, idx, { equalityCheck });
+    }
+    else {
+      await something.expectIsExist();
     }
 
     return something;

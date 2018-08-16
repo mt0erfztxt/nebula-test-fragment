@@ -28,10 +28,10 @@ class Foo extends Fragment {
   /**
    * Creates new foo fragment.
    *
-   * @param {?object} [spec] - Foo fragment specification
-   * @param {?Options} [opts] - Foo fragment Options
-   * @param {Options} [opts.BarFragmentOpts] - Opts for `Bar` fragment used in this fragment
-   * @param {object} [opts.BarFragmentSpec] - Spec for `Bar` fragment used in this fragment
+   * @param {?Object} [spec] Foo fragment specification
+   * @param {?Options} [opts] Foo fragment Options
+   * @param {Options} [opts.BarFragmentOpts] Opts for `Bar` fragment used in this fragment
+   * @param {Object} [opts.BarFragmentSpec] Spec for `Bar` fragment used in this fragment
    */
   constructor(spec, opts) {
     const { initializedOpts, initializedSpec, isInstance } = Foo.initializeFragmentSpecAndOpts(spec, opts);
@@ -61,8 +61,8 @@ class Foo extends Fragment {
   /**
    * Returns bar fragment that matches `spec` and `opts`.
    *
-   * @param {*} [spec] - See `spec` parameter of `Bar`
-   * @param {*} [opts] - See `opts` parameter of `Bar`
+   * @param {*} [spec] See `spec` parameter of `Bar`
+   * @param {*} [opts] See `opts` parameter of `Bar`
    * @returns {Bar}
    */
   getBar(spec, opts) {
@@ -209,7 +209,8 @@ test("080 It should respect `options.getSomething` argument - case of function",
    * @returns {Bar}
    */
   const getBarCid2 = function(spec, opts) {
-    // Check this is not bound.
+
+    // Check that `this` is not bound.
     expect(this, 'to be', void(0));
 
     // Check arguments.
@@ -251,7 +252,8 @@ test("090 It should respect `options.getSomething` argument - case of string", a
    * @returns {Bar}
    */
   foo.getBarCid1 = (function(spec, opts) {
-    // Check this is bound because it's a case of foo's method call.
+
+    // Check that `this` is bound because it's a case of foo's method call.
     expect(this, 'to be', foo);
 
     // Check arguments.
@@ -277,4 +279,33 @@ test("090 It should respect `options.getSomething` argument - case of string", a
   // Check that returned bar fragment is expected one. This is no more than
   // 'Just to be sure' check :)
   await barCid1.expectExistsAndConformsRequirements({ text: 'bar 1' });
+});
+
+test("100 It should allow to use custom equality logic with `options.equalityCheck` as function", async () => {
+  const foo = new Foo();
+  const barCid2 = new Bar({ cid: '2' });
+
+  await foo.expectIsExist();
+  await barCid2.expectIsExist();
+
+  const equalityCheck = function(thisFragment, thatFragment) {
+
+    // Check that `this` is not bound.
+    expect(this, 'to be undefined');
+
+    // -- Check arguments.
+
+    expect(thisFragment, 'to be a', Bar);
+    expect(thisFragment.spec, 'to only have keys', ['cid', 'parent']);
+    expect(thisFragment.spec, 'to have own properties', { cid: '2', parent: foo.selector });
+
+    expect(thatFragment, 'to be a', Bar);
+    expect(thatFragment.spec, 'to only have keys', ['idx', 'parent']);
+    expect(thatFragment.spec, 'to have own properties', { idx: 2, parent: foo.selector });
+  };
+  const equalityCheckSpy = sinon.spy(equalityCheck);
+
+  await foo.expectHasSomething('Bar', { cid: '2' }, null, { idx: 2, equalityCheck: equalityCheckSpy });
+
+  expect(equalityCheckSpy, 'was called times', 1);
 });
