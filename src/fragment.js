@@ -990,6 +990,13 @@ class Fragment {
    * @throws {TypeError} When arguments aren't valid.
    */
   async expectHasSomething(somethingName, somethingSpec, somethingOpts, options) {
+    if (!utils.isNonBlankString(somethingName)) {
+      throw new TypeError(
+        `'${this.displayName}#expectHasSomething()': 'somethingName' argument must be a ` +
+        `non-blank string but it is ${typeOf(somethingName)} (${somethingName})`
+      );
+    }
+
     const { equalityCheck, getSomething, idx } = new Options(options, {
       validator: ({ getSomething }) => {
         if (!(_.isNil(getSomething) || _.isFunction(getSomething) || utils.isNonBlankString(getSomething))) {

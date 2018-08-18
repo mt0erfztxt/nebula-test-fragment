@@ -86,6 +86,25 @@ Object.defineProperties(Foo, {
   }
 });
 
+test("005 It should throw error when 'somethingName' argument is not a non-blank string", async () => {
+  let isThrown = false;
+  const foo = new Foo();
+
+  try {
+    await foo.expectHasSomething(42, [{ cid: '42' }], null);
+  }
+  catch (e) {
+    expect(
+      e.message,
+      'to equal',
+      "'Foo#expectHasSomething()': 'somethingName' argument must be a non-blank string but it is Number (42)"
+    );
+    isThrown = true;
+  }
+
+  expect(isThrown, 'to be true');
+});
+
 test("010 It should throw error when `options.getSomething` argument is not set and fragment class doesn't have corresponding getter", async () => {
   let isThrown = false;
   const foo = new Foo();
