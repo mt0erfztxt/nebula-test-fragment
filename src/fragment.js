@@ -1047,54 +1047,103 @@ class Fragment {
   }
 
   /**
-   * Asserts that fragment has list of other fragments, named `somethingName`,
-   * and that other fragments. Optionally, asserts that `this` fragment has
-   * only specified other fragments, and, also optionally, asserts that other
-   * fragments found in fragment in same order as in
-   * `somethingSpecificationsAndOptions`.
+   * Asserts that fragment has list of something fragments, named
+   * `somethingName`. Optionally, asserts that this fragment has only
+   * specified something fragments, and, also optionally, asserts that
+   * something fragments found in this fragment in same order as in
+   * `somethingSpecAndOpts`.
    *
-   * It requires that fragment has `#expect[somethingName]sCountIs()` and
-   * `#expectHas[somethingName]()` methods.
-   *
-   * @param {String} somethingName - Name of something. For example, in Dialog it can be an Action
-   * @param {Array} somethingSpecificationsAndOptions - An array where each element is an array of two elements - something's specification and something's options. See `spec` and `opts` arguments of something's constructor
-   * @param {Options|Object} [options] - Options
-   * @param {Boolean} [options.only=false] - When `true` fragment must have only specified other fragments to pass assertion
-   * @param {Boolean} [options.sameOrder=false] - When `true` other fragments must be found in fragment in same order as in `somethingSpecificationsAndOptions` to pass assertion. Work only in conjunction with `only` parameter
-   * @returns {Promise<Array<Object>>} Found somethings.
-   * @throws {TypeError} When requirements failed.
+   * @param {String} somethingName Name of something. For example, in Dialog it can be an Action
+   * @param {Array} somethingSpecAndOpts An array where each element is an array of two elements - something's spec and something's opts. See `spec` and `opts` arguments of something's constructor
+   * @param {Options|Object} [options] Options
+   * @param {Boolean} [options.equalityCheck] Same as in `Fragment#expectHasSomething`. Usable only when assertion on placement order requested (see `options.sameOrder`)
+   * @param {Function|String} [options.expectSomethingsCountIs] When it's a function then it would be called with number of something fragments to assert that count is valid, note that no `this` binding provided. When it's a string then it must be a method name of this fragment that would be called with number of something fragments to assert that count is valid. When nil then this fragment's method named `#expectSomethingsCountIs`, where 'Something' part equal to upercased version of `somethingName` argument would be used
+   * @param {Function|String} [options.getSomething] Same as in `Fragment#expectHasSomething`
+   * @param {Boolean} [options.only=false] When `true` fragment must have only specified something fragments to pass assertion
+   * @param {Boolean} [options.sameOrder=false] When `true` something fragments must be found in fragment in same order as in `somethingSpecificationsAndOptions` to pass assertion. Usable only when `options.only` is truthy
+   * @returns {Promise<Array>} Found somethings.
+   * @throws {AssertionError} When any of expectations failed.
+   * @throws {TypeError} When any of arguments aren't valid.
    */
-  async expectHasSomethings(somethingName, somethingSpecificationsAndOptions, options) {
-    const len = somethingSpecificationsAndOptions.length;
-    const opts = new Options(options, {
+  async expectHasSomethings(somethingName, somethingSpecAndOpts, options) {
+    if (!utils.isNonBlankString(somethingName)) {
+      throw new TypeError(
+        `'${this.displayName}#expectHasSomethings()': 'somethingName' argument must be a ` +
+        `non-blank string but it is ${typeOf(somethingName)} (${somethingName})`
+      );
+    }
+
+    const len = somethingSpecAndOpts.length;
+
+    for (let i = 0; i < len; i++) {
+      const somethingSpecAndOptsItem = somethingSpecAndOpts[i];
+
+      if (!_.isArray(somethingSpecAndOptsItem)) {
+        throw new TypeError(
+          `'${this.displayName}#expectHasSomethings()': each element of 'somethingSpecAndOpts' ` +
+          `argument must be an array but it is ${typeOf(somethingSpecAndOptsItem)} (${somethingSpecAndOptsItem})`
+        );
+      }
+    }
+
+    const { equalityCheck, expectSomethingsCountIs, getSomething, only, sameOrder } = new Options(options, {
+      validator: ({ expectSomethingsCountIs }) => {
+        if (!(_.isNil(expectSomethingsCountIs) || _.isFunction(expectSomethingsCountIs) || utils.isNonBlankString(expectSomethingsCountIs))) {
+          return `'expectSomethingsCountIs' option must be a function or a non-blank string but it is ${typeOf(expectSomethingsCountIs)} (${expectSomethingsCountIs})`;
+        }
+        else {
+          return null;
+        }
+      },
       defaults: {
         only: false,
         sameOrder: false
       }
     });
-    const { only, sameOrder } = opts;
 
     if (only === true) {
-      const counterMethodName = `expect${ucFirst(somethingName)}sCountIs`;
 
-      if (_.isFunction(this[counterMethodName])) {
-        await this[counterMethodName](len);
+      // When `options.expectSomethingsCountIs` is a string, fragment must have
+      // correspondingly named method.
+      if (_.isString(expectSomethingsCountIs) && !_.isFunction(this[expectSomethingsCountIs])) {
+        throw new TypeError(
+          `'${this.displayName}' fragment must have '${expectSomethingsCountIs}' method, specified ` +
+          `in 'expectSomethingsCountIs' option, but it doesn't`
+        );
+      }
+
+      const expectSomethingsCountIsMethodName = `expect${ucFirst(somethingName)}sCountIs`;
+
+      // When `options.expectSomethingsCountIs` not provided, fragment must
+      // have method named using something's name, e.g. 'Dialog#expectActionsCountIs`.
+      if (_.isNil(expectSomethingsCountIs) && !_.isFunction(this[expectSomethingsCountIsMethodName])) {
+        throw new TypeError(
+          `'${this.displayName}' fragment must have '${expectSomethingsCountIsMethodName}' method or ` +
+          `'expectSomethingsCountIs' option set but it doesn't`
+        );
+      }
+
+      if (_.isFunction(expectSomethingsCountIs)) {
+        await expectSomethingsCountIs(len);
       }
       else {
-        throw new TypeError(
-          `'${this.displayName}' fragment must have '${counterMethodName}' method but it doesn't`
-        );
+        await this[(expectSomethingsCountIs || expectSomethingsCountIsMethodName)](len);
       }
     }
 
     const somethings = [];
 
     for (let i = 0; i < len; i++) {
-      const expectHasSomethingOptions = { idx: (only === true && sameOrder === true && i) };
+      const somethingSpecAndOptsItem = somethingSpecAndOpts[i];
+      const expectHasSomethingOptions = {
+        equalityCheck,
+        getSomething,
+        idx: (only === true && sameOrder === true) ? i : void(0)
+      };
       const something = await this.expectHasSomething(
         somethingName,
-        somethingSpecificationsAndOptions[i][0],
-        somethingSpecificationsAndOptions[i][1],
+        somethingSpecAndOptsItem[0],
+        somethingSpecAndOptsItem[1],
         expectHasSomethingOptions
       );
 
