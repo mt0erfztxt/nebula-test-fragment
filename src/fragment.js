@@ -260,12 +260,22 @@ class Fragment {
   }
 
   /**
-   * TestCafe's selector for fragment.
+   * Returns selector of fragment.
    *
    * @return {Selector}
    */
   get selector() {
     return this._selector;
+  }
+
+  /**
+   * Sets selector of fragment to specified one.
+   * 
+   * @returns {Fragment} This fragment.
+   */
+  set selector(selector) {
+    this._selector = selector;
+    return this;
   }
 
   /**
