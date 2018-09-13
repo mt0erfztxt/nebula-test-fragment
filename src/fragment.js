@@ -374,6 +374,16 @@ class Fragment {
   }
 
   /**
+   * Reloads browser page (aka F5, Ctrl+R, etc...).
+   *
+   * @returns {Promise<void>}
+   */
+  static async reloadBrowserPage() {
+    const currentUrl = await t.eval(() => document.documentURI);
+    await t.navigateTo(currentUrl);
+  }
+
+  /**
    * Makes new fragment class by extending provided base class and adding
    * requested behavior.
    *
