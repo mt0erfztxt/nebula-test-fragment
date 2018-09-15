@@ -1077,7 +1077,8 @@ class Fragment {
    * @param {Array} somethingSpecAndOpts An array where each element is an array of two elements - something's spec and something's opts. See `spec` and `opts` arguments of something's constructor
    * @param {Options|Object} [options] Options
    * @param {Boolean} [options.equalityCheck] Same as in `Fragment#expectHasSomething`. Usable only when assertion on placement order requested (see `options.sameOrder`)
-   * @param {Function|String} [options.expectSomethingsCountIs] When it's a function then it would be called with number of something fragments to assert that count is valid, note that no `this` binding provided. When it's a string then it must be a method name of this fragment that would be called with number of something fragments to assert that count is valid. When nil then this fragment's method named `#expectSomethingsCountIs`, where 'Something' part equal to upercased version of `somethingName` argument would be used
+   * @param {Function|String} [options.expectHasSomething] Allows to handle expectation of has something in custom way. It can be a function (no `this` binding provided) or a name (string) of fragment's method. By default it's a `Fragment#expectHasSomething()` that would receive `somethingName`
+   * @param {Function|String} [options.expectSomethingsCountIs] When it's a function then it would be called with number of something fragments to assert that count is valid, note that no `this` binding provided. When it's a string then it must be a method name of this fragment that would be called with number of something fragments to assert that count is valid. When nil then this fragment's method named `#expectSomethingsCountIs`, where 'Something' part equal to upercased version of `somethingName` argument, would be used
    * @param {Function|String} [options.getSomething] Same as in `Fragment#expectHasSomething`
    * @param {Boolean} [options.only=false] When `true` fragment must have only specified something fragments to pass assertion
    * @param {Boolean} [options.sameOrder=false] When `true` something fragments must be found in fragment in same order as in `somethingSpecificationsAndOptions` to pass assertion. Usable only when `options.only` is truthy
@@ -1106,10 +1107,13 @@ class Fragment {
       }
     }
 
-    const { equalityCheck, expectSomethingsCountIs, getSomething, only, sameOrder } = new Options(options, {
-      validator: ({ expectSomethingsCountIs }) => {
+    const { equalityCheck, expectHasSomething, expectSomethingsCountIs, getSomething, only, sameOrder } = new Options(options, {
+      validator: ({ expectHasSomething, expectSomethingsCountIs }) => {
         if (!(_.isNil(expectSomethingsCountIs) || _.isFunction(expectSomethingsCountIs) || utils.isNonBlankString(expectSomethingsCountIs))) {
           return `'expectSomethingsCountIs' option must be a function or a non-blank string but it is ${typeOf(expectSomethingsCountIs)} (${expectSomethingsCountIs})`;
+        }
+        else if (!(_.isNil(expectHasSomething) || _.isFunction(expectHasSomething) || utils.isNonBlankString(expectHasSomething))) {
+          return `'expectHasSomething' option must be a function or a non-blank string but it is ${typeOf(expectHasSomething)} (${expectHasSomething})`;
         }
         else {
           return null;
@@ -1151,6 +1155,31 @@ class Fragment {
       }
     }
 
+    // When `options.expectHasSomething` is a string, fragment must have
+    // correspondingly named method.
+    if (_.isString(expectHasSomething) && !_.isFunction(this[expectHasSomething])) {
+      throw new TypeError(
+        `'${this.displayName}' fragment must have '${expectHasSomething}' method, specified ` +
+        `in 'expectHasSomething' option, but it doesn't`
+      );
+    }
+
+    const expectHasSomethingMethodName = `expectHas${ucFirst(somethingName)}`;
+
+    // When `options.expectHasSomething` not provided, fragment must have
+    // method named using something's name, e.g. 'Dialog#expectHasAction`. That
+    // method doesn't called directly but rather through call of
+    // `Fragment#expectHasSomething()` because that way we can pass other
+    // options - 'equalityCheck', 'getSomething', 'idx'.
+    // TODO Another way is to change signature of fragment's expect has
+    //      something method so 'idx' param no 'options.idx'.
+    if (_.isNil(expectHasSomething) && !_.isFunction(this[expectHasSomethingMethodName])) {
+      throw new TypeError(
+        `'${this.displayName}' fragment must have '${expectHasSomethingMethodName}' method or ` +
+        `'expectHasSomething' option set but it doesn't`
+      );
+    }
+
     const somethings = [];
 
     for (let i = 0; i < len; i++) {
@@ -1160,12 +1189,31 @@ class Fragment {
         getSomething,
         idx: (only === true && sameOrder === true) ? i : void(0)
       };
-      const something = await this.expectHasSomething(
-        somethingName,
-        somethingSpecAndOptsItem[0],
-        somethingSpecAndOptsItem[1],
-        expectHasSomethingOptions
-      );
+
+      let something;
+
+      if (_.isFunction(expectHasSomething)) {
+        something = await expectHasSomething(
+          somethingSpecAndOptsItem[0],
+          somethingSpecAndOptsItem[1],
+          expectHasSomethingOptions
+        );
+      }
+      else if (this[expectHasSomething]) {
+        something = await this[expectHasSomething](
+          somethingSpecAndOptsItem[0],
+          somethingSpecAndOptsItem[1],
+          expectHasSomethingOptions
+        );
+      }
+      else {
+        something = await this.expectHasSomething(
+          somethingName,
+          somethingSpecAndOptsItem[0],
+          somethingSpecAndOptsItem[1],
+          expectHasSomethingOptions
+        );
+      }
 
       somethings.push(something);
     }

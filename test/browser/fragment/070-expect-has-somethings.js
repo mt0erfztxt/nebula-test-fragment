@@ -71,6 +71,18 @@ class Foo extends Fragment {
   }
 
   /**
+   * Asserts that foo fragment has specific bar fragment
+   * 
+   * @param {*} spec Spec for bar
+   * @param {*} opts Opts for bar
+   * @param {Number} idx Bar must be in foo at specified index to pass assertion
+   * @returns {Bar} Bar fragment matched `spec` and `opts`.
+   */
+  async expectHasBar(spec, opts, idx) {
+    return this.expectHasSomething('bar', spec, opts, { idx });
+  }
+
+  /**
    * Asserts that count of items in fragment equal value specified in `count`.
    *
    * @param {array|number} count - Fragment must have that number of items to pass assertion. When you need more flexibility than just equality pass an `Array` with TestCafe assertion name (default to 'eql') as first element and expected value for assertion as second, for example, `['gte', 3]`
@@ -407,4 +419,133 @@ test("140 It should return specified somethings", async (t) => {
   expect(bars[1], 'to be a', Bar);
   await t.expect(bars[0].selector.textContent).eql('Bar 0');
   await t.expect(bars[1].selector.textContent).eql('Bar 2');
+});
+
+test("150 It should throw error when 'expectHasSomething' option is not valid", async () => {
+  let isThrown = false;
+  const foo = new Foo();
+
+  try {
+    await foo.expectHasSomethings('bar', [
+      [{ cid: '42' }]
+    ], {
+      expectHasSomething: 42
+    });
+  }
+  catch (e) {
+    expect(
+      e.message,
+      'to equal',
+      "'Options.constructor()': validation failed with error: 'expectHasSomething' option must be a function or a non-blank string but it is Number (42)"
+    );
+    isThrown = true;
+  }
+
+  expect(isThrown, 'to be true');
+});
+
+test("160 It should throw error when 'expectHasSomething' option is a string but fragment doesn't have corresponding method", async () => {
+  let isThrown = false;
+  const foo = new Foo();
+
+  try {
+    await foo.expectHasSomethings('bar', [
+      [{ cid: '42' }]
+    ], {
+      expectHasSomething: 'expectHasCustomBar'
+    });
+  }
+  catch (e) {
+    expect(
+      e.message,
+      'to equal',
+      "'Foo' fragment must have 'expectHasCustomBar' method, specified in 'expectHasSomething' option, but it doesn't"
+    );
+    isThrown = true;
+  }
+
+  expect(isThrown, 'to be true');
+});
+
+test("170 It should throw error when no 'expectHasSomething' option is provided and fragment doesn't have method for assert on something fragement existence", async () => {
+  let isThrown = false;
+  const foo = new Foo();
+
+  try {
+    await foo.expectHasSomethings('buz', [
+      [{ cid: '42' }]
+    ]);
+  }
+  catch (e) {
+    expect(
+      e.message,
+      'to equal',
+      "'Foo' fragment must have 'expectHasBuz' method or 'expectHasSomething' option set but it doesn't"
+    );
+    isThrown = true;
+  }
+
+  expect(isThrown, 'to be true');
+});
+
+test("180 It respects 'expectHasSomething' option - case of function", async () => {
+  const foo = new Foo();
+
+  const expectHasBar = function(spec, opts, idx) {
+    expect(this, 'to be', void(0)); // check that `this` is not bound
+  };
+  const expectHasBarSpy = sinon.spy(expectHasBar);
+
+  await foo.expectHasSomethings('bar', [
+    [{ cid: '1' }],
+    [{ cid: '2' }]
+  ], {
+    expectHasSomething: expectHasBarSpy
+  });
+
+  expect(expectHasBarSpy, 'was called times', 2);
+  expect(expectHasBarSpy, 'to have a call satisfying', { args: [{ cid: '1' }, void(0), {}] });
+  expect(expectHasBarSpy, 'to have a call satisfying', { args: [{ cid: '2' }, void(0), {}] });
+});
+
+test("190 It respects 'expectHasSomething' option - case of string", async () => {
+  const foo = new Foo();
+
+  foo.expectHasCustomBar = (function(spec, opts, idx) {
+    expect(this, 'to be', foo); // check that `this` is bound because it's a case of foo's method call
+  }).bind(foo);
+
+  const expectHasCustomBarSpy = sinon.spy(foo, 'expectHasCustomBar');
+
+  await foo.expectHasSomethings('bar', [
+    [{ cid: '1' }],
+    [{ cid: '2' }]
+  ], {
+    expectHasSomething: 'expectHasCustomBar'
+  });
+
+  expect(expectHasCustomBarSpy, 'was called times', 2);
+  expect(expectHasCustomBarSpy, 'to have a call satisfying', { args: [{ cid: '1' }, void(0), {}] });
+  expect(expectHasCustomBarSpy, 'to have a call satisfying', { args: [{ cid: '2' }, void(0), {}] });
+});
+
+test("200 It respects 'expectHasSomething' option - case of nil (default)", async () => {
+  const foo = new Foo();
+  const expectHasSomethingSpy = sinon.spy(foo, 'expectHasSomething');
+
+  await foo.expectIsExist();
+
+  await foo.expectHasSomethings('bar', [
+    [{ cid: '0' }],
+    [{ cid: '1' }],
+    [{ cid: '2' }]
+  ], {
+    only: true,
+    sameOrder: true
+  });
+
+  expect(expectHasSomethingSpy, 'was called times', 3);
+  expect(expectHasSomethingSpy, 'to have a call satisfying', { args: ['bar', { cid: '0' }, void(0), { idx: 0 }] });
+  expect(expectHasSomethingSpy, 'to have a call satisfying', { args: ['bar', { cid: '1' }, void(0), { idx: 1 }] });
+  expect(expectHasSomethingSpy, 'to have a call satisfying', { args: ['bar', { cid: '2' }, void(0), { idx: 2 }] });
 });
