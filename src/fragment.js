@@ -1167,12 +1167,7 @@ class Fragment {
     const expectHasSomethingMethodName = `expectHas${ucFirst(somethingName)}`;
 
     // When `options.expectHasSomething` not provided, fragment must have
-    // method named using something's name, e.g. 'Dialog#expectHasAction`. That
-    // method doesn't called directly but rather through call of
-    // `Fragment#expectHasSomething()` because that way we can pass other
-    // options - 'equalityCheck', 'getSomething', 'idx'.
-    // TODO Another way is to change signature of fragment's expect has
-    //      something method so 'idx' param no 'options.idx'.
+    // method named using something's name, e.g. 'Dialog#expectHasAction`.
     if (_.isNil(expectHasSomething) && !_.isFunction(this[expectHasSomethingMethodName])) {
       throw new TypeError(
         `'${this.displayName}' fragment must have '${expectHasSomethingMethodName}' method or ` +
@@ -1207,8 +1202,7 @@ class Fragment {
         );
       }
       else {
-        something = await this.expectHasSomething(
-          somethingName,
+        something = await this[expectHasSomethingMethodName](
           somethingSpecAndOptsItem[0],
           somethingSpecAndOptsItem[1],
           expectHasSomethingOptions

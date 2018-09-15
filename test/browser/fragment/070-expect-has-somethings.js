@@ -5,6 +5,7 @@ import unexpected from 'unexpected';
 import unexpectedSinon from 'unexpected-sinon';
 
 import Fragment from '../../../src/fragment';
+import Options from '../../../src/options';
 
 const expect = unexpected.clone();
 expect.use(unexpectedSinon);
@@ -28,8 +29,8 @@ class Foo extends Fragment {
   /**
    * Creates new foo fragment.
    *
-   * @param {?Object} [spec] Foo fragment specification
-   * @param {?Options} [opts] Foo fragment Options
+   * @param {Object} [spec] Foo fragment specification
+   * @param {Options|Object} [opts] Foo fragment Options
    * @param {Options} [opts.BarFragmentOpts] Opts for `Bar` fragment used in this fragment
    * @param {Object} [opts.BarFragmentSpec] Spec for `Bar` fragment used in this fragment
    */
@@ -75,11 +76,12 @@ class Foo extends Fragment {
    * 
    * @param {*} spec Spec for bar
    * @param {*} opts Opts for bar
-   * @param {Number} idx Bar must be in foo at specified index to pass assertion
+   * @param {Options|Object} [options] Options
+   * @param {Number} [options.idx] Bar must be in foo at specified index to pass assertion
    * @returns {Bar} Bar fragment matched `spec` and `opts`.
    */
-  async expectHasBar(spec, opts, idx) {
-    return this.expectHasSomething('bar', spec, opts, { idx });
+  async expectHasBar(spec, opts, options) {
+    return this.expectHasSomething('bar', spec, opts, options);
   }
 
   /**
