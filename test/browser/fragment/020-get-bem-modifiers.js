@@ -58,25 +58,7 @@ test("010 It should throw error when `modifierName` argument is not a nil or a n
   expect(isThrown, 'to be true');
 });
 
-test("020 It should throw error when fragment's BEM base already have BEM modifier", async (t) => {
-  let isThrown = false;
-  const fragment = new Fragment(null, { bemBase: 'foobar--foo' });
-
-  await t.expect(fragment.selector.count).gte(1);
-
-  try {
-    await fragment.getBemModifiers();
-  }
-  catch (e) {
-    const msg = "Can not obtain BEM modifiers because fragment's BEM base already have modifier 'foo'";
-    expect(e.message, 'to equal', msg);
-    isThrown = true;
-  }
-
-  expect(isThrown, 'to be true');
-});
-
-test("030 It should throw error when fragment's selector does not return DOM elements", async (t) => {
+test("030 It should throw error when fragment's selector not return DOM elements", async (t) => {
   let isThrown = false;
   const fragment = new Fragment(null, { bemBase: 'non-existent' });
 
@@ -113,27 +95,50 @@ test("040 It should throw error when fragment's selector return more than one DO
 });
 
 test("050 It should return array that contains all BEM modifiers when `modifierName` argument is nil", async () => {
-  const fragment = new Fragment(null, { bemBase: 'foobar' });
-  const bemModifiers = await fragment.getBemModifiers();
-  expect(bemModifiers, 'to equal', [
+  const foobar = new Fragment(null, { bemBase: 'foobar' });
+  const foobarBemModifiers = await foobar.getBemModifiers();
+  expect(foobarBemModifiers, 'to equal', [
     ['mod1'],
     ['no-mod2'],
     ['mod3', 'val']
   ]);
+
+  // -- Check case of fragment built on BEM base with modifier.
+
+  const fizBuz = new Fragment(null, { bemBase: 'fiz--buz' });
+  const fizBuzModifiers = await fizBuz.getBemModifiers();
+  expect(fizBuzModifiers, 'to equal', [
+    ['buz'],
+    ['id', '42'],
+    ['invalid']
+  ]);
 });
 
 test("060 It should return array that contains only matching BEM modifiers when `modifierName` argument is not nil", async () => {
-  const fragment1 = new Fragment(null, { bemBase: 'bar1' });
-  expect(await fragment1.getBemModifiers('mod1'), 'to equal', [
+  const bar1 = new Fragment(null, { bemBase: 'bar1' });
+  expect(await bar1.getBemModifiers('mod1'), 'to equal', [
     ['mod1']
   ]);
-  expect(await fragment1.getBemModifiers('mod3'), 'to equal', [
+  expect(await bar1.getBemModifiers('mod3'), 'to equal', [
     ['mod3', 'val']
   ]);
 
-  const fragment2 = new Fragment(null, { bemBase: 'bar2' });
-  expect(await fragment2.getBemModifiers('mod3'), 'to equal', [
+  const bar2 = new Fragment(null, { bemBase: 'bar2' });
+  expect(await bar2.getBemModifiers('mod3'), 'to equal', [
     ['mod3', 'val'],
     ['mod3', 'foo']
+  ]);
+
+  // -- Check case of fragment built on BEM base with modifier.
+
+  const bar3 = new Fragment(null, { bemBase: 'bar3--foo' });
+  expect(await bar3.getBemModifiers('mod4'), 'to equal', [
+    ['mod4', 'val341']
+  ]);
+
+  const bar4 = new Fragment(null, { bemBase: 'bar4--foo' });
+  expect(await bar4.getBemModifiers('mod5'), 'to equal', [
+    ['mod5', 'val451'],
+    ['mod5', 'val452']
   ]);
 });
