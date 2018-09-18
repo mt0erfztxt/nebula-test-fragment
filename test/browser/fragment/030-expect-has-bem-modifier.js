@@ -16,6 +16,16 @@ Object.defineProperties(Foo, {
     value: 'Foo'
   }
 });
+class DisabledBar extends Fragment {}
+
+Object.defineProperties(DisabledBar, {
+  bemBase: {
+    value: 'bar--disabled'
+  },
+  displayName: {
+    value: 'DisabledBar'
+  }
+});
 
 test("010 It should throw error when fragment must have specified BEM modifier but it doesn't (case of simple modifier)", async () => {
   let isThrown = false;
@@ -85,6 +95,22 @@ test("040 It should not throw error when fragment must have specified BEM modifi
   }
 
   expect(isThrown, 'to be false');
+
+  // -- Check case of fragment built on BEM base with modifier.
+
+  const disabledBar = new DisabledBar();
+  await disabledBar.expectIsExist();
+
+  isThrown = false;
+
+  try {
+    await disabledBar.expectHasBemModifier(['param0']);
+  }
+  catch (e) {
+    isThrown = true;
+  }
+
+  expect(isThrown, 'to be false');
 });
 
 test("050 It should not throw error when fragment must have specified BEM modifier (case of full modifier)", async () => {
@@ -95,6 +121,22 @@ test("050 It should not throw error when fragment must have specified BEM modifi
 
   try {
     await foo.expectHasBemModifier(['bar1', '1']);
+  }
+  catch (e) {
+    isThrown = true;
+  }
+
+  expect(isThrown, 'to be false');
+
+  // -- Check case of fragment built on BEM base with modifier.
+
+  const disabledBar = new DisabledBar();
+  await disabledBar.expectIsExist();
+
+  isThrown = false;
+
+  try {
+    await disabledBar.expectHasBemModifier(['param1', '1']);
   }
   catch (e) {
     isThrown = true;
@@ -213,6 +255,22 @@ test("120 It should not throw error when fragment must not have specified BEM mo
 
   try {
     await foo.expectHasNoBemModifier('boo');
+  }
+  catch (e) {
+    isThrown = true;
+  }
+
+  expect(isThrown, 'to be false');
+
+  // -- Check case of fragment built on BEM base with modifier.
+
+  const disabledBar = new DisabledBar();
+  await disabledBar.expectIsExist();
+
+  isThrown = false;
+
+  try {
+    await disabledBar.expectHasNoBemModifier(['boo']);
   }
   catch (e) {
     isThrown = true;
