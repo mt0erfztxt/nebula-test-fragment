@@ -179,8 +179,8 @@ function filterByText(selectorInitializer, text, options) {
     );
   }
 
-  // XXX TestCafe, currently, always converts `withText` argument to `RegExp`
-  // and so we must use workaround to use string equality.
+  // TestCafe (v0.16.2) always converts `withText` argument to `RegExp` and so
+  // we must use workaround to use string equality.
   const textAsRegExp = _.isRegExp(text) ?
     text : new RegExp(`^${escapeStringRegexp('' + text)}$`);
 
