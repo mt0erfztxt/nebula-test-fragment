@@ -1434,20 +1434,15 @@ class Fragment {
       );
     }
 
-    if (this.bemBase.mod) {
-      throw new TypeError(
-        `Can not obtain BEM modifiers because fragment's BEM base already have modifier '${this.bemBase.mod}'`
-      );
-    }
-
     await this.expectIsExist({ allowMultiple: false });
 
-    const bemBasePlusModifierName = modifierName ? `${this.bemBase}--${modifierName}` : `${this.bemBase}--`;
+    const bemBaseWithoutMod = this.cloneBemBase().setMod();
+    const bemBaseWithModName = modifierName ? `${bemBaseWithoutMod}--${modifierName}` : `${bemBaseWithoutMod}--`;
     const bemMods = [];
     const classNames = await this.selector.classNames;
 
     for (const className of classNames) {
-      if (_.startsWith(className, bemBasePlusModifierName)) {
+      if (_.startsWith(className, bemBaseWithModName)) {
         const bemBase = new BemBase(className);
         bemMods.push(bemBase.mod);
       }
