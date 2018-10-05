@@ -24,6 +24,7 @@ const testCafeAssertionNames = [
 ];
 
 const utils = {
+  asArray,
   buildTestCafeAssertionName,
   isEmptyString,
   isNonBlankString,
@@ -31,6 +32,22 @@ const utils = {
   isString,
   Options
 };
+
+/**
+ * When `value` is an array it returned as-is, otherwise it wrapped in array
+ * and returned.
+ * 
+ * @param {*} value 
+ * @returns {Arraya}
+ */
+function asArray(value) {
+  if (_.isArray(value)) {
+    return value;
+  }
+  else {
+    return [value];
+  }
+}
 
 /**
  * Checks that TestCafe provides assertion with specified name and returns it.

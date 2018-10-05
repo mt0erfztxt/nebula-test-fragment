@@ -2,7 +2,19 @@ import expect from 'unexpected';
 
 import utils from '../../../src/utils';
 
-describe('utils', () => {
+describe("utils", function() {
+  describe("asArray()", function() {
+    it("should return passed in `value` as-is when it's an array", function() {
+      const v = ['foo', 'bar', 42];
+      expect(utils.asArray(v) === v, 'to be true');
+    });
+
+    it("should return passed in `value` wrapped in array when it's not an array", function() {
+      const v = 42;
+      expect(utils.asArray(v), 'to equal', [v]);
+    });
+  });
+
   describe("buildTestCafeAssertionName()", function() {
     it("should throw error when `assertionName` argument is not non-blank string", function() {
       expect(
