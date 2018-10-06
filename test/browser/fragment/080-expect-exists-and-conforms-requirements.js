@@ -1,5 +1,6 @@
 import appRootPath from 'app-root-path';
 import expect from 'unexpected';
+import { Selector } from 'testcafe';
 
 import Fragment from '../../../src/fragment';
 
@@ -1054,4 +1055,14 @@ test("482 It should allow text content to be a regular expression", async (t) =>
   }
 
   expect(isThrown, 'to be false');
+});
+
+test("490 It should handle 'selector' option", async (t) => {
+  const bar = new Fragment(null, { bemBase: 'bar' });
+  await t.expect(Selector('.selector-option').count).eql(1);
+  await bar.expectExistsAndConformsRequirements({
+    text: 'Selector Option'
+  }, {
+    selector: '.selector-option'
+  });
 });

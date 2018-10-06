@@ -818,7 +818,7 @@ class Fragment {
    * @param {String|RegExp|Array} [requirements.text] - Allows to assert that fragment selector's text equal or matches specified value. Condition of assertion can be reversing by passing `Array` where first element is a text and second is a flag that specifies whether condition must be negated or not, for example, `'Qwerty'` can be used to assert that text of fragment's selector is equal 'Qwerty' and `['Qwerty', true]'` can be used to assert that text of `selector` isn't equal 'Qwerty'
    * @param {*} [requirements.textContent] - Allows to assert that fragment selector's text content equal or matches specified value. When value is not regular expression it would be coerced to string as `value + ''`. To negate assertion condition pass `Array` with text content and boolean flag, see `requirements.text` for examples
    * @param {Options|Object} [options] - Options
-   * @param {Selector} [options.selector=this.selector] - TestCafe selector to assert on. Fragment's selector by default
+   * @param {Selector} [options.selector=this.selector] - TestCafe selector to assert on. Can be anything that TestCafe `Selector` accepts as initializer, fragment's selector by default
    * @return {Promise<void>}
    */
   async expectExistsAndConformsRequirements(requirements, options) {
@@ -831,6 +831,7 @@ class Fragment {
     let sel = opts.selector;
 
     if (options && options.selector) {
+      sel = Selector(sel);
       await t.expect(sel.count).eql(1, "'options.selector' must return one DOM node but it doesn't");
     }
     else {
