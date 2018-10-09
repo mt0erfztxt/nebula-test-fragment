@@ -1236,7 +1236,7 @@ class Fragment {
    * 
    * @param {Options|Object} [options] Options
    * @param {String|RegExp|Array} [options.text] Allows to assert on text of fragment's element. See `requirements.text` argument of {@link `Fragment#expectExistsAndConformsRequirements`} for details on supported formats. Examples: `'foo'`, `['foo']`, `['foo', true]`
-   * @param {Selector} [options.selector=this.selector] TestCafe selector to assert on. Fragment's selector by default
+   * @param {*} [options.selector=this.selector] TestCafe selector to assert on. Can be anything that TestCafe Selector accepts as initializer. Fragment's selector by default
    * @returns {Promise<void>}
    */
   async expectIsButton(options) {
@@ -1372,7 +1372,7 @@ class Fragment {
    * @param {Options|Object} [options] Options
    * @param {String|RegExp|Array} [options.href] Allows to assert on 'href' attribute of fragment's element. See `requirements.attributes` argument of {@link `Fragment#expectExistsAndConformsRequirements`} for details on supported formats. Examples: `'foo'`, `['foo']`, `['foo', true]`
    * @param {String|RegExp|Array} [options.text] Allows to assert on text of fragment's element. See `requirements.text` argument of {@link `Fragment#expectExistsAndConformsRequirements`} for details on supported formats. Examples: `'foo'`, `['foo']`, `['foo', true]`
-   * @param {Selector} [options.selector=this.selector] TestCafe selector to assert on. Fragment's selector by default
+   * @param {*} [options.selector=this.selector] TestCafe selector to assert on. Can be anything that TestCafe Selector accepts as initializer. Fragment's selector by default
    * @returns {Promise<void>}
    */
   async expectIsLink(options) {
