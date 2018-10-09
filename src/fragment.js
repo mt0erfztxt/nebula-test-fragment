@@ -1472,11 +1472,14 @@ class Fragment {
    * @param {String|RegExp} text
    * @param {Options|Object} [options] Options
    * @param {Boolean} [options.isNot=false] When truthy assertion would be negated
+   * @param {*} [options.selector=this.selector] TestCafe selector to assert on. Can be anything that TestCafe Selector accepts as initializer. Fragment's selector by default
    * @returns {Promise<void>}
    */
   async expectTextIs(text, options) {
-    const { isNot } = new Options(options);
-    await this.expectExistsAndConformsRequirements({ text: [text, isNot] });
+    const { isNot, selector } = new Options(options);
+    await this.expectExistsAndConformsRequirements({ text: [text, isNot] }, {
+      selector
+    });
   }
 
   /**
