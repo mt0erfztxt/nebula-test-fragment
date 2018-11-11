@@ -1696,6 +1696,15 @@ class Fragment {
   }
 
   /**
+   * Hovers on fragment.
+   * 
+   * @returns {Promise<void>}
+   */
+  async hover() {
+    await t.hover(this.selector);
+  }
+
+  /**
    * Persists fragment's state under specified `id` and returns it. When
    * optional `state` argument is `nil` then fragment's current state would be
    * persisted.
