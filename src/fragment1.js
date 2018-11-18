@@ -31,7 +31,7 @@ class Fragment {
     /**
      * Value used to initialize fragment's selector.
      */
-    this.selectorInitializer = selectorInitializer;
+    this.selectorInitializer = selectorInitializer || [];
 
     // Fragment must have BEM base. It can be provided as property of
     // fragment's class or ancestor fragment's class, and can be an instance of
@@ -70,7 +70,7 @@ class Fragment {
      * @private
      * @type {Selector}
      */
-    this._selector = parentSelector.find(`.${bemBase}`);
+    this._selector = parentSelector.find(`.${this._bemBase}`);
 
     /**
      * Whether fragment's selector is initialized or not.
@@ -105,8 +105,8 @@ class Fragment {
    * @returns {Selector}
    */
   get selector() {
-    if (!this._selector) {
-      this._selector = this._initializeSelector();
+    if (!this._selectorInitialized) {
+      this._initializeSelector();
     }
 
     return this._selector;
