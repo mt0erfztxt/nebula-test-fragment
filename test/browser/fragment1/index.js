@@ -1,3 +1,4 @@
+import _ from 'lodash';
 import appRootPath from 'app-root-path';
 import sinon from 'sinon';
 import unexpected from 'unexpected';
@@ -325,19 +326,93 @@ test
   });
 
 test
-  .page(buildPagePath('110'))
+  .page(buildPagePath('100'))
   ("110 It should allow 'selectorInitializer' argument to be a list of POJOs", async (t) => {
-    throw new Error('To be done!')
+    const f1a = new F1([{ cns: 'bar', cid: '11' }, { idx: 2 }]);
+    await t.expect(f1a.selector.count).eql(1);
+    await t.expect(f1a.selector.classNames).eql(['f1', 'f1--cns_bar', 'f1--cid_11']);
+    await t.expect(f1a.selector.textContent).eql('bar 11 2');
+
+    // -- Check that order does matter
+
+    const f1b = new F1([{ idx: 2 }, { cns: 'bar', cid: '11' }]);
+    await t.expect(f1b.selector.count).eql(0);
   });
 
 test
   .page(buildPagePath('120'))
   ("120 It should allow 'selectorInitializer' argument to be a mix of function and POJOs", async (t) => {
-    throw new Error('To be done!')
+    const f1 = new F1([
+      (sel, _) => sel.filter('[data-id="bar"]'),
+      { idx: 2 }
+    ]);
+
+    await t.expect(f1.selector.count).eql(1);
+    await t.expect(f1.selector.classNames).eql(['f1']);
+    await t.expect(f1.selector.getAttribute('data-id')).eql('bar');
+    await t.expect(f1.selector.textContent).eql('bar2');
+
+    // -- Ensure it fails as expected
+
+    let isThrown = false;
+
+    try {
+      await t.expect(f1.selector.textContent).eql('foo');
+    }
+    catch (e) {
+      expect(
+        e.errMsg,
+        'to match',
+        /.+expected 'bar2' to deeply equal 'foo'/
+      );
+
+      isThrown = true;
+    }
+
+    expect(isThrown, 'to be true');
   });
 
 test
   .page(buildPagePath('130'))
   ("130 It should allow 'selectorInitializer' argument to have custom tranformations provided by derived fragments", async (t) => {
-    throw new Error('To be done!')
+    class F2 extends F1 {
+
+      /**
+       * Allows to select fragment F2 by its text and it can be a string,
+       * a RegExp or a tupple where first element is a string/RegExp and second
+       * is an options (see implementation for details).
+       */
+      transformSelector(transformations, sel, bemBase) {
+        sel = super.transformSelector(transformations, sel, bemBase);
+
+        for (const k in transformations) {
+          if (_.has(transformations, k) && (k === 'text')) {
+            const v = transformations[k];
+            const [val, opts] = _.isArray(v) ? v : [v];
+            sel = selector.filterByText(sel, val, opts);
+          }
+        }
+
+        return sel;
+      }
+    }
+
+    Object.defineProperties(F2, {
+      bemBase: {
+        value: 'f2'
+      },
+      displayName: {
+        value: 'F2'
+      }
+    });
+
+    const f2a = new F2([{ cid: '1' }, { text: 'Otherthing' }]);
+    await t.expect(f2a.selector.count).eql(1);
+    await t.expect(f2a.selector.classNames).eql(['f2', 'f2--cid_1']);
+    await t.expect(f2a.selector.textContent).eql('Otherthing');
+
+    const f2b = new F2([{ cid: '1', text: 'Otherthing' }]);
+    await t.expect(f2b.selector.count).eql(1);
+    await t.expect(f2b.selector.classNames).eql(['f2', 'f2--cid_1']);
+    await t.expect(f2b.selector.textContent).eql('Otherthing');
   });

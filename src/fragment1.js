@@ -146,11 +146,11 @@ class Fragment {
   }
 
   /**
-   * Used to allow custom selector transformation to be added derived fragment
-   * class when required.
+   * Used to allow custom selector transformation to be added by derived
+   * fragment class when required.
    * 
    * @private
-   * @param {*} transformation 
+   * @param {Object} transformation 
    * @returns {Selector}
    */
   _transformSelector(transformation) {
@@ -161,35 +161,17 @@ class Fragment {
       );
     }
 
-    const sel = this.transformSelector(
+    return this.transformSelector(
       transformation,
       this._selector,
       this.bemBase
     );
-
-    if (sel) {
-      return sel;
-    }
-    else {
-      if (this.bemBase + '' === _baseFragmentMarker) {
-        throw new Error(
-          `${this.displayName}: dont't know how to apply selector ` +
-          `transformation ${transformation}`
-        );
-      }
-
-      return super.transformSelector(
-        transformation,
-        this._selector,
-        this.bemBase
-      );
-    }
   }
 
   /**
    * Transforms fragment's selector.
    * 
-   * NOTE Don't use `this.selector` here!!!
+   * NOTE Don't use `this.selector` here because that cause infinite loop!!!
    * TODO Maybe add a guard that `this.selector` doesn't used or unbind `this`
    *      in `#_transformSelector()`?
    * 
@@ -204,17 +186,20 @@ class Fragment {
       .filter(_.has)
       .value();
 
-    const unsupportedTransformations = _.filter(
-      requestedTransformations,
-      (v) => !_.includes(['cid', 'cns', 'idx'], v)
-    );
-
-    if (!_.isEmpty(unsupportedTransformations)) {
-      throw new TypeError(
-        `${this.displayName}#transformSelector(): unsupported ` +
-        `transformation(-s) '${unsupportedTransformations}'`
-      );
-    }
+    // TODO Need to find a way to obtain list of all available transformations
+    //      in fragment's hierarchy first. Maybe it can be passed as fourth
+    //      argument or method like `Fragment#getPartsOfState()` can be used.
+    // const unsupportedTransformationsNames = _.filter(
+    //   requestedTransformations,
+    //   (v) => !_.includes(['cid', 'cns', 'idx'], v)
+    // );
+    // 
+    // if (!_.isEmpty(unsupportedTransformationsNames)) {
+    //   throw new TypeError(
+    //     `${this.displayName}#transformSelector(): unsupported ` +
+    //     `transformation(-s) '${unsupportedTransformationsNames}'`
+    //   );
+    // }
 
     // Handle 'cns' (component namespace) transformation.
     if (_.includes(requestedTransformations, 'cns')) {
