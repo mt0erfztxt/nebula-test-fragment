@@ -1,6 +1,6 @@
 import _ from 'lodash';
 import typeOf from 'typeof--'
-import { Selector } from 'testcafe';
+import { Selector, t } from 'testcafe';
 
 import bem from "./bem";
 import Options from "./options";
@@ -263,6 +263,105 @@ class Fragment {
     }
 
     return selector;
+  }
+
+  /**
+   * Creates new instance of BEM base using fragment's `bemBase` as its
+   * initializer.
+   *
+   * @returns {BemBase}
+   */
+  cloneBemBase() {
+    return new BemBase(this.bemBase);
+  }
+
+  /**
+   * Asserts that fragment is exist - its selector returns one or more DOM
+   * elements.
+   *
+   * @param {Options|Object} [options] Options
+   * @param {Boolean} [options.allowMultiple=false] When falsey then fragment's selector must return only one DOM element to pass assertion
+   * @param {Boolean} [options.isNot=false] When truthy fragment's selector must not exist (return zero DOM elements) to pass assertion
+   * @param {String} [options.message] Custom message for error
+   * @return {Promise<void>}
+   */
+  async expectIsExist(options) {
+    const opts = new Options(options, {
+      defaults: {
+        allowMultiple: false,
+        isNot: false
+      }
+    });
+
+    let msg = '';
+    const { allowMultiple, isNot, message } = opts;
+
+    // ---------------------------------------------------------------------------
+    // Handling case when selector must not exist
+    // ---------------------------------------------------------------------------
+
+    if (isNot) {
+      if (utils.isNonEmptyString(message)) {
+        msg = message;
+      }
+      else {
+        msg = `'${this.displayName}' fragment's selector must not return DOM ` +
+          'elements but it does';
+      }
+
+      await t
+        .expect(this.selector.exists)
+        .notOk(msg);
+
+      return;
+    }
+
+    // ---------------------------------------------------------------------------
+    // Handling case when selector must exist
+    // ---------------------------------------------------------------------------
+
+    if (allowMultiple) {
+      msg = utils.isNonEmptyString(message) ?
+        message :
+        `'${this.displayName}' fragment's selector must return one or more DOM ` +
+        "elements but it doesn't";
+
+      await t
+        .expect(this.selector.count)
+        .gte(1, msg);
+    }
+    else {
+      msg = utils.isNonEmptyString(message) ?
+        message :
+        `'${this.displayName}' fragment's selector must return exactly one DOM ` +
+        "element but it doesn't";
+
+      await t
+        .expect(this.selector.count)
+        .eql(1, msg);
+    }
+  }
+
+  /**
+   * Asserts that fragment is not exist - its selector returns zero DOM
+   * elements.
+   *
+   * @param {Options|Object} [options] Options
+   * @param {Boolean} [options.allowMultiple=false] When falsey then fragment's selector must return only one DOM element to pass assertion
+   * @param {Boolean} [options.isNot=false] When truthy fragment's selector must exist (return one or more DOM elements) to pass assertion
+   * @param {String} [options.message] Custom message for error
+   * @return {Promise<void>}
+   */
+  async expectIsNotExist(options) {
+    const opts = new Options(options, {
+      defaults: {
+        allowMultiple: false,
+        isNot: false
+      }
+    });
+
+    opts['isNot'] = !opts.isNot;
+    await this.expectIsExist(opts);
   }
 }
 

@@ -4,9 +4,9 @@ import sinon from 'sinon';
 import unexpected from 'unexpected';
 import unexpectedSinon from 'unexpected-sinon';
 
-import bem from '../../../src/bem';
-import Fragment from '../../../src/fragment1';
-import selector from '../../../src/selector';
+import bem from '../../../../src/bem';
+import Fragment from '../../../../src/fragment1';
+import selector from '../../../../src/selector';
 
 const { BemBase } = bem;
 
@@ -15,7 +15,7 @@ expect.use(unexpectedSinon);
 
 function buildPagePath(testId) {
   return (
-    appRootPath.path + `/test/browser/fragment1/${testId ? testId : 'index'}.html`
+    appRootPath.path + `/test/browser/fragment1/010-index/${testId ? testId : 'index'}.html`
   );
 }
 
