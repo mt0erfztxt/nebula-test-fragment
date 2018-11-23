@@ -363,6 +363,38 @@ class Fragment {
     opts['isNot'] = !opts.isNot;
     await this.expectIsExist(opts);
   }
+
+  /**
+   * Returns array of CSS class names of fragment's selector that have `name`
+   * as name of BEM modifier. When `name` is nil array would contain all CSS
+   * class names that have (any) BEM modifier.
+   *
+   * @param {String} [modifierName] BEM modifier name
+   * @return {Promise<BemModifier[]>}
+   */
+  async getBemModifiers(modifierName) {
+    if (!(_.isNil(modifierName) || utils.isNonBlankString(modifierName))) {
+      throw new TypeError(
+        `'modifierName' argument must be a nil or a non-blank string but it ` +
+        `is ${typeOf(modifierName)} (${modifierName})`
+      );
+    }
+
+    await this.expectIsExist({ allowMultiple: false });
+
+    const bemBaseWithoutMod = this.cloneBemBase().setMod();
+    const bemBaseWithModName = `${bemBaseWithoutMod}--` + (modifierName || '');
+    const bemMods = [];
+    const classNames = await this.selector.classNames;
+
+    for (const className of classNames) {
+      if (_.startsWith(className, bemBaseWithModName)) {
+        bemMods.push(new BemBase(className).mod);
+      }
+    }
+
+    return bemMods;
+  }
 }
 
 Object.defineProperties(Fragment, {
