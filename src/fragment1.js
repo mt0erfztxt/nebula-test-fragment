@@ -350,6 +350,88 @@ class Fragment {
   }
 
   /**
+   * Asserts that fragment has other fragment, named `somethingName`, and that
+   * other fragment must be obtained using `somethingLocator` and
+   * `somethingOptions`, and optionally, asserts that other fragment found at
+   * position specified by `idx`.
+   *
+   * @param {String} somethingName Name of something. For example, in Dialog it can be an Action
+   * @param {*} somethingLocator See `locator` parameter of Something's constructor
+   * @param {*} somethingOptions See `options` parameter of Something's constructor
+   * @param {Options|Object} [options] Options
+   * @param {Boolean} [options.equalityCheck] Same as in `#expectIsEqual()`. Usable only with 'idx' option
+   * @param {Function|String} [options.getSomething] When it's a function then it would be used to get something, note that no `this` binding provided. When it's a string then it's must be a name of method of something that must be used to get something. When nil then instance's method named `#getSomething`, where 'Something' part equal to upercased version of `somethingName` argument would be used
+   * @param {Number} [options.idx] Position at which other fragment must be found to pass assertion. Must be an integer greater than or equal zero
+   * @returns {Promise<Object>} Found something.
+   * @throws {AssertionError} When something fragment specified by `somethingLocator` and `somethingOptions` doesn't exist.
+   * @throws {TypeError} When arguments aren't valid.
+   */
+  async expectHasSomething(somethingName, somethingLocator, somethingOptions, options) {
+    if (!utils.isNonBlankString(somethingName)) {
+      throw new TypeError(
+        `'${this.displayName}#expectHasSomething()': 'somethingName' ` +
+        `argument must be a non-blank string but it is ` +
+        `${typeOf(somethingName)} (${somethingName})`
+      );
+    }
+
+    const { equalityCheck, getSomething, idx } = new Options(options, {
+      validator: ({ getSomething }) => {
+        if (!(_.isNil(getSomething) || _.isFunction(getSomething) ||
+            utils.isNonBlankString(getSomething))) {
+          return (
+            `${this.displayName}#expectHasSomething(): 'getSomething' ` +
+            `option must be a function or a non-blank string but it is ` +
+            `${typeOf(getSomething)} (${getSomething})`
+          );
+        }
+        else {
+          return null;
+        }
+      }
+    });
+
+    if (_.isString(getSomething) && !_.isFunction(this[getSomething])) {
+      throw new TypeError(
+        `'${this.displayName}' fragment must have '${getSomething}' method ` +
+        `specified in 'getSomething' option but it doesn't`
+      );
+    }
+
+    const getSomethingMethodName = `get${ucFirst(somethingName)}`;
+
+    if (_.isNil(getSomething) && !_.isFunction(this[getSomethingMethodName])) {
+      throw new TypeError(
+        `'${this.displayName}' fragment must have ` +
+        `'${getSomethingMethodName}' method or 'getSomething' option set ` +
+        `but it doesn't`
+      );
+    }
+
+    /**
+     * @type {Fragment}
+     */
+    let something;
+
+    if (_.isFunction(getSomething)) {
+      something = getSomething(somethingLocator, somethingOptions);
+    }
+    else {
+      const method = getSomething || getSomethingMethodName;
+      something = this[method](somethingLocator, somethingOptions);
+    }
+
+    if (_.isInteger(idx)) {
+      await something.expectIndexInParentIs(this, idx, { equalityCheck });
+    }
+    else {
+      await something.expectIsExist();
+    }
+
+    return something;
+  }
+
+  /**
    * Asserts that fragment is found in specified parent at specified index.
    *
    * @param {*} parent Same as constructor's 'parent' option
@@ -545,6 +627,76 @@ class Fragment {
     }
 
     return bemMods;
+  }
+
+  /**
+   * Returns fragment of class `Something`.
+   *
+   * @param {*} Something Fragment class, must be descendant of `Fragment` class
+   * @param {Object|Function|Array} [locator] Same as `locator` parameter of `Something` constructor
+   * @param {Options|Object} [options] Same as `options` parameter of `Something` constructor, but 'parent' is forcibly set to this fragment
+   * @returns {*}
+   * @throws {TypeError} When argument aren't valid.
+   */
+  getSomething(something, locator, options) {
+    const somethingProp = ucFirst(something) + 'Fragment'; // e.g. 'TextInputFragment'
+    const Something = this[somethingProp];
+
+    if (!(Something && Something.isFragment)) {
+      throw new TypeError(
+        `'${this.displayName}' fragment must have '${somethingProp}' getter ` +
+        `that returns '${something}' fragment class but it returns ` +
+        `${typeOf(Something)} (${Something})`
+      );
+    }
+
+    if (locator instanceof Fragment) {
+      throw new TypeError(
+        `'locator' argument is a '${locator.displayName}' fragment but it ` +
+        'must be a fragment locator or nil'
+      );
+    }
+
+    const opts = _
+      .chain((options instanceof Options) ? options : new Options(options))
+      .set('parent', this)
+      .value()
+
+    return new Something(locator, opts);
+  }
+
+  /**
+   * Returns class of named fragment from one of following places (in specified
+   * order) - fragment's option named 'NameFragment' -> fragment's class
+   * property named 'NameFragment' -> traversing fragment's ancestors up to
+   * `RootFragmentOfSomething`, where 'NameFragment' is an uppercased version
+   * of `name` argument plus string 'Fragment', e.g. for `name` 'bar' it would
+   * be 'BarFragment'.
+   *
+   * @param {String} name Name (without 'Fragment' suffix) of fragment's class to return
+   * @param {Class} RootFragmentOfSomething Root of fragments hierarchy
+   * @return {Class}
+   * @throws {TypeError} When matching fragment class not found.
+   */
+  getSomethingFragment(name, RootFragmentOfSomething) {
+    const propName = ucFirst(name) + 'Fragment'; // e.g. 'TextInputFragment'
+    const SomethingFragment =
+      this.options[propName] ||
+      this.constructor[propName] ||
+      (
+        this instanceof RootFragmentOfSomething &&
+        this.constructor !== RootFragmentOfSomething &&
+        super[propName]
+      );
+
+    if (!(SomethingFragment && SomethingFragment.isFragment)) {
+      throw new TypeError(
+        `'${propName}' must be a fragment class but it is ` +
+        `${typeOf(SomethingFragment)} (${SomethingFragment})`
+      );
+    }
+
+    return SomethingFragment;
   }
 }
 
