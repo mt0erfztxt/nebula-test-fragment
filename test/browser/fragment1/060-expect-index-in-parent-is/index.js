@@ -49,9 +49,8 @@ test("010 It should delegate most of its logic to '#expectIsEqual()'", async () 
   expect(barCid1ConstructorSpy, 'was called times', 1);
   expect(barCid1ConstructorSpy, 'to have a call satisfying', {
     args: [
-      expect
-      .it('to only have keys', ['idx', 'parent'])
-      .and('to have own properties', { idx: 0, parent: foo })
+      expect.it('to equal', { idx: 0 }),
+      expect.it('to equal', { parent: foo })
     ]
   });
 
