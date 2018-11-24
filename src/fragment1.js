@@ -322,6 +322,68 @@ class Fragment {
       );
   }
 
+  // TODO: Add option to easily swap default implementation of equality check
+  //       to equality by BEM modifier, attribute.
+  /**
+   * Asserts that `this` fragment is equal `that` fragment.
+   * 
+   * @param {*} that A fragment to which `this` fragment must be equal to pass assertion
+   * @param {Options|Object} [options] Options
+   * @param {Boolean|Function} [options.equalityCheck=true] When it is a nil or `true` a default implementation, that asserts on equality of `this` and `that` text content, would be used. When it is a (async) function then it would be called with `this` and `that` fragments and it must throw when fragments aren't equal, note that no `this` binding is provided. Set it to falsey value and override in descendant to get custom equality check logic
+   * @throws {AssertionError} When `this` or `that` fragment doesn't exist or they doesn't equal.
+   * @throws {TypeError} When `that` is not a fragment of same class as `this`.
+   */
+  async expectIsEqual(that, options) {
+    if (!(that instanceof Fragment)) {
+      throw new TypeError(
+        `'${this.displayName}#expectIsEqual()': 'that' argument must be a ` +
+        `'${this.displayName}' fragment but it's even not a fragment`
+      );
+    }
+
+    if (!(that instanceof this.constructor)) {
+      throw new TypeError(
+        `'${this.displayName}#expectIsEqual()': 'that' argument must be a ` +
+        `'${this.displayName}' fragment but it is a '${that.displayName}' fragment`
+      );
+    }
+
+    const { equalityCheck } = _
+      .chain(new Options(options, { defaults: { equalityCheck: true } }))
+      .update('equalityCheck', (v) => (_.isNil(v) || v === true) ? true : v)
+      .value();
+
+    await this.expectIsExist({
+      message: `'${this.displayName}#expectIsEqual()': 'this' fragment must ` +
+        "exist but it doesn't"
+    });
+    await that.expectIsExist({
+      message: `'${that.displayName}#expectIsEqual()': fragment passed in as ` +
+        "'that' argument must exist but it doesn't"
+    });
+
+    if (equalityCheck === true) {
+      const thisTextContent = await this.selector.textContent;
+      const thatTextContent = await that.selector.textContent;
+      const msg = `'${this.displayName}#expectIsEqual()': fragments text ` +
+        "content doesn't match"
+
+      await t
+        .expect(thisTextContent)
+        .eql(thatTextContent, msg);
+    }
+    else if (_.isFunction(equalityCheck)) {
+      await equalityCheck(this, that);
+    }
+    else if (!(_.isNil(equalityCheck) || equalityCheck === false)) {
+      throw new TypeError(
+        `'${this.displayName}#expectIsEqual()': 'equalityCheck' option must ` +
+        `be a boolean or a function but it is ${typeOf(equalityCheck)} ` +
+        `(${equalityCheck})`
+      );
+    }
+  }
+
   /**
    * Asserts that fragment is exist - its selector returns one or more DOM
    * elements.
