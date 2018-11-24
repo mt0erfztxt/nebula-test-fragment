@@ -322,6 +322,21 @@ class Fragment {
       );
   }
 
+  /**
+   * Asserts that fragment is found in specified parent at specified index.
+   *
+   * @param {*} parent Same as `Fragment` constructor's `spec.parent` argument
+   * @param {Number} idx Position at which fragment must be found in parent to pass assertion. Must be an integer greater or equal zero
+   * @param {Options|Object} [options] Options
+   * @param {Boolean} [options.equalityCheck] Same as in `Fragment#expectIsEqual`
+   * @returns {Promise<void>}
+   */
+  async expectIndexInParentIs(parent, idx, options) {
+    await this.expectIsEqual(new this.constructor({ idx, parent }), {
+      equalityCheck: _.get(options, 'equalityCheck')
+    });
+  };
+
   // TODO: Add option to easily swap default implementation of equality check
   //       to equality by BEM modifier, attribute.
   /**
