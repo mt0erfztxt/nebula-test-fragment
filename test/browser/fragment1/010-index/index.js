@@ -149,7 +149,7 @@ test
 
 test
   .page(buildPagePath('050'))
-  ("050 It should allow 'selectorInitializer' argument to be a function", async (t) => {
+  ("050 It should allow 'locator' argument to be a function", async (t) => {
     const f1 = new F1((sel, _) => selector.filterByText(sel, 'f1b'));
 
     await t.expect(f1.selector.count).eql(1);
@@ -178,7 +178,7 @@ test
 
 test
   .page(buildPagePath('060'))
-  ("060 It should allow 'selectorInitializer' argument to be a list of functions", async (t) => {
+  ("060 It should allow 'locator' argument to be a list of functions", async (t) => {
     const f1 = new F1([
       (sel, _) => selector.filterByText(sel, 'f1b'),
       (sel, _) => sel.nth(3),
@@ -211,7 +211,7 @@ test
 
 test
   .page(buildPagePath('070'))
-  ("070 It should allow 'selectorInitializer' argument to be a POJO with built-in 'cid' transformation", async (t) => {
+  ("070 It should allow 'locator' argument to be a POJO with built-in 'cid' transformation", async (t) => {
     const f1 = new F1({ cid: 'baz' });
 
     await t.expect(f1.selector.count).eql(1);
@@ -240,7 +240,7 @@ test
 
 test
   .page(buildPagePath('080'))
-  ("080 It should allow 'selectorInitializer' argument to be a POJO with built-in 'cns' transformation", async (t) => {
+  ("080 It should allow 'locator' argument to be a POJO with built-in 'cns' transformation", async (t) => {
     const f1 = new F1({ cns: 'baz' });
 
     await t.expect(f1.selector.count).eql(1);
@@ -269,7 +269,7 @@ test
 
 test
   .page(buildPagePath('090'))
-  ("090 It should allow 'selectorInitializer' argument to be a POJO with built-in 'idx' transformation", async (t) => {
+  ("090 It should allow 'locator' argument to be a POJO with built-in 'idx' transformation", async (t) => {
     const f1 = new F1({ idx: 2 });
 
     await t.expect(f1.selector.count).eql(1);
@@ -327,7 +327,7 @@ test
 
 test
   .page(buildPagePath('100'))
-  ("110 It should allow 'selectorInitializer' argument to be a list of POJOs", async (t) => {
+  ("110 It should allow 'locator' argument to be a list of POJOs", async (t) => {
     const f1a = new F1([{ cns: 'bar', cid: '11' }, { idx: 2 }]);
     await t.expect(f1a.selector.count).eql(1);
     await t.expect(f1a.selector.classNames).eql(['f1', 'f1--cns_bar', 'f1--cid_11']);
@@ -341,7 +341,7 @@ test
 
 test
   .page(buildPagePath('120'))
-  ("120 It should allow 'selectorInitializer' argument to be a mix of function and POJOs", async (t) => {
+  ("120 It should allow 'locator' argument to be a mix of function and POJOs", async (t) => {
     const f1 = new F1([
       (sel, _) => sel.filter('[data-id="bar"]'),
       { idx: 2 }
@@ -374,7 +374,7 @@ test
 
 test
   .page(buildPagePath('130'))
-  ("130 It should allow 'selectorInitializer' argument to have custom tranformations provided by derived fragments", async (t) => {
+  ("130 It should allow 'locator' argument to have custom tranformations provided by derived fragments", async (t) => {
     class F2 extends F1 {
 
       /**

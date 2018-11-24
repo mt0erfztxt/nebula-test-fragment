@@ -11,33 +11,49 @@ const { BemBase } = bem;
 
 class Fragment {
 
+  // TODO Allow `locator` to be string/number by providing
+  //      `defaultTransformation` on class.
   /**
    * Creates fragment.
    * 
-   * @param {Object|Function|Array} selectorInitializer 
-   * @param {Options|Object} options 
+   * @param {*} [locator] Used to create fragment's selector. In general case it is a list of transformations used to transform selector (see 'parent' option) so it returns DOM element(-s) for one or more fragments. Each transformation is a function (receive selector to transform and fragment's BEM base) or an object (key/value pairs are transformation names/values). Built-in transformations are: 'cns' (must be a string), 'cid' (must be a string), 'idx' (must be an integer gte 0).
+   * @param {Options|Object} [options] Options
+   * @param {*} [options.parent='body'] Used to specify selector to which locator must be applied. It can be fragment, and then its selector would be used, or it can be anything that TestCafe `Selector` accepts as initializer
    */
-  constructor(selectorInitializer, options) {
-    const opts = new Options(options, {
+  constructor(locator, options) {
+
+    /**
+     * Locator passed to `constructor`.
+     * 
+     * @type {*}
+     */
+    this.locator = locator;
+
+    /**
+     * Options passed to `constructor`.
+     * 
+     * @type {Options}
+     */
+    this.options = new Options(options, {
       defaults: {
         parent: 'body'
       }
     });
 
-    // TODO Check `selectorInitializer` is supported - function, map or list of
-    //      functions and/or maps.
     /**
-     * Value used to initialize fragment's selector.
+     * List of transformations that must be applied to selector for it to
+     * return DOM element(-s) for one or more fragments.
      * 
+     * @private
      * @type {Array<*>}
      */
-    this.selectorInitializer = [];
+    this._selectorTransformations = [];
 
-    if (_.isArray(selectorInitializer)) {
-      this.selectorInitializer = selectorInitializer;
+    if (_.isArray(locator)) {
+      this._selectorTransformations = locator;
     }
-    else if (!_.isNil(selectorInitializer)) {
-      this.selectorInitializer = [selectorInitializer];
+    else if (!_.isNil(locator)) {
+      this._selectorTransformations = [locator];
     }
 
     // Fragment must have BEM base. It can be provided as property of
@@ -46,7 +62,8 @@ class Fragment {
     const chosenBemBase = this.constructor.bemBase || super.bemBase;
     const chosenBemBaseAsStr = chosenBemBase + '';
 
-    if (!utils.isNonEmptyString(chosenBemBaseAsStr) || chosenBemBaseAsStr === _baseFragmentMarker) {
+    if (!utils.isNonEmptyString(chosenBemBaseAsStr) ||
+      chosenBemBaseAsStr === _baseFragmentMarker) {
       throw new TypeError(
         `${this.displayName}.constructor(): can't create fragment without ` +
         'BEM base'
@@ -68,8 +85,9 @@ class Fragment {
     // initializer to create parent selector.
     // 3. No parent specified - we use 'body' as initializer to create parent
     // selector.
-    const parentSelector = (opts.parent instanceof Fragment) ?
-      opts.parent.selector : Selector(opts.parent);
+    const { parent } = this.options;
+    const parentSelector = (parent instanceof Fragment) ?
+      parent.selector : Selector(parent);
 
     /**
      * Fragment's selector, scoped into parent.
@@ -86,6 +104,15 @@ class Fragment {
      * @type {Boolean}
      */
     this._selectorInitialized = false;
+  }
+
+  /**
+   * Just a simple check that class is a Fragment or its descendant.
+   *
+   * @returns {Boolean}
+   */
+  static get isFragment() {
+    return true;
   }
 
   /**
@@ -125,7 +152,7 @@ class Fragment {
    * @private
    */
   _initializeSelector() {
-    for (const transformation of this.selectorInitializer) {
+    for (const transformation of this._selectorTransformations) {
       const transformedSelector = _.isFunction(transformation) ?
         transformation(this._selector, this.bemBase) :
         this._transformSelector(transformation);
