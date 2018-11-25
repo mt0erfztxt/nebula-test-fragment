@@ -598,6 +598,27 @@ class Fragment {
   }
 
   /**
+   * Asserts that count of somethings in fragment equal value specified in
+   * `count`.
+   *
+   * @param {*} somethingSelector TestCafe selector for something
+   * @param {Number|Array} count Fragment must have that number of somethings to pass assertion. When you need more flexibility than just equality pass an `Array` with TestCafe assertion name (default to 'eql') as first element and expected value for assertion as second, for example, `['gte', 3]`
+   * @param {Options|Object} [options] Options
+   * @param {Boolean} [options.isNot=false] When truthy assertion would be negated
+   * @return {Promise<void>}
+   */
+  static async expectSomethingsCountIs(somethingSelector, count, options) {
+    let assertionName = 'eql';
+
+    if (_.isArray(count)) {
+      [assertionName, count] = count;
+    }
+
+    assertionName = utils.buildTestCafeAssertionName(assertionName, options);
+    await t.expect(somethingSelector.count)[assertionName](count);
+  }
+
+  /**
    * Returns array of CSS class names of fragment's selector that have `name`
    * as name of BEM modifier. When `name` is nil array would contain all CSS
    * class names that have (any) BEM modifier.
