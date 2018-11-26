@@ -1,7 +1,7 @@
 import _ from 'lodash';
 import escapeStringRegexp from 'escape-string-regexp';
 import typeOf from 'typeof--'
-import { ucFirst } from 'change-case';
+import { pascalCase, ucFirst } from 'change-case';
 import { Selector, t } from 'testcafe';
 
 import bem from "./bem";
@@ -1066,6 +1066,105 @@ class Fragment {
     }
 
     return SomethingFragment;
+  }
+
+  /**
+   * Returns fragment's state (all parts).
+   *
+   * @param {Options|Object} [options] Options
+   * @param {String[]} [options.omitParts] Only parts of state that not found in that list would be in returned state. Applied after `options.onlyParts`
+   * @param {String[]} [options.onlyParts] Only parts of state that found in that list would be in returned state. Applied before `options.omitParts`
+   * @return {Promise<Object>}
+   * @throws {TypeError} When arguments aren't valid.
+   */
+  async getState(options) {
+    let statePartList = this.getStateParts();
+
+    if (!_.isArray(statePartList)) {
+      throw new Error(
+        `'${this.displayName}#getStateParts()' must return an array of ` +
+        `state parts but it return ${typeOf(statePartList)} (${statePartList})`
+      );
+    }
+    else {
+      statePartList = _.uniq(statePartList);
+    }
+
+    const { omitParts, onlyParts, waitBefore } = new Options(options);
+
+    if (waitBefore) {
+      await t.wait(waitBefore);
+    }
+
+    if (!(_.isNil(omitParts) ||
+        (_.isArray(omitParts) && _.every(omitParts, utils.isNonBlankString)))) {
+      throw new TypeError(
+        `'omitParts' option must be a nil or array of non-blank strings but ` +
+        `it is ${typeOf(omitParts)} (${omitParts})`
+      );
+    }
+
+    if (!(_.isNil(onlyParts) ||
+        (_.isArray(onlyParts) && _.every(onlyParts, utils.isNonBlankString)))) {
+      throw new TypeError(
+        `'onlyParts' option must be a nil or array of non-blank strings but ` +
+        `it is ${typeOf(onlyParts)} (${onlyParts})`
+      );
+    }
+
+    const state = {};
+
+    if (statePartList.length) {
+      const partNames = [];
+      const partGetStatePromises = [];
+
+      for (const k of statePartList) {
+        let mustBeIncluded = true;
+        let mustBeExcluded = false;
+
+        if (onlyParts && !_.includes(onlyParts, k)) {
+          mustBeIncluded = false;
+        }
+
+        if (omitParts && _.includes(omitParts, k)) {
+          mustBeExcluded = true;
+        }
+
+        if (mustBeIncluded && !mustBeExcluded) {
+          const partOfStateGetterName = `get${pascalCase(k)}PartOfState`;
+          partNames.push(k);
+
+          if (!_.isFunction(this[partOfStateGetterName])) {
+            throw new TypeError(
+              `'${this.displayName}#${partOfStateGetterName}' must be a ` +
+              `function but it is ${this[partOfStateGetterName]}`
+            );
+          }
+
+          partGetStatePromises.push(this[partOfStateGetterName](options));
+        }
+      }
+
+      const partStateList = await Promise.all(partGetStatePromises);
+      const partStateListLength = partStateList.length;
+
+      for (let i = 0; i < partStateListLength; i++) {
+        state[partNames[i]] = partStateList[i];
+      }
+    }
+
+    return state;
+  }
+
+  /**
+   * Returns list of fragment's state parts.
+   *
+   * @param {Options|Object} [options] Options
+   * @param {Boolean} [options.onlyWritable=false] When truthy then only writable state parts would be returned
+   * @return {Array<String>} List of parts of fragment's state.
+   */
+  getStateParts(options) {
+    return [];
   }
 }
 
