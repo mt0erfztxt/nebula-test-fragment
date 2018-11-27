@@ -1288,6 +1288,34 @@ class Fragment {
   }
 
   /**
+   * Sets fragment's state to one that was persisted earlier and identified by
+   * passed `id`.
+   *
+   * @param {String} id Id of state that was persisted earlier
+   * @return {Promise<Object>} Fragment's state after restore state operation is done.
+   * @throws {TypeError} When arguments aren't valid.
+   */
+  async restoreState(id) {
+    if (!utils.isNonBlankString(id)) {
+      throw new TypeError(
+        `'id' argument must be a non-blank string but it is ${typeOf(id)} ` +
+        `(${id})`
+      );
+    }
+
+    const state = this._persistedStates && this._persistedStates[id];
+
+    if (!_.isPlainObject(state)) {
+      throw new TypeError(
+        `State, persisted under id '${id}', is not valid - it must be a ` +
+        `plain object but it is ${typeOf(state)} (${state})`
+      );
+    }
+
+    return this.setState(state);
+  }
+
+  /**
    * Sets state of fragment.
    *
    * @param {Object|undefined} newState New state for fragment. Passing `undefined` means "Do nothing and just return current state". Values for read-only parts silently ignored
