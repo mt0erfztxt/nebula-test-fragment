@@ -1,6 +1,7 @@
 import _ from 'lodash';
 import escapeStringRegexp from 'escape-string-regexp';
 import typeOf from 'typeof--'
+import { detailedDiff } from 'deep-object-diff';
 import { pascalCase, ucFirst } from 'change-case';
 import { Selector, t } from 'testcafe';
 
@@ -971,6 +972,60 @@ class Fragment {
 
     assertionName = utils.buildTestCafeAssertionName(assertionName, options);
     await t.expect(somethingSelector.count)[assertionName](count);
+  }
+
+  /**
+   * Asserts that fragment's current state is equal state specified by
+   * `stateOrId`.
+   *
+   * @param {String|Object} stateOrId When it's an object than fragment's current state must be deeply equal it to pass assertion, otherwise it must be a string - id of persisted state to which fragment's current state must be deeply equal to pass assertion
+   * @param {Options|Object} [options] Options. Same as in `#getState()` plus following ones
+   * @param {Boolean} [options.debug=false] When truthy then detailed diff would be logged to console on assertion failure
+   * @return {Promise<void>}
+   * @throws {TypeError} When arguments aren't valid.
+   */
+  async expectStateIs(stateOrId, options) {
+    if (!(_.isPlainObject(stateOrId) || utils.isNonBlankString(stateOrId))) {
+      throw new TypeError(
+        `'stateOrId' argument must be a plain object or a non-blank string ` +
+        `but it is ${typeOf(stateOrId)} (${stateOrId})`
+      );
+    }
+
+    const stateToMatch = _.isPlainObject(stateOrId) ?
+      stateOrId : this.getPersistedState(stateOrId);
+
+    if (!_.isPlainObject(stateToMatch)) {
+      throw new TypeError(
+        `State to match must be a plain object but it is ` +
+        `${typeOf(stateToMatch)} (${stateToMatch})`
+      );
+    }
+
+    const opts = new Options(options, {
+      defaults: {
+        debug: false
+      }
+    });
+    const currentState = await this.getState(_.omit(opts, ['debug']));
+
+    if (opts.debug) {
+      console.log('// ----------------------------- Current State --------------------------------');
+      console.log(JSON.stringify(currentState, null, '\t'));
+      console.log('// ----------------------------------------------------------------------------');
+      console.log();
+      console.log('// ------------------------------Expected State--------------------------------');
+      console.log(JSON.stringify(stateToMatch, null, '\t'));
+      console.log('// ----------------------------------------------------------------------------');
+    }
+
+    await t
+      .expect(currentState)
+      .eql(
+        stateToMatch,
+        `'${this.displayName}' fragment's current state doesn't match expected\n` +
+        `${JSON.stringify(detailedDiff(stateToMatch, currentState), null, '\t')}\n`
+      );
   }
 
   /**
