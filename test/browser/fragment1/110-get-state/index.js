@@ -66,7 +66,7 @@ class TextInput extends Fragment {
    * Obtains 'Disabled' part of fragment's state and returns it.
    *
    * @param {Options} [options] Options
-   * @return {Promise<string>}
+   * @return {Promise<Boolean>}
    */
   async getDisabledPartOfState(options) {
     return this.inputElementSelector.hasAttribute('disabled');
@@ -76,7 +76,7 @@ class TextInput extends Fragment {
    * Obtains 'Value' part of fragment's state and returns it.
    *
    * @param {Options} [options] Options
-   * @return {Promise<string>}
+   * @return {Promise<String>}
    */
   async getValuePartOfState(options) {
     return this.inputElementSelector.value;

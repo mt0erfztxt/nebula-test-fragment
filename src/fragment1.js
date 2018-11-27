@@ -1166,6 +1166,56 @@ class Fragment {
   getStateParts(options) {
     return [];
   }
+
+  /**
+   * Sets state of fragment.
+   *
+   * @param {Object|undefined} newState New state for fragment. Passing `undefined` means "Do nothing and just return current state". Values for read-only parts silently ignored
+   * @param {Options|Object} [options] Options
+   * @return {Promise<Object>} Fragment's state, that have only updated (writable) parts, after set state operation is done.
+   * @throws {TypeError} When arguments aren't valid.
+   */
+  async setState(newState, options) {
+    if (_.isUndefined(newState)) {
+      return this.getState(options);
+    }
+
+    if (!_.isPlainObject(newState)) {
+      throw new TypeError(
+        `'newState' argument must be a plain object but it is ` +
+        `${typeOf(newState)} (${newState})`
+      );
+    }
+
+    let statePartList = this.getStateParts({ onlyWritable: true });
+    const state = {};
+
+    if (!_.isArray(statePartList)) {
+      throw new Error(
+        `'${this.displayName}#getStateParts()' must return an array of ` +
+        `state parts but it return ${typeOf(statePartList)} (${statePartList})`
+      );
+    }
+    else {
+      statePartList = _.uniq(statePartList);
+    }
+
+    for (let k of statePartList) {
+      const partOfStateSetterName = `set${pascalCase(k)}PartOfState`;
+
+      if (!_.isFunction(this[partOfStateSetterName])) {
+        throw new TypeError(
+          `'${this.displayName}#${partOfStateSetterName}' must be a ` +
+          `function but it is ${typeOf(this[partOfStateSetterName])} ` +
+          `(${this[partOfStateSetterName]})`
+        );
+      }
+
+      state[k] = await this[partOfStateSetterName](newState[k], options);
+    }
+
+    return state;
+  }
 }
 
 Object.defineProperties(Fragment, {
