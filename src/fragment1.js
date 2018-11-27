@@ -1256,6 +1256,38 @@ class Fragment {
   }
 
   /**
+   * Persists fragment's state under specified `id` and returns it. When
+   * optional `state` argument is `nil` then fragment's current state would be
+   * persisted.
+   *
+   * @param {String} id Id that would be used to identify persisted state
+   * @param {Object} [state] State that must be persisted. Pass `nil` to persist fragment's current state
+   * @param {Options|Object} [options] Options. Same as for `#getState()`
+   * @return {Promise<Object>} State that was persisted.
+   * @throws {TypeError} When arguments aren't valid.
+   */
+  async persistState(id, state, options) {
+    if (!utils.isNonBlankString(id)) {
+      throw new TypeError(
+        `'id' argument must be a non-blank string but it is ${typeOf(id)} ` +
+        `(${id})`
+      );
+    }
+
+    if (_.isNil(state)) {
+      state = await this.getState(options);
+    }
+    else if (!_.isPlainObject(state)) {
+      throw new TypeError(
+        `'state' argument must be a nil or a plain object but it is ` +
+        `${typeOf(state)} (${state})`
+      );
+    }
+
+    return this._persistedStates[id] = state;
+  }
+
+  /**
    * Sets state of fragment.
    *
    * @param {Object|undefined} newState New state for fragment. Passing `undefined` means "Do nothing and just return current state". Values for read-only parts silently ignored
