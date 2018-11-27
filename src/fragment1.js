@@ -107,6 +107,13 @@ class Fragment {
      * @type {Boolean}
      */
     this._selectorInitialized = false;
+
+    /**
+     * Store for persisted states.
+     *
+     * @private
+     */
+    this._persistedStates = {};
   }
 
   /**
@@ -996,6 +1003,32 @@ class Fragment {
     }
 
     return bemMods;
+  }
+
+  /**
+   * Returns fragment's state that was persisted earlier under specified `id`.
+   *
+   * @param {String} id Id of state that was persisted earlier
+   * @returns {Object|null} Persisted state.
+   * @throws {TypeError} When argument isn't valid or persisted state identified by `id` not exists.
+   */
+  getPersistedState(id) {
+    if (!utils.isNonBlankString(id)) {
+      throw new TypeError(
+        `'id' argument must be a non-blank string but it is ${typeOf(id)} ` +
+        `(${id})`
+      );
+    }
+
+    const state = this._persistedStates && this._persistedStates[id];
+
+    if (_.isUndefined(state)) {
+      throw new TypeError(
+        `Persisted state with id '${id}' does not exist`
+      );
+    }
+
+    return state;
   }
 
   /**
