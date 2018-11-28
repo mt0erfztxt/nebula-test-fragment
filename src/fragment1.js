@@ -1364,6 +1364,391 @@ class Fragment {
 
     return state;
   }
+
+  //  TODO Improve docs - add names of generated methods, describe their
+  //       signatures
+  /**
+   * Returns new fragment class that is a descendant of base fragment class
+   * and, additionally, have methods for part of state. See description of
+   * available options for more about additionally generated methods.
+   *
+   * @static
+   * @param {Fragment} BaseFragment Fragment class to extend from
+   * @param {Array|String} statePartName Name of state part. When it's a string then it would be used as state part name and also as name of attribute/BEM modifier that holds that part in fragment's selector DOM element. When names differ, for example a case of data attribute, an array of two non-blank strings - a state part name and attribute/BEM modifier name, can be passed
+   * @param {Options|Object} [options] Options
+   * @param {String} [options.antonym] Name of other side of state part. For example, for 'Disabled' part of state other side would be 'Enabled'. Used to generate additional assertion methods, but only when `options.isBoolean` is truthy and `options.isBooleanHas` is falsey. For example, when `options.antonym` is 'Enabled' `expectIsEnabled` and `expectIsNotEnabled` methods would be generated
+   * @param {Boolean} [options.isBoolean=true] When truthy additional assertion methods would be generated. For example, when name is 'Disabled' and `options.isBoolean` is truthy `expectIsDisabled` and `expectIsNotDisabled` methods would be generated
+   * @param {Boolean} [options.isBooleanHas=false] When truthy then assertion methods would be named with 'Has' instead of 'Is'. For example, `expectHasSomething` and `expectHasNoSomething`
+   * @param {String} [options.src='bemModifier'] Where state part holds it's value. Must be one of 'attribute', or 'bemModifier'
+   * @param {Boolean|String} [options.waitTil] Same as `options.waitUntil` but reversed - allows to wait til attribute/BEM modifier exists (boolean) or have specified value. When value is a boolean then state part name would be used to generate name of method, when it's a string then it would be used in method name generation. For example, for part of state named 'Fetched' they would be `waitTilFetched` in case of boolean and `waitTilSomething` in case of string 'something'
+   * @param {Boolean|String} [options.waitUntil] When truthy and `options.isBoolean` also truthy fragment's class would have `waitUntil[NameOfStatePart]` method, that is a convenience alias for `expectIs[NameOfStatePart]` method, that can be used to wait until fragment's part of state doesn't have specified value. For example, for part of state named 'Fetched' we can wait if fragment's state part doesn't have specified value
+   * @returns {Fragment}
+   */
+  static withPartOfStateMixin(BaseFragment, statePartName, options) {
+    if (!BaseFragment.isFragment) {
+      throw new TypeError(
+        `'BaseFragmentClass' argument must be a 'Fragment' class or its ` +
+        `descendant`
+      );
+    }
+
+    let _attrName;
+    let _partName = statePartName;
+
+    if (_.isArray(statePartName)) {
+      [_partName, _attrName] = statePartName;
+    }
+
+    if (!utils.isNonBlankString(_partName)) {
+      throw new TypeError(
+        `Name of state part must be a non-blank string but it is ` +
+        `${typeOf(_partName)} (${_partName})`
+      );
+    }
+
+    if (!(_.isNil(_attrName) || utils.isNonBlankString(_attrName))) {
+      throw new TypeError(
+        `Attribute/BEM modifier name that holds value of part of state ` +
+        `must be a non-blank string but it is ${typeOf(_attrName)} ` +
+        `(${_attrName})`
+      );
+    }
+
+    const {
+      antonym,
+      isBoolean,
+      isBooleanHas,
+      src,
+      waitTil,
+      waitUntil
+    } = new Options(options, {
+      defaults: {
+        isBoolean: true,
+        isBooleanHas: false,
+        src: 'bemModifier'
+      },
+      validator: ({ src }) => {
+        let msg = null;
+
+        if (!_.includes(['attribute', 'bemModifier'], src)) {
+          msg =
+            "'options.src' argument must be a nil or one of 'attribute' " +
+            `or 'bemModifier' but it is ${typeOf(src)} (${src})`;
+        }
+
+        return msg;
+      }
+    });
+
+    const attrName = _attrName || _partName;
+    const partName = pascalCase(_partName);
+
+    /**
+     * @extends {Fragment}
+     */
+    class MixedFragment extends BaseFragment {
+
+      /**
+       * Obtains value of state's part and returns it.
+       *
+       * @param {Options|Object} [options] - Options
+       * @returns {*} Returns value of state's part.
+       */
+      async [`get${partName}PartOfState`](options) {
+        if (src === 'bemModifier') {
+          if (isBoolean) {
+            const className = this.cloneBemBase().setMod([attrName]).toString();
+            return this.selector.hasClass(className);
+          }
+          else {
+            const modifiers = await this.getBemModifiers(attrName);
+            return _.isEmpty(modifiers) ? void(0) : (modifiers[0][1] || void(0));
+          }
+        }
+        else if (src === 'attribute') {
+          return isBoolean ?
+            this.selector.hasAttribute(attrName) :
+            this.selector.getAttribute(attrName);
+        }
+      }
+
+      /**
+       * Does nothing because this part of state is read only.
+       *
+       * @param {*} value Doesn't matter
+       * @param {Options|Object} [options] Options
+       * @return {Promise<*>} Current value of part of fragment's state after set state operation is done.
+       */
+      async [`set${partName}PartOfState`](value, options) {
+        return this[`get${partName}PartOfState`](options);
+      }
+
+      /**
+       * Asserts that fragment's state part is equal specified value.
+       *
+       * @param {*} value Part of state must match that value to pass assertion
+       * @param {Options|Object} [options] Options
+       * @param {Boolean} [options.isNot=false] When truthy assertion would be inverted
+       * @return {Promise<void>}
+       */
+      async [`expect${partName}PartOfStateIs`](value, options) {
+        const opts = new Options(options, {
+          defaults: {
+            isNot: false
+          }
+        });
+        const { isNot } = opts;
+
+        if (isBoolean) {
+          value = !!value;
+        }
+
+        if (src === 'bemModifier') {
+          if (isBoolean) {
+            await this.expectExistsAndConformsRequirements({
+              bemModifiers: [
+                [
+                  [attrName, null], (isNot ? value : !value)
+                ]
+              ]
+            });
+          }
+          else {
+            await this.expectExistsAndConformsRequirements({
+              bemModifiers: [
+                [
+                  [attrName, (value + '')], isNot
+                ] // TODO Remove casting to string (#5)
+              ]
+            });
+          }
+        }
+        else if (src === 'attribute') {
+          if (isBoolean) {
+            await this.expectExistsAndConformsRequirements({
+              attributes: [
+                [attrName, null, (isNot ? value : !value)]
+              ]
+            });
+          }
+          else {
+            await this.expectExistsAndConformsRequirements({
+              attributes: [
+                [attrName, value, isNot]
+              ]
+            });
+          }
+        }
+      }
+    }
+
+    if (isBoolean) {
+
+      // Boolean part of states have methods named like `expectIsDisabled` and
+      // `expectIsNotDisabled`. That methods accepts zero arguments and asserts
+      // on boolean `true` and `false` accordingly.
+      Object.defineProperties(MixedFragment.prototype, {
+        [`expect${isBooleanHas ? 'Has' : 'Is'}${partName}`]: {
+          configurable: true,
+          enumerable: false,
+          writable: true,
+          /**
+           * Asserts that fragment's state part value equal boolean `true`,
+           * which means that fragment selector DOM element has corresponding
+           * attribute/BEM modifier.
+           *
+           * @return {Promise<void>}
+           */
+          value: async function() {
+            await this[`expect${partName}PartOfStateIs`](true);
+          }
+        },
+        [`expect${isBooleanHas ? 'HasNo' : 'IsNot'}${partName}`]: {
+          configurable: true,
+          enumerable: false,
+          writable: true,
+          /**
+           * Asserts that fragment's state part value equal boolean `false`,
+           * which means that fragment selector DOM element has no
+           * corresponding attribute/BEM modifier.
+           *
+           * @return {Promise<void>}
+           */
+          value: async function() {
+            await this[`expect${partName}PartOfStateIs`](false);
+          }
+        }
+      });
+
+      // Handle `options.antonym`.
+      if (!(_.isNil(antonym) || utils.isNonBlankString(antonym))) {
+        throw new TypeError(
+          `'options.antonym' argument must be a non-blank string but it is ` +
+          `${typeOf(antonym)} (${antonym})`
+        );
+      }
+
+      if (antonym && !isBooleanHas) {
+        const antonymPartName = pascalCase(antonym);
+
+        Object.defineProperties(MixedFragment.prototype, {
+          [`expectIs${antonymPartName}`]: {
+            configurable: true,
+            enumerable: false,
+            writable: true,
+            value: async function() {
+              await this[`expectIsNot${partName}`]();
+            }
+          },
+          [`expectIsNot${antonymPartName}`]: {
+            configurable: true,
+            enumerable: false,
+            writable: true,
+            value: async function() {
+              await this[`expectIs${partName}`]();
+            }
+          }
+        });
+      }
+
+      // Handle `options.waitTil`.
+      if (!(_.isNil(waitTil) || _.isBoolean(waitTil) ||
+          utils.isNonBlankString(waitTil))) {
+        throw new TypeError(
+          `'options.waitTil' argument must be a boolean or a non-blank ` +
+          `string but it is ${typeOf(waitTil)} (${waitTil})`
+        );
+      }
+
+      let waitTilPartName = null;
+
+      if (waitTil === true) {
+        waitTilPartName = partName;
+      }
+      else if (_.isString(waitTil)) {
+        waitTilPartName = pascalCase(waitTil);
+      }
+
+      if (waitTilPartName) {
+        Object.defineProperty(MixedFragment.prototype, `waitTil${waitTilPartName}`, {
+          configurable: true,
+          enumerable: false,
+          writable: true,
+          /**
+           * Allows to wait til fragment's selector has attribute/BEM modifier
+           * used to specify state part. For example, we want to wait til
+           * form data is fetching, then we call `someForm.waitTilFetching()`.
+           * Waiting period determined by TestCafe's '--assertion-timeout'
+           * setting (about 3 seconds by default), but additional delay can be
+           * specified using 'options.wait' argument and that delay would be
+           * issued before assertion.
+           *
+           * @param {Options|Object} [options] Options
+           * @param {number} [options.wait] Number of milliseconds to wait before assertion
+           * @return {Promise<void>}
+           */
+          value: async function(options) {
+            const opts = new Options(options);
+            const { wait } = opts;
+
+            if (wait) {
+              await t.wait(wait);
+            }
+
+            await this[`expect${partName}PartOfStateIs`](false);
+          }
+        });
+      }
+
+      // Handle `options.waitUntil`.
+      if (!(_.isNil(waitUntil) || _.isBoolean(waitUntil) ||
+          utils.isNonBlankString(waitUntil))) {
+        throw new TypeError(
+          `'options.waitUntil' argument must be a boolean or a non-blank ` +
+          `string but it is ${typeOf(waitUntil)} (${waitUntil})`
+        );
+      }
+
+      let waitUntilPartName = null;
+
+      if (waitUntil === true) {
+        waitUntilPartName = partName;
+      }
+      else if (_.isString(waitUntil)) {
+        waitUntilPartName = pascalCase(waitUntil);
+      }
+
+      if (waitUntilPartName) {
+        Object.defineProperty(MixedFragment.prototype, `waitUntil${waitUntilPartName}`, {
+          configurable: true,
+          enumerable: false,
+          writable: true,
+          /**
+           * Allows to wait until fragment's selector has no attribute/BEM
+           * modifier used to specify state part. For example, we need to wait
+           * until fragment has 'fetched' BEM modifier, then we call
+           * `someInput.waitUntilFetched()` - it reads like 'Wait **if not**
+           * fetched'.
+           * Waiting period determined by TestCafe's '--assertion-timeout'
+           * setting (about 3 seconds by default), but additional delay can be
+           * specified using 'options.wait' argument and that delay would be
+           * issued before assertion.
+           *
+           * @param {Options|Object} [options] Options
+           * @param {Number} [options.wait] Number of milliseconds to wait before assertion execution
+           * @return {Promise<void>}
+           */
+          value: async function(options) {
+            const opts = new Options(options);
+            const { wait } = opts;
+
+            if (wait) {
+              await t.wait(wait);
+            }
+
+            await this[`expectIs${partName}`]();
+          }
+        });
+      }
+    }
+    else {
+
+      // Non-boolean part of states have methods named like `expectWidgetIs` and
+      // `expectWidgetIsNot`. That methods accepts single argument and asserts
+      // on it.
+      Object.defineProperties(MixedFragment.prototype, {
+        [`expect${partName}Is`]: {
+          configurable: true,
+          enumerable: false,
+          writable: true,
+          /**
+           * Asserts that fragment's state part value is equal to `value`.
+           */
+          value: async function(value) {
+            await this[`expect${partName}PartOfStateIs`](value, {
+              isNot: false
+            });
+          }
+        },
+        [`expect${partName}IsNot`]: {
+          configurable: true,
+          enumerable: false,
+          writable: true,
+          /**
+           * Asserts that fragment's state part value is not equal to `value`.
+           */
+          value: async function(value) {
+            await this[`expect${partName}PartOfStateIs`](value, {
+              isNot: true
+            });
+          }
+        }
+      });
+
+    }
+
+    return MixedFragment;
+  }
 }
 
 Object.defineProperties(Fragment, {
