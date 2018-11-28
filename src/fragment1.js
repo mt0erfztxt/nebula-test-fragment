@@ -802,6 +802,27 @@ class Fragment {
     });
   };
 
+  /**
+   * Asserts that fragment rendered using `<BUTTON>` HTML tag.
+   * 
+   * @param {Options|Object} [options] Options
+   * @param {String|RegExp|Array} [options.text] Allows to assert on text of fragment's element. See `requirements.text` argument of {@link `Fragment#expectExistsAndConformsRequirements`} for details on supported formats. Examples: `'foo'`, `['foo']`, `['foo', true]`
+   * @param {*} [options.selector=this.selector] TestCafe selector to assert on. Can be anything that TestCafe Selector accepts as initializer. Fragment's selector by default
+   * @returns {Promise<void>}
+   */
+  async expectIsButton(options) {
+    const opts = new Options(options);
+    const { selector, text } = opts;
+
+    let requirements = { tagName: 'button' };
+
+    if (_.has(opts, 'text')) {
+      requirements.text = utils.asArray(text);
+    }
+
+    await this.expectExistsAndConformsRequirements(requirements, { selector });
+  }
+
   // TODO: Add option to easily swap default implementation of equality check
   //       to equality by BEM modifier, attribute.
   /**
