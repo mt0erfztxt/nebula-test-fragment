@@ -953,6 +953,32 @@ class Fragment {
   }
 
   /**
+   * Asserts that fragment rendered using `<A>` HTML tag.
+   * 
+   * @param {Options|Object} [options] Options
+   * @param {String|RegExp|Array} [options.href] Allows to assert on 'href' attribute of fragment's element. See `requirements.attributes` argument of {@link `Fragment#expectExistsAndConformsRequirements`} for details on supported formats. Examples: `'foo'`, `['foo']`, `['foo', true]`
+   * @param {String|RegExp|Array} [options.text] Allows to assert on text of fragment's element. See `requirements.text` argument of {@link `Fragment#expectExistsAndConformsRequirements`} for details on supported formats. Examples: `'foo'`, `['foo']`, `['foo', true]`
+   * @param {*} [options.selector=this.selector] TestCafe selector to assert on. Can be anything that TestCafe Selector accepts as initializer. Fragment's selector by default
+   * @returns {Promise<void>}
+   */
+  async expectIsLink(options) {
+    const opts = new Options(options);
+    const { href, selector, text } = opts;
+
+    let requirements = { tagName: 'a' };
+
+    if (_.has(opts, 'href')) {
+      requirements.attributes = [_.concat(['href'], utils.asArray(href))];
+    }
+
+    if (_.has(opts, 'text')) {
+      requirements.text = utils.asArray(text);
+    }
+
+    await this.expectExistsAndConformsRequirements(requirements, { selector });
+  }
+
+  /**
    * Asserts that fragment is not exist - its selector returns zero DOM
    * elements.
    *
