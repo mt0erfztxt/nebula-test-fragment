@@ -1076,6 +1076,22 @@ class Fragment {
   }
 
   /**
+   * Asserts that fragment's text equal or matches specified value.
+   * 
+   * @param {String|RegExp} text
+   * @param {Options|Object} [options] Options
+   * @param {Boolean} [options.isNot=false] When truthy assertion would be negated
+   * @param {*} [options.selector=this.selector] TestCafe selector to assert on. Can be anything that TestCafe Selector accepts as initializer. Fragment's selector by default
+   * @returns {Promise<void>}
+   */
+  async expectTextIs(text, options) {
+    const { isNot, selector } = new Options(options);
+    await this.expectExistsAndConformsRequirements({ text: [text, isNot] }, {
+      selector
+    });
+  }
+
+  /**
    * Returns array of CSS class names of fragment's selector that have `name`
    * as name of BEM modifier. When `name` is nil array would contain all CSS
    * class names that have (any) BEM modifier.
