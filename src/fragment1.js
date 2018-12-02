@@ -1,6 +1,6 @@
 import _ from 'lodash';
 import escapeStringRegexp from 'escape-string-regexp';
-import typeOf from 'typeof--'
+import typeOf from 'typeof--';
 import { detailedDiff } from 'deep-object-diff';
 import { pascalCase, ucFirst } from 'change-case';
 import { Selector, t } from 'testcafe';
@@ -243,6 +243,7 @@ class Fragment {
     if (_.includes(requestedTransformations, 'cns')) {
       const v = transformations.cns;
 
+      // TODO Use `isNonBlankString`
       if (!utils.isNonEmptyString(v)) {
         throw new TypeError(
           `${this.displayName}#transformSelector(): Built-in 'cns' ` +
@@ -259,6 +260,7 @@ class Fragment {
     if (_.includes(requestedTransformations, 'cid')) {
       const v = transformations.cid;
 
+      // TODO Use `isNonBlankString`
       if (!utils.isNonEmptyString(v)) {
         throw new TypeError(
           `${this.displayName}#transformSelector(): Built-in 'cid'  ` +
@@ -1316,6 +1318,28 @@ class Fragment {
    */
   getStateParts(options) {
     return [];
+  }
+
+  /**
+   * Hovers on fragment.
+   * 
+   * @param {Options|Object} [options] Options
+   * @param {Boolean} [options.selector=this.selector] Selector to hover on
+   * @param {Number} [options.wait] Wait specified number of milliseconds after hover is done
+   * @returns {Promise<void>}
+   */
+  async hover(options) {
+    const { selector, wait } = new Options(options, {
+      defaults: {
+        selector: this.selector
+      }
+    });
+
+    await t.hover(selector);
+
+    if (wait) {
+      await t.wait(wait);
+    }
   }
 
   /**
