@@ -29,6 +29,7 @@ const utils = {
   isEmptyString,
   isNonBlankString,
   isNonEmptyString,
+  isRegExp,
   isString,
   Options
 };
@@ -136,6 +137,19 @@ function isNonBlankString(value) {
  */
 function isNonEmptyString(value) {
   return (isString(value) && value.length > 0);
+}
+
+/**
+ * Returns `true` when passed in `value` is a regular expression, otherwise
+ * returns `false`.
+ * 
+ * @param {*} value 
+ * @returns {boolean}
+ */
+function isRegExp(value) {
+  return !!(value && value.test && value.exec &&
+    (value.ignoreCase || value.ignoreCase === false)
+  );
 }
 
 /**
