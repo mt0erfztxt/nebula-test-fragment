@@ -19,7 +19,7 @@ class Fragment {
   //      `defaultTransformation` on class.
   /**
    * Creates fragment.
-   * 
+   *
    * @param {*} [locator] Used to create fragment's selector. In general case it is a list of transformations used to transform selector (see 'parent' option) so it returns DOM element(-s) for one or more fragments. Each transformation is a function (receive selector to transform and fragment's BEM base) or an object (key/value pairs are transformation names/values). Built-in transformations are: 'cns' (must be a string), 'cid' (must be a string), 'idx' (must be an integer gte 0).
    * @param {Options|Object} [options] Options
    * @param {*} [options.parent='body'] Used to specify selector to which locator must be applied. It can be fragment, and then its selector would be used, or it can be anything that TestCafe `Selector` accepts as initializer
@@ -28,14 +28,14 @@ class Fragment {
 
     /**
      * Locator passed to `constructor`.
-     * 
+     *
      * @type {*}
      */
     this.locator = locator;
 
     /**
      * Options passed to `constructor`.
-     * 
+     *
      * @type {Options}
      */
     this.options = new Options(options, {
@@ -47,7 +47,7 @@ class Fragment {
     /**
      * List of transformations that must be applied to selector for it to
      * return DOM element(-s) for one or more fragments.
-     * 
+     *
      * @private
      * @type {Array<*>}
      */
@@ -95,7 +95,7 @@ class Fragment {
 
     /**
      * Fragment's selector, scoped into parent.
-     * 
+     *
      * @private
      * @type {Selector}
      */
@@ -103,7 +103,7 @@ class Fragment {
 
     /**
      * Whether fragment's selector is initialized or not.
-     * 
+     *
      * @private
      * @type {Boolean}
      */
@@ -136,6 +136,28 @@ class Fragment {
   }
 
   /**
+   * Clicks on fragment.
+   *
+   * @param {Options|Object} [options] Options
+   * @param {Boolean} [options.selector=this.selector] Selector to click on
+   * @param {Number} [options.wait] Wait specified number of milliseconds after click is done
+   * @returns {Promise<void>}
+   */
+  async click(options) {
+    const { selector, wait } = new Options(options, {
+      defaults: {
+        selector: this.selector
+      }
+    });
+
+    await t.click(selector);
+
+    if (wait) {
+      await t.wait(wait);
+    }
+  }
+
+  /**
    * Fragment's display name.
    *
    * @returns {String}
@@ -146,7 +168,7 @@ class Fragment {
 
   /**
    * Fragment's selector.
-   * 
+   *
    * @returns {Selector}
    */
   get selector() {
@@ -159,7 +181,7 @@ class Fragment {
 
   /**
    * Used to initialize fragment's selector.
-   * 
+   *
    * @private
    */
   _initializeSelector() {
@@ -186,9 +208,9 @@ class Fragment {
   /**
    * Used to allow custom selector transformation to be added by derived
    * fragment class when required.
-   * 
+   *
    * @private
-   * @param {Object} transformation 
+   * @param {Object} transformation
    * @returns {Selector}
    */
   _transformSelector(transformation) {
@@ -707,7 +729,7 @@ class Fragment {
 
   /**
    * Asserts that fragment rendered using `<BUTTON>` HTML tag.
-   * 
+   *
    * @param {Options|Object} [options] Options
    * @param {String|RegExp|Array} [options.text] Allows to assert on text of fragment's element. See `requirements.text` argument of {@link `Fragment#expectExistsAndConformsRequirements`} for details on supported formats. Examples: `'foo'`, `['foo']`, `['foo', true]`
    * @param {*} [options.selector=this.selector] TestCafe selector to assert on. Can be anything that TestCafe Selector accepts as initializer. Fragment's selector by default
@@ -730,7 +752,7 @@ class Fragment {
   //       to equality by BEM modifier, attribute.
   /**
    * Asserts that `this` fragment is equal `that` fragment.
-   * 
+   *
    * @param {*} that A fragment to which `this` fragment must be equal to pass assertion
    * @param {Options|Object} [options] Options
    * @param {Boolean|Function} [options.equalityCheck=true] When it is a nil or `true` a default implementation, that asserts on equality of `this` and `that` text content, would be used. When it is a (async) function then it would be called with `this` and `that` fragments and it must throw when fragments aren't equal, note that no `this` binding is provided. Set it to falsey value and override in descendant to get custom equality check logic
@@ -857,7 +879,7 @@ class Fragment {
 
   /**
    * Asserts that fragment rendered using `<A>` HTML tag.
-   * 
+   *
    * @param {Options|Object} [options] Options
    * @param {String|RegExp|Array} [options.href] Allows to assert on 'href' attribute of fragment's element. See `requirements.attributes` argument of {@link `Fragment#expectExistsAndConformsRequirements`} for details on supported formats. Examples: `'foo'`, `['foo']`, `['foo', true]`
    * @param {String|RegExp|Array} [options.text] Allows to assert on text of fragment's element. See `requirements.text` argument of {@link `Fragment#expectExistsAndConformsRequirements`} for details on supported formats. Examples: `'foo'`, `['foo']`, `['foo', true]`
@@ -980,7 +1002,7 @@ class Fragment {
 
   /**
    * Asserts that fragment's text equal or matches specified value.
-   * 
+   *
    * @param {String|RegExp} text
    * @param {Options|Object} [options] Options
    * @param {Boolean} [options.isNot=false] When truthy assertion would be negated
@@ -1223,7 +1245,7 @@ class Fragment {
 
   /**
    * Hovers on fragment.
-   * 
+   *
    * @param {Options|Object} [options] Options
    * @param {Boolean} [options.selector=this.selector] Selector to hover on
    * @param {Number} [options.wait] Wait specified number of milliseconds after hover is done
