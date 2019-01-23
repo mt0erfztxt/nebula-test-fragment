@@ -26,6 +26,7 @@ const testCafeAssertionNames = [
 const utils = {
   asArray,
   buildTestCafeAssertionName,
+  isBlankString,
   isEmptyString,
   isNonBlankString,
   isNonEmptyString,
@@ -104,6 +105,17 @@ function buildTestCafeAssertionName(assertionName, options) {
   }
 
   return assertionName;
+}
+
+/**
+ * Returns `true` when passed in `value` is a blank string, otherwise
+ * returns `false`.
+ *
+ * @param {*} value - Subject that must be tested
+ * @returns {boolean}
+ */
+function isBlankString(value) {
+  return (isString(value) && _.trim(value).length === 0);
 }
 
 /**
