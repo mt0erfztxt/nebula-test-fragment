@@ -816,20 +816,20 @@ class Fragment {
    *
    * @param {Options|Object} [options] Options
    * @param {Boolean} [options.allowMultiple=false] When falsey then fragment's selector must return only one DOM element to pass assertion
+   * @param {Boolean} [options.hover=false] When truthy and `isNot` is falsey then `#hover()` would be called additionally
    * @param {Boolean} [options.isNot=false] When truthy fragment's selector must not exist (return zero DOM elements) to pass assertion
    * @param {String} [options.message] Custom message for error
    * @return {Promise<void>}
    */
   async expectIsExist(options) {
-    const opts = new Options(options, {
+    let msg = '';
+    const { allowMultiple, hover, isNot, message } = new Options(options, {
       defaults: {
         allowMultiple: false,
+        hover: false,
         isNot: false
       }
     });
-
-    let msg = '';
-    const { allowMultiple, isNot, message } = opts;
 
     // ---------------------------------------------------------------------------
     // Handling case when selector must not exist
@@ -874,6 +874,10 @@ class Fragment {
       await t
         .expect(this.selector.count)
         .eql(1, msg);
+    }
+
+    if (hover && !isNot) {
+      await this.hover();
     }
   }
 
