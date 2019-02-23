@@ -713,6 +713,25 @@ class Fragment {
   }
 
   /**
+   * Asserts that fragment has specified icon.
+   *
+   * @param {String} icon Fragment must have that icon to pass assertion. Icon must be one of FontAwesome 4 icons, but without 'fa-' prefix
+   * @param {Options|Object} [options] Options
+   * @param {*} [options.selector=this.selector] TestCafe selector to assert on. Can be anything that TestCafe Selector accepts as initializer. Fragment's selector by default
+   */
+  async expectIconIs(icon, options) {
+    const { selector } = new Options(options, {
+      defaults: {
+        selector: this.selector
+      }
+    })
+
+    await t
+      .expect(selector.find(`i.fa-${icon}`).count)
+      .eql(1, `${this.displayName}'s icon is not '${icon}'`);
+  }
+
+  /**
    * Asserts that fragment is found in specified parent at specified index.
    *
    * @param {*} parent Same as constructor's 'parent' option
