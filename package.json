@@ -3,6 +3,10 @@
   "version": "0.1.0",
   "description": "Base fragment and utilities for e2e testing",
   "license": "Apache-2.0",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/mt0erfztxt/nebula-test-fragment.git"
+  },
   "author": "Sergey Kozhevnikov <mt0erfztxt@gmail.com>",
   "main": "lib/index.js",
   "directories": {
@@ -33,11 +37,11 @@
     "babel-cli": "^6.26.0",
     "babel-core": "^6.26.3",
     "babel-preset-env": "^1.6.1",
-    "mocha": "^5.1.1",
+    "mocha": "^6.0.2",
     "nyc": "^11.7.1",
-    "sinon": "^5.0.3",
+    "sinon": "^7.2.6",
     "testcafe-browser-provider-browserstack": "^1.4.0",
-    "unexpected": "^10.37.5",
-    "unexpected-sinon": "^10.10.0"
+    "unexpected": "^11.1.1",
+    "unexpected-sinon": "^10.11.1"
   }
 }
