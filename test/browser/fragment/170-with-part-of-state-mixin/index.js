@@ -45,14 +45,11 @@ test("035 It should throw error when 'options.src' argument set to not supported
   expect(
     () => Fragment.withPartOfStateMixin(Fragment, 'foo', { src: 'notSupported' }),
     'to throw',
-    (e) => {
-      expect(e, 'to be a', TypeError);
-      expect(
-        e.message,
-        'to match',
-        /'options.src' argument must be a nil or one of 'attribute' or 'bemModifier' but it is String \(notSupported\)/
-      );
-    }
+    new TypeError(
+      "'Options.constructor()': validation failed with error: 'options.src' " +
+      "argument must be a nil or one of 'attribute' or 'bemModifier' but it " +
+      "is String (notSupported)"
+    )
   );
 });
 
