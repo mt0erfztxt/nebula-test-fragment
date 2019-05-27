@@ -274,7 +274,7 @@ and examples in [tests](test/browser/fragment/010-index/index.js).
 There is one open source project for this version of tool available in public
 GitHub [repository](https://mt0erfztxt.github.io/nebula-widgets/). Fragment classes
 for widgets can be found in this [directory](https://github.com/mt0erfztxt/nebula-widgets/tree/master/src/js)
-and tests form in this [directory](https://github.com/mt0erfztxt/nebula-widgets/tree/master/test/js/browser).
+and tests for them in this [directory](https://github.com/mt0erfztxt/nebula-widgets/tree/master/test/js/browser).
 
 ## Running project tests
 
