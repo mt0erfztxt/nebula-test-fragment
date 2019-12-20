@@ -1,8 +1,8 @@
-const assert = require("assert");
-const appRootPath = require("app-root-path");
 import { Selector } from "testcafe";
-
 import { expectHasCssClasses } from "../../../../main/selector";
+
+const appRootPath = require("app-root-path");
+const assert = require("assert");
 
 fixture("selector.expectHasCssClasses()").page(
   appRootPath.path +
