@@ -3,7 +3,7 @@ import { Selector } from "testcafe";
 
 import { filterByAttribute } from "../../../../main/selector";
 
-fixture("selector.filterByAttribute").page(
+fixture("selector.filterByAttribute()").page(
   appRootPath.path +
     "/src/test/testcafe/selector/filter-by-attribute/index.html"
 );
