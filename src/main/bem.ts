@@ -564,7 +564,11 @@ export class BemBase {
     return new BemBase({ blk: this.blk, elt: this.elt, mod: this.mod });
   }
 
-  toString() {
+  toString(): BemString {
     return this.toBemString();
+  }
+
+  toQuerySelector(): string {
+    return `.${this.toString()}`;
   }
 }
