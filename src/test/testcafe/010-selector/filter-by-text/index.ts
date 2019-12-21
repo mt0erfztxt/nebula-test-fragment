@@ -4,7 +4,7 @@ import { filterByText } from "../../../../main/selector";
 const appRootPath = require("app-root-path");
 
 fixture("selector.filterByText()").page(
-  appRootPath.path + "/src/test/testcafe/selector/filter-by-text/index.html"
+  appRootPath.path + "/src/test/testcafe/010-selector/filter-by-text/index.html"
 );
 
 test("010 It filters selector by text", async t => {

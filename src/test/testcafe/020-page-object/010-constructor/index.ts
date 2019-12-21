@@ -7,7 +7,7 @@ const appRootPath = require("app-root-path");
 
 function buildPagePath(testId: string): string {
   return (
-    appRootPath.path + `/src/test/testcafe/page-object/010-index/${testId}.html`
+    appRootPath.path + `/src/test/testcafe/020-page-object/010-constructor/${testId}.html`
   );
 }
 

@@ -6,7 +6,7 @@ const assert = require("assert");
 
 fixture("selector.expectHasCssClasses()").page(
   appRootPath.path +
-    "/src/test/testcafe/selector/expect-has-css-classes/index.html"
+    "/src/test/testcafe/010-selector/expect-has-css-classes/index.html"
 );
 
 test("010 It should fail when selector does not return DOM elements", async t => {
