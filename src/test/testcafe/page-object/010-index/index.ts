@@ -1,7 +1,6 @@
 import { PageObject } from "../../../../main/page-object";
 import { filterByText } from "../../../../main/selector";
 
-const assert = require("assert");
 const appRootPath = require("app-root-path");
 
 function buildPagePath(testId: string): string {
@@ -24,10 +23,10 @@ fixture("PageObject");
 
 test.page(buildPagePath("010"))(
   "010 It created with correct BEM base",
-  async () => {
-    const f1 = new WidgetA();
-    assert.strictEqual(f1.bemBase.toString(), "f1");
-    assert.strictEqual(f1.bemBase.frozen, true);
+  async t => {
+    const widgetA = new WidgetA();
+    await t.expect(widgetA.bemBase.toString()).eql("widgetA");
+    await t.expect(widgetA.bemBase.frozen).ok();
   }
 );
 
@@ -64,11 +63,11 @@ test.page(buildPagePath("025"))(
       await t.expect(widgetA3.selector.textContent).eql("foo");
     } catch (e) {
       isThrown = true;
-      assert.ok(
-        e.errMsg.match(/.+expected 'Widget A -- 3' to deeply equal 'foo'/)
-      );
+      await t
+        .expect(e.errMsg)
+        .match(/.+expected 'Widget A -- 3' to deeply equal 'foo'/);
     }
-    assert.ok(isThrown);
+    await t.expect(isThrown).ok();
   }
 );
 
