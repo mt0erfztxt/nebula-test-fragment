@@ -2,12 +2,22 @@ import is from "@sindresorhus/is";
 import { Selector, t } from "testcafe";
 import { BemBase } from "./bem";
 
+/**
+ * Represents selector transformation.
+ */
 export type SelectorTransformation =
   | SelectorTransformationFn
   | SelectorTransformationAlias;
 
+/**
+ * Represents selector transformation function.
+ */
 export type SelectorTransformationFn = (s: Selector, b: BemBase) => Selector;
-export type SelectorTransformationAlias = {};
+
+/**
+ * Represents selector transformation alias.
+ */
+export type SelectorTransformationAlias = [string, boolean | number | string];
 
 export abstract class AbstractPageObject {
   /**
@@ -47,19 +57,31 @@ export abstract class AbstractPageObject {
    * List of transformations that must be applied to selector for it to return
    * DOM element used as root of page object.
    */
-  private readonly _selectorTransformations: SelectorTransformation[];
+  private readonly _selectorTransformations: SelectorTransformation[] = [];
 
-  constructor(
-    locator?: SelectorTransformation | SelectorTransformation[],
-    options?: { parent?: any }
-  ) {
-    options = options || {};
-    if (!options.parent) {
-      options.parent = "body";
-    }
-
-    if (is.array(locator)) {
-      this._selectorTransformations = is.array(locator) ? locator : [locator];
+  /**
+   * Creates page object.
+   *
+   * Accepts variable number of selector transformations that need ot be
+   * applied to locate page object. To specify parent page object pass it as first selector transformation.
+   */
+  constructor(...args: (AbstractPageObject | SelectorTransformation)[]) {
+    let parentSelector = Selector("body");
+    for (let i = 0; i < args.length; i++) {
+      const selectorTransformation = args[i];
+      if (selectorTransformation instanceof AbstractPageObject) {
+        if (i === 0) {
+          parentSelector = selectorTransformation.selector;
+        } else {
+          throw new Error(
+            `${this.displayName} -- only first selector transformation ` +
+              `allowed to be parent page object but '${i}' is ` +
+              "also page object"
+          );
+        }
+      } else {
+        this._selectorTransformations.push(selectorTransformation);
+      }
     }
 
     this._bemBase = new BemBase(
@@ -67,17 +89,6 @@ export abstract class AbstractPageObject {
       { frozen: true }
     );
 
-    // When choosing parent for page object's selector there are following
-    // options:
-    // 1. Parent is specified and it's a page object -- use that page
-    // object's selector as parent selector.
-    // 2. Parent is specified and it isn't a page object - use it as
-    // initializer to create parent selector.
-    // 3. No parent specified -- use 'body' as initializer to create parent
-    // selector.
-    const { parent } = options;
-    const parentSelector =
-      parent instanceof AbstractPageObject ? parent.selector : Selector(parent);
     this._selector = parentSelector.find(this._bemBase.toQuerySelector());
   }
 
@@ -113,19 +124,21 @@ export abstract class AbstractPageObject {
    */
   private _initializeSelector() {
     for (const transformation of this._selectorTransformations) {
-      this._selector = is.function_(transformation)
-        ? transformation(this._selector, this._bemBase)
-        : this._transformSelector(transformation);
+      this._selector = is.array(transformation)
+        ? this._transformSelector(transformation)
+        : transformation(this._selector, this._bemBase.clone());
     }
 
     this._selectorInitialized = true;
   }
 
   /**
-   * Used to allow custom selector transformation to be added by derived page
-   * object class when required.
+   * Used to allow custom selector transformation aliases to be added in
+   * derived page object classes by overriding {@link AbstractPageObject#transformSelector} method.
    */
-  private _transformSelector(transformation: SelectorTransformation): Selector {
+  private _transformSelector(
+    transformation: SelectorTransformationAlias
+  ): Selector {
     if (this._selectorInitialized) {
       throw new Error(
         `${this.displayName} -- selector is initialized and therefore can ` +

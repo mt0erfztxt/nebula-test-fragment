@@ -1,112 +1,118 @@
-import { BemBase } from "../../../../main/bem";
 import { PageObject } from "../../../../main/page-object";
-import {} from "../../../../main/selector";
+import { filterByText } from "../../../../main/selector";
 
 const assert = require("assert");
 const appRootPath = require("app-root-path");
 
-function buildPagePath(testId?: string): string {
+function buildPagePath(testId: string): string {
   return (
-    appRootPath.path +
-    `/src/test/testcafe/page-object/010-index/${testId ? testId : "index"}.html`
+    appRootPath.path + `/src/test/testcafe/page-object/010-index/${testId}.html`
   );
 }
 
-class F1 extends PageObject {
-  static bemBase = "f1";
-  static displayName = "F1";
+class WidgetA extends PageObject {
+  static bemBase = "widgetA";
+  static displayName = "WidgetA";
+}
+
+class WidgetB extends PageObject {
+  static bemBase = "widgetB";
+  static displayName = "WidgetB";
 }
 
 fixture("PageObject");
 
-test.page(buildPagePath())(
-  "010 It should choose correct BEM base for page object",
+test.page(buildPagePath("010"))(
+  "010 It created with correct BEM base",
   async () => {
-    const f1 = new F1();
-    assert.strictEqual(f1.displayName, "F1");
+    const f1 = new WidgetA();
     assert.strictEqual(f1.bemBase.toString(), "f1");
+    assert.strictEqual(f1.bemBase.frozen, true);
   }
 );
 
-// test.page(buildPagePath("020"))(
-//   "020 It should create fragment with selector returning only elements with fragment's BEM base",
-//   async t => {
-//     const f1 = new F1();
-//     expect(f1._selector, "to be defined");
-//     await t.expect(f1._selector.count).eql(2);
-//     await t.expect(f1._selector.nth(0).textContent).eql("f1a");
-//     await t.expect(f1._selector.nth(1).textContent).eql("f1b");
-//   }
-// );
-//
-// test.page(buildPagePath("030"))(
-//   "030 It should scope fragment's selector into parent selector",
-//   async t => {
-//     // -- Check when parent not provided
-//
-//     const f1a = new F1();
-//     expect(f1a._selector, "to be defined");
-//     await t.expect(f1a._selector.textContent).eql("f1a");
-//     await t.expect(f1a._selector.parent(0).tagName).eql("body");
-//
-//     // -- Check when parent provided as string
-//
-//     const f1b = new F1({}, { parent: ".parent" });
-//     expect(f1b._selector, "to be defined");
-//     await t.expect(f1b._selector.textContent).eql("f1b");
-//     await t.expect(f1b._selector.parent(0).tagName).eql("div");
-//     await t.expect(f1b._selector.parent(0).classNames).eql(["parent"]);
-//
-//     // -- Check when parent provided as fragment
-//
-//     class F2 extends Fragment {}
-//
-//     Object.defineProperties(F2, {
-//       bemBase: {
-//         value: "f2"
-//       },
-//       displayName: {
-//         value: "F2"
-//       }
-//     });
-//
-//     const f2 = new F2();
-//     const f1c = new F1({}, { parent: f2 });
-//     expect(f1c._selector, "to be defined");
-//     await t.expect(f1c._selector.textContent).eql("f1c");
-//     await t.expect(f1c._selector.parent(0).tagName).eql("div");
-//     await t.expect(f1c._selector.parent(0).classNames).eql(["f2"]);
-//   }
-// );
-//
-// test.page(buildPagePath())(
-//   "040 It should initialize fragment's selector on first access",
-//   async () => {
-//     let sel;
-//     const f1 = new F1();
-//     const initializeSelectorSpy = sinon.spy(f1, "_initializeSelector");
-//
-//     // -- Check that selector initialized only on first access and fragment
-//     // -- marked accordingly
-//
-//     expect(f1._selectorInitialized, "to be false");
-//
-//     sel = f1.selector;
-//     expect(sel, "to be defined");
-//     expect(initializeSelectorSpy, "was called times", 1);
-//     expect(f1._selectorInitialized, "to be true");
-//
-//     sel = f1.selector;
-//     expect(sel, "to be defined");
-//     expect(initializeSelectorSpy, "was called times", 1);
-//     expect(f1._selectorInitialized, "to be true");
-//   }
-// );
-//
+test.page(buildPagePath("020"))(
+  "020 It can be created without selector transformations at all",
+  async t => {
+    const widgetA = new WidgetA();
+    await t.expect(widgetA.selector.count).eql(2);
+    await t.expect(widgetA.selector.nth(0).textContent).eql("Widget A -- 1");
+    await t.expect(widgetA.selector.nth(1).textContent).eql("Widget A -- 2");
+  }
+);
+
+test.page(buildPagePath("025"))(
+  "025 It can be created with selector transformation function",
+  async t => {
+    const widgetA2 = new WidgetA((s, b) =>
+      s.filter(b.setMod(["foo"]).toQuerySelector())
+    );
+    await t.expect(widgetA2.selector.count).eql(1);
+    await t.expect(widgetA2.selector.nth(0).textContent).eql("Widget A -- 2");
+
+    const widgetA3 = new WidgetA(s => filterByText(s, /A -- 3/));
+    await t.expect(widgetA3.selector.count).eql(1);
+    await t.expect(widgetA3.selector.nth(0).textContent).eql("Widget A -- 3");
+
+    const widgetA = new WidgetA(s => s.withText("No such element"));
+    await t.expect(widgetA.selector.count).eql(0);
+
+    // -- Check failure --
+
+    let isThrown = false;
+    try {
+      await t.expect(widgetA3.selector.textContent).eql("foo");
+    } catch (e) {
+      isThrown = true;
+      assert.ok(
+        e.errMsg.match(/.+expected 'Widget A -- 3' to deeply equal 'foo'/)
+      );
+    }
+    assert.ok(isThrown);
+  }
+);
+
+test.page(buildPagePath("030"))(
+  "030 It allow parent page object to be passed as first selector transformation",
+  async t => {
+    // Without parent.
+    const widgetA1 = new WidgetA();
+    await t.expect(widgetA1.selector.textContent).eql("Widget A -- 1");
+    await t.expect(widgetA1.selector.parent(0).tagName).eql("body");
+
+    // With parent.
+    const widgetB = new WidgetB();
+    const widgetA2 = new WidgetA(widgetB);
+    await t.expect(widgetA2.selector.textContent).eql("Widget A -- 2");
+    await t.expect(widgetA2.selector.parent(0).tagName).eql("div");
+    await t.expect(widgetA2.selector.parent(0).classNames).eql(["widgetB"]);
+  }
+);
+
+test.page(buildPagePath("040"))(
+  "040 It can be created using multiple selector transformations",
+  async t => {
+    const widgetA23 = new WidgetA(
+      (s, b) => s.filter(b.setMod(["foo"]).toQuerySelector()),
+      (s, b) => s.filter(b.setMod(["bar"]).toQuerySelector())
+    );
+    await t.expect(widgetA23.selector.count).eql(2);
+    await t.expect(widgetA23.selector.nth(0).textContent).eql("Widget A -- 2");
+    await t.expect(widgetA23.selector.nth(1).textContent).eql("Widget A -- 3");
+
+    const widgetA3 = new WidgetA(
+      (s, b) => s.filter(b.setMod(["foo"]).toQuerySelector()),
+      s => filterByText(s, "Widget A -- 3")
+    );
+    await t.expect(widgetA3.selector.count).eql(1);
+    await t.expect(widgetA3.selector.textContent).eql("Widget A -- 3");
+  }
+);
+
 // test.page(buildPagePath("050"))(
 //   "050 It should allow 'locator' argument to be a function",
 //   async t => {
-//     const f1 = new F1((sel, _) => selector.filterByText(sel, "f1b"));
+//     const f1 = new WidgetA((sel, _) => selector.filterByText(sel, "f1b"));
 //
 //     await t.expect(f1.selector.count).eql(1);
 //     await t.expect(f1.selector.classNames).eql(["f1"]);
@@ -131,7 +137,7 @@ test.page(buildPagePath())(
 // test.page(buildPagePath("060"))(
 //   "060 It should allow 'locator' argument to be a list of functions",
 //   async t => {
-//     const f1 = new F1([
+//     const f1 = new WidgetA([
 //       (sel, _) => selector.filterByText(sel, "f1b"),
 //       (sel, _) => sel.nth(3)
 //     ]);
@@ -160,7 +166,7 @@ test.page(buildPagePath())(
 // test.page(buildPagePath("070"))(
 //   "070 It should allow 'locator' argument to be a POJO with built-in 'cid' transformation",
 //   async t => {
-//     const f1 = new F1({ cid: "baz" });
+//     const f1 = new WidgetA({ cid: "baz" });
 //
 //     await t.expect(f1.selector.count).eql(1);
 //     await t.expect(f1.selector.classNames).eql(["f1", "f1--cid_baz"]);
@@ -185,7 +191,7 @@ test.page(buildPagePath())(
 // test.page(buildPagePath("080"))(
 //   "080 It should allow 'locator' argument to be a POJO with built-in 'cns' transformation",
 //   async t => {
-//     const f1 = new F1({ cns: "baz" });
+//     const f1 = new WidgetA({ cns: "baz" });
 //
 //     await t.expect(f1.selector.count).eql(1);
 //     await t.expect(f1.selector.classNames).eql(["f1", "f1--cns_baz"]);
@@ -210,7 +216,7 @@ test.page(buildPagePath())(
 // test.page(buildPagePath("090"))(
 //   "090 It should allow 'locator' argument to be a POJO with built-in 'idx' transformation",
 //   async t => {
-//     const f1 = new F1({ idx: 2 });
+//     const f1 = new WidgetA({ idx: 2 });
 //
 //     await t.expect(f1.selector.count).eql(1);
 //     await t.expect(f1.selector.classNames).eql(["f1"]);
@@ -235,7 +241,7 @@ test.page(buildPagePath())(
 // test.page(buildPagePath("100"))(
 //   "100 It should apply built-in transformations in following order 'cns' -> 'cid' -> 'idx'",
 //   async t => {
-//     const f1 = new F1({ idx: 1, cns: "bar", cid: "11" });
+//     const f1 = new WidgetA({ idx: 1, cns: "bar", cid: "11" });
 //
 //     await t.expect(f1.selector.count).eql(1);
 //     await t
@@ -266,7 +272,7 @@ test.page(buildPagePath())(
 // test.page(buildPagePath("100"))(
 //   "110 It should allow 'locator' argument to be a list of POJOs",
 //   async t => {
-//     const f1a = new F1([{ cns: "bar", cid: "11" }, { idx: 2 }]);
+//     const f1a = new WidgetA([{ cns: "bar", cid: "11" }, { idx: 2 }]);
 //     await t.expect(f1a.selector.count).eql(1);
 //     await t
 //       .expect(f1a.selector.classNames)
@@ -275,7 +281,7 @@ test.page(buildPagePath())(
 //
 //     // -- Check that order does matter
 //
-//     const f1b = new F1([{ idx: 2 }, { cns: "bar", cid: "11" }]);
+//     const f1b = new WidgetA([{ idx: 2 }, { cns: "bar", cid: "11" }]);
 //     await t.expect(f1b.selector.count).eql(0);
 //   }
 // );
@@ -283,7 +289,7 @@ test.page(buildPagePath())(
 // test.page(buildPagePath("120"))(
 //   "120 It should allow 'locator' argument to be a mix of function and POJOs",
 //   async t => {
-//     const f1 = new F1([(sel, _) => sel.filter('[data-id="bar"]'), { idx: 2 }]);
+//     const f1 = new WidgetA([(sel, _) => sel.filter('[data-id="bar"]'), { idx: 2 }]);
 //
 //     await t.expect(f1.selector.count).eql(1);
 //     await t.expect(f1.selector.classNames).eql(["f1"]);
@@ -309,7 +315,7 @@ test.page(buildPagePath())(
 // test.page(buildPagePath("130"))(
 //   "130 It should allow 'locator' argument to have custom tranformations provided by derived fragments",
 //   async t => {
-//     class F2 extends F1 {
+//     class F2 extends WidgetA {
 //       /**
 //        * Allows to select fragment F2 by its text and it can be a string,
 //        * a RegExp or a tupple where first element is a string/RegExp and second

@@ -1,20 +1,9 @@
 import is from "@sindresorhus/is";
 import {
   AbstractPageObject,
-  SelectorTransformationAlias as APOSTA,
-  SelectorTransformationFn
+  SelectorTransformationAlias
 } from "./abstract-page-object";
 import { BemBase } from "./bem";
-
-export type SelectorTransformation =
-  | SelectorTransformationFn
-  | SelectorTransformationAlias;
-
-export type SelectorTransformationAlias = APOSTA & {
-  cid: string;
-  cns: string;
-  idx: number;
-};
 
 export class PageObject extends AbstractPageObject {
   static bemBase: string = "";
@@ -24,7 +13,11 @@ export class PageObject extends AbstractPageObject {
    * Adds 'cid', 'cns' and 'idx' selector transformation aliases.
    */
   transformSelector(
-    selectorTransformationAlias: SelectorTransformationAlias,
+    selectorTransformationAlias: SelectorTransformationAlias & {
+      cid: string;
+      cns: string;
+      idx: number;
+    },
     selector: Selector,
     bemBase: BemBase
   ): Selector {
