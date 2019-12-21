@@ -10,37 +10,17 @@ export class PageObject extends AbstractPageObject {
   static displayName: string = "PageObject";
 
   /**
-   * Adds 'cid', 'cns' and 'idx' selector transformation aliases.
+   * Adds 'cid' and 'idx' selector transformation aliases.
    */
   transformSelector(
     selectorTransformationAlias: SelectorTransformationAlias & {
       cid: string;
-      cns: string;
       idx: number;
     },
     selector: Selector,
     bemBase: BemBase
   ): Selector {
     const requestedTransformations = Object.keys(selectorTransformationAlias);
-
-    // Handle 'cns' (component namespace) transformation.
-    if (requestedTransformations.includes("cns")) {
-      const v = selectorTransformationAlias.cns;
-
-      if (is.string(v) && v.trim().length) {
-        selector = selector.filter(
-          bemBase
-            .clone()
-            .setMod(["cns", v])
-            .toQuerySelector()
-        );
-      } else {
-        throw new Error(
-          `${this.displayName} -- Built-in 'cns' transformation must be a ` +
-            `non-blank string but it is '${is(v)}' -- ${v}`
-        );
-      }
-    }
 
     // Handle 'cid' (component id) transformation.
     if (requestedTransformations.includes("cid")) {
@@ -61,8 +41,8 @@ export class PageObject extends AbstractPageObject {
       }
     }
 
-    // Handle 'idx' transformation. It respects 'cns' and 'cid' transformations
-    //  and so applied after them.
+    // Handle 'idx' transformation. It respects 'cid' transformation and so
+    // applied after it.
     if (requestedTransformations.includes("idx")) {
       const v = selectorTransformationAlias.idx;
 
