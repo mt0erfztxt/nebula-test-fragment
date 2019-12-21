@@ -13,39 +13,31 @@ export class PageObject extends AbstractPageObject {
    * Adds 'cid' and 'idx' selector transformation aliases.
    */
   transformSelector(
-    selectorTransformationAlias: SelectorTransformationAlias & {
-      cid: string;
-      idx: number;
-    },
+    selectorTransformationAlias: SelectorTransformationAlias,
     selector: Selector,
     bemBase: BemBase
   ): Selector {
-    const requestedTransformations = Object.keys(selectorTransformationAlias);
+    const [n, v] = selectorTransformationAlias;
 
-    // Handle 'cid' (component id) transformation.
-    if (requestedTransformations.includes("cid")) {
-      const v = selectorTransformationAlias.cid;
+    if (!["cid", "idx"].includes(n)) {
+      return selector;
+    }
 
-      if (is.string(v) && v.trim().length) {
+    if ("cid" === n) {
+      if (is.boolean(v) || is.number(v) || (is.string(v) && v.trim().length)) {
         selector = selector.filter(
           bemBase
             .clone()
-            .setMod(["cid", v])
+            .setMod(["cid", "" + v])
             .toQuerySelector()
         );
       } else {
         throw new Error(
           `${this.displayName} -- Built-in 'cid' transformation must be a ` +
-            `non-blank string but it is '${is(v)}' -- ${v}`
+            `boolean, number or non-blank string but it is '${is(v)}' -- ${v}`
         );
       }
-    }
-
-    // Handle 'idx' transformation. It respects 'cid' transformation and so
-    // applied after it.
-    if (requestedTransformations.includes("idx")) {
-      const v = selectorTransformationAlias.idx;
-
+    } else if ("idx" === n) {
       if (is.integer(v) && v >= 0) {
         /*
          * NOTE: Don't use `Selector.nth()` because it doesn't work properly,

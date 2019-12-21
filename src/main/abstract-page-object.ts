@@ -17,7 +17,7 @@ export type SelectorTransformationFn = (s: Selector, b: BemBase) => Selector;
 /**
  * Represents selector transformation alias.
  */
-export type SelectorTransformationAlias = [string, boolean | number | string];
+export type SelectorTransformationAlias = [string, unknown];
 
 export abstract class AbstractPageObject {
   /**
@@ -75,8 +75,8 @@ export abstract class AbstractPageObject {
         } else {
           throw new Error(
             `${this.displayName} -- only first selector transformation ` +
-              `allowed to be parent page object but '${i}' is ` +
-              "also page object"
+              `allowed to be parent page object but transformation at ` +
+              `index ${i} is page object`
           );
         }
       } else {
