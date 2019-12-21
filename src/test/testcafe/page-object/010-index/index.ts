@@ -1,3 +1,5 @@
+import { SelectorTransformationAlias } from "../../../../main/abstract-page-object";
+import { BemBase } from "../../../../main/bem";
 import { PageObject } from "../../../../main/page-object";
 import { filterByText } from "../../../../main/selector";
 
@@ -19,10 +21,42 @@ class WidgetB extends PageObject {
   static displayName = "WidgetB";
 }
 
+class WidgetC extends PageObject {
+  static bemBase = "widgetC";
+  static displayName = "WidgetC";
+
+  /**
+   * Adds 'label' and 'text' selector transformation aliases.
+   */
+  transformSelector(
+    selectorTransformationAlias: SelectorTransformationAlias,
+    selector: Selector,
+    bemBase: BemBase
+  ) {
+    selector = super.transformSelector(
+      selectorTransformationAlias,
+      selector,
+      bemBase
+    );
+
+    const [n, v] = selectorTransformationAlias;
+
+    if (!["label", "text"].includes(n)) {
+      return selector;
+    }
+
+    if ("label" === n || "text" === n) {
+      selector = filterByText(selector, v as RegExp | string);
+    }
+
+    return selector;
+  }
+}
+
 fixture("PageObject");
 
 test.page(buildPagePath("010"))(
-  "010 It created with correct BEM base",
+  "010 created with correct BEM base",
   async t => {
     const widgetA = new WidgetA();
     await t.expect(widgetA.bemBase.toString()).eql("widgetA");
@@ -31,7 +65,7 @@ test.page(buildPagePath("010"))(
 );
 
 test.page(buildPagePath("020"))(
-  "020 It can be created without selector transformations at all",
+  "020 can be created without selector transformations at all",
   async t => {
     const widgetA = new WidgetA();
     await t.expect(widgetA.selector.count).eql(2);
@@ -41,7 +75,7 @@ test.page(buildPagePath("020"))(
 );
 
 test.page(buildPagePath("025"))(
-  "025 It can be created with selector transformation function",
+  "025 can be created using selector transformation function",
   async t => {
     const widgetA2 = new WidgetA((s, b) =>
       s.filter(b.setMod(["foo"]).toQuerySelector())
@@ -72,7 +106,7 @@ test.page(buildPagePath("025"))(
 );
 
 test.page(buildPagePath("030"))(
-  "030 It allow parent page object to be passed as first selector transformation",
+  "030 parent page object can be provided as first selector transformation",
   async t => {
     // Without parent.
     const widgetA1 = new WidgetA();
@@ -85,11 +119,27 @@ test.page(buildPagePath("030"))(
     await t.expect(widgetA2.selector.textContent).eql("Widget A -- 2");
     await t.expect(widgetA2.selector.parent(0).tagName).eql("div");
     await t.expect(widgetA2.selector.parent(0).classNames).eql(["widgetB"]);
+
+    // Throws if not first.
+    let isThrown = false;
+    try {
+      new WidgetA(s => filterByText(s, /A -- 2/), widgetB);
+    } catch (e) {
+      isThrown = true;
+      await t
+        .expect(e.message)
+        .eql(
+          "WidgetA -- only first selector transformation " +
+            "allowed to be parent page object but transformation at index 1 " +
+            "is page object"
+        );
+    }
+    await t.expect(isThrown).ok();
   }
 );
 
 test.page(buildPagePath("040"))(
-  "040 It can be created using multiple selector transformations",
+  "040 can be created using multiple selector transformations",
   async t => {
     const widgetA23 = new WidgetA(
       (s, b) => s.filter(b.setMod(["foo"]).toQuerySelector()),
@@ -108,250 +158,122 @@ test.page(buildPagePath("040"))(
   }
 );
 
-// test.page(buildPagePath("050"))(
-//   "050 It should allow 'locator' argument to be a function",
-//   async t => {
-//     const f1 = new WidgetA((sel, _) => selector.filterByText(sel, "f1b"));
-//
-//     await t.expect(f1.selector.count).eql(1);
-//     await t.expect(f1.selector.classNames).eql(["f1"]);
-//     await t.expect(f1.selector.textContent).eql("f1b");
-//
-//     // -- Ensure it fails as expected
-//
-//     let isThrown = false;
-//
-//     try {
-//       await t.expect(f1.selector.textContent).eql("foo");
-//     } catch (e) {
-//       expect(e.errMsg, "to match", /.+expected 'f1b' to deeply equal 'foo'/);
-//
-//       isThrown = true;
-//     }
-//
-//     expect(isThrown, "to be true");
-//   }
-// );
-//
-// test.page(buildPagePath("060"))(
-//   "060 It should allow 'locator' argument to be a list of functions",
-//   async t => {
-//     const f1 = new WidgetA([
-//       (sel, _) => selector.filterByText(sel, "f1b"),
-//       (sel, _) => sel.nth(3)
-//     ]);
-//
-//     await t.expect(f1.selector.count).eql(1);
-//     await t.expect(f1.selector.classNames).eql(["f1"]);
-//     await t.expect(f1.selector.textContent).eql("f1b");
-//     await t.expect(f1.selector.getAttribute("data-nth")).eql("3");
-//
-//     // -- Ensure it fails as expected
-//
-//     let isThrown = false;
-//
-//     try {
-//       await t.expect(f1.selector.getAttribute("data-nth")).eql("4");
-//     } catch (e) {
-//       expect(e.errMsg, "to match", /.+expected '3' to deeply equal '4'/);
-//
-//       isThrown = true;
-//     }
-//
-//     expect(isThrown, "to be true");
-//   }
-// );
-//
-// test.page(buildPagePath("070"))(
-//   "070 It should allow 'locator' argument to be a POJO with built-in 'cid' transformation",
-//   async t => {
-//     const f1 = new WidgetA({ cid: "baz" });
-//
-//     await t.expect(f1.selector.count).eql(1);
-//     await t.expect(f1.selector.classNames).eql(["f1", "f1--cid_baz"]);
-//     await t.expect(f1.selector.textContent).eql("baz");
-//
-//     // -- Ensure it fails as expected
-//
-//     let isThrown = false;
-//
-//     try {
-//       await t.expect(f1.selector.textContent).eql("foo");
-//     } catch (e) {
-//       expect(e.errMsg, "to match", /.+expected 'baz' to deeply equal 'foo'/);
-//
-//       isThrown = true;
-//     }
-//
-//     expect(isThrown, "to be true");
-//   }
-// );
-//
-// test.page(buildPagePath("080"))(
-//   "080 It should allow 'locator' argument to be a POJO with built-in 'cns' transformation",
-//   async t => {
-//     const f1 = new WidgetA({ cns: "baz" });
-//
-//     await t.expect(f1.selector.count).eql(1);
-//     await t.expect(f1.selector.classNames).eql(["f1", "f1--cns_baz"]);
-//     await t.expect(f1.selector.textContent).eql("baz");
-//
-//     // -- Ensure it fails as expected
-//
-//     let isThrown = false;
-//
-//     try {
-//       await t.expect(f1.selector.textContent).eql("foo");
-//     } catch (e) {
-//       expect(e.errMsg, "to match", /.+expected 'baz' to deeply equal 'foo'/);
-//
-//       isThrown = true;
-//     }
-//
-//     expect(isThrown, "to be true");
-//   }
-// );
-//
-// test.page(buildPagePath("090"))(
-//   "090 It should allow 'locator' argument to be a POJO with built-in 'idx' transformation",
-//   async t => {
-//     const f1 = new WidgetA({ idx: 2 });
-//
-//     await t.expect(f1.selector.count).eql(1);
-//     await t.expect(f1.selector.classNames).eql(["f1"]);
-//     await t.expect(f1.selector.textContent).eql("baz");
-//
-//     // -- Ensure it fails as expected
-//
-//     let isThrown = false;
-//
-//     try {
-//       await t.expect(f1.selector.textContent).eql("abc");
-//     } catch (e) {
-//       expect(e.errMsg, "to match", /.+expected 'baz' to deeply equal 'abc'/);
-//
-//       isThrown = true;
-//     }
-//
-//     expect(isThrown, "to be true");
-//   }
-// );
-//
-// test.page(buildPagePath("100"))(
-//   "100 It should apply built-in transformations in following order 'cns' -> 'cid' -> 'idx'",
-//   async t => {
-//     const f1 = new WidgetA({ idx: 1, cns: "bar", cid: "11" });
-//
-//     await t.expect(f1.selector.count).eql(1);
-//     await t
-//       .expect(f1.selector.classNames)
-//       .eql(["f1", "f1--cns_bar", "f1--cid_11"]);
-//     await t.expect(f1.selector.textContent).eql("bar 11 1");
-//
-//     // -- Ensure it fails as expected
-//
-//     let isThrown = false;
-//
-//     try {
-//       await t.expect(f1.selector.textContent).eql("bar 11 0");
-//     } catch (e) {
-//       expect(
-//         e.errMsg,
-//         "to match",
-//         /.+expected 'bar 11 1' to deeply equal 'bar 11 0'/
-//       );
-//
-//       isThrown = true;
-//     }
-//
-//     expect(isThrown, "to be true");
-//   }
-// );
-//
-// test.page(buildPagePath("100"))(
-//   "110 It should allow 'locator' argument to be a list of POJOs",
-//   async t => {
-//     const f1a = new WidgetA([{ cns: "bar", cid: "11" }, { idx: 2 }]);
-//     await t.expect(f1a.selector.count).eql(1);
-//     await t
-//       .expect(f1a.selector.classNames)
-//       .eql(["f1", "f1--cns_bar", "f1--cid_11"]);
-//     await t.expect(f1a.selector.textContent).eql("bar 11 2");
-//
-//     // -- Check that order does matter
-//
-//     const f1b = new WidgetA([{ idx: 2 }, { cns: "bar", cid: "11" }]);
-//     await t.expect(f1b.selector.count).eql(0);
-//   }
-// );
-//
-// test.page(buildPagePath("120"))(
-//   "120 It should allow 'locator' argument to be a mix of function and POJOs",
-//   async t => {
-//     const f1 = new WidgetA([(sel, _) => sel.filter('[data-id="bar"]'), { idx: 2 }]);
-//
-//     await t.expect(f1.selector.count).eql(1);
-//     await t.expect(f1.selector.classNames).eql(["f1"]);
-//     await t.expect(f1.selector.getAttribute("data-id")).eql("bar");
-//     await t.expect(f1.selector.textContent).eql("bar2");
-//
-//     // -- Ensure it fails as expected
-//
-//     let isThrown = false;
-//
-//     try {
-//       await t.expect(f1.selector.textContent).eql("foo");
-//     } catch (e) {
-//       expect(e.errMsg, "to match", /.+expected 'bar2' to deeply equal 'foo'/);
-//
-//       isThrown = true;
-//     }
-//
-//     expect(isThrown, "to be true");
-//   }
-// );
-//
-// test.page(buildPagePath("130"))(
-//   "130 It should allow 'locator' argument to have custom tranformations provided by derived fragments",
-//   async t => {
-//     class F2 extends WidgetA {
-//       /**
-//        * Allows to select fragment F2 by its text and it can be a string,
-//        * a RegExp or a tupple where first element is a string/RegExp and second
-//        * is an options (see implementation for details).
-//        */
-//       transformSelector(transformations, sel, bemBase) {
-//         sel = super.transformSelector(transformations, sel, bemBase);
-//
-//         for (const k in transformations) {
-//           if (_.has(transformations, k) && k === "text") {
-//             const v = transformations[k];
-//             const [val, opts] = _.isArray(v) ? v : [v];
-//             sel = selector.filterByText(sel, val, opts);
-//           }
-//         }
-//
-//         return sel;
-//       }
-//     }
-//
-//     Object.defineProperties(F2, {
-//       bemBase: {
-//         value: "f2"
-//       },
-//       displayName: {
-//         value: "F2"
-//       }
-//     });
-//
-//     const f2a = new F2([{ cid: "1" }, { text: "Otherthing" }]);
-//     await t.expect(f2a.selector.count).eql(1);
-//     await t.expect(f2a.selector.classNames).eql(["f2", "f2--cid_1"]);
-//     await t.expect(f2a.selector.textContent).eql("Otherthing");
-//
-//     const f2b = new F2([{ cid: "1", text: "Otherthing" }]);
-//     await t.expect(f2b.selector.count).eql(1);
-//     await t.expect(f2b.selector.classNames).eql(["f2", "f2--cid_1"]);
-//     await t.expect(f2b.selector.textContent).eql("Otherthing");
-//   }
-// );
+test.page(buildPagePath("050"))(
+  "050 can be created using built-in 'cid' transformation",
+  async t => {
+    const widgetA2 = new WidgetA(["cid", 101]);
+    await t.expect(widgetA2.selector.count).eql(1);
+    await t
+      .expect(widgetA2.selector.classNames)
+      .eql(["widgetA", "widgetA--cid_101"]);
+    await t.expect(widgetA2.selector.textContent).eql("Widget A -- 2");
+
+    // -- Check failure --
+
+    let isThrown = false;
+    try {
+      await t.expect(widgetA2.selector.textContent).eql("Widget A -- 1");
+    } catch (e) {
+      isThrown = true;
+      await t
+        .expect(e.errMsg)
+        .match(/.+expected 'Widget A -- 2' to deeply equal 'Widget A -- 1'/);
+    }
+    await t.expect(isThrown).ok();
+  }
+);
+
+test.page(buildPagePath("060"))(
+  "060 can be created using built-in 'idx' transformation",
+  async t => {
+    const widgetA1 = new WidgetA(["idx", 0]);
+    await t.expect(widgetA1.selector.count).eql(1);
+    await t.expect(widgetA1.selector.classNames).eql(["widgetA"]);
+    await t.expect(widgetA1.selector.textContent).eql("Widget A -- 1");
+
+    const widgetA3 = new WidgetA(["idx", 2]);
+    await t.expect(widgetA3.selector.count).eql(1);
+    await t.expect(widgetA3.selector.textContent).eql("Widget A -- 3");
+
+    // -- Check failure --
+
+    let isThrown = false;
+    try {
+      await t.expect(widgetA3.selector.textContent).eql("abc");
+    } catch (e) {
+      isThrown = true;
+      await t
+        .expect(e.errMsg)
+        .match(/.+expected 'Widget A -- 3' to deeply equal 'abc'/);
+    }
+    await t.expect(isThrown).ok();
+  }
+);
+
+test.page(buildPagePath("070"))(
+  "070 applies transformations in correct order",
+  async t => {
+    const widgetA1 = new WidgetA(["cid", "foo"], ["idx", 0]);
+    await t.expect(widgetA1.selector.count).eql(1);
+    await t
+      .expect(widgetA1.selector.classNames)
+      .eql(["widgetA", "widgetA--cid_foo"]);
+    await t.expect(widgetA1.selector.textContent).eql("Widget A -- 1");
+
+    const widgetA2 = new WidgetA(["cid", "foo"], ["idx", 1]);
+    await t.expect(widgetA2.selector.count).eql(1);
+    await t
+      .expect(widgetA2.selector.classNames)
+      .eql(["widgetA", "widgetA--cid_foo"]);
+    await t.expect(widgetA2.selector.textContent).eql("Widget A -- 2");
+
+    // With parent.
+    const widgetB = new WidgetB();
+    const widgetA4 = new WidgetA(widgetB, ["cid", "bar"], ["idx", 1]);
+    await t.expect(widgetA4.selector.count).eql(1);
+    await t
+      .expect(widgetA4.selector.classNames)
+      .eql(["widgetA", "widgetA--cid_bar"]);
+    await t.expect(widgetA4.selector.textContent).eql("Widget A -- 4");
+
+    // -- Check failure --
+
+    let isThrown = false;
+    try {
+      await t.expect(widgetA4.selector.textContent).eql("foobar");
+    } catch (e) {
+      isThrown = true;
+      await t
+        .expect(e.errMsg)
+        .match(/.+expected 'Widget A -- 4' to deeply equal 'foobar'/);
+    }
+    await t.expect(isThrown).ok();
+  }
+);
+
+test.page(buildPagePath("080"))(
+  "080 can provide additional selector transformation aliases",
+  async t => {
+    const widgetC1 = new WidgetC(["label", "Widget C -- 1"]);
+    await t.expect(widgetC1.selector.count).eql(1);
+    await t.expect(widgetC1.selector.classNames).eql(["widgetC"]);
+    await t.expect(widgetC1.selector.textContent).eql("Widget C -- 1");
+
+    const widgetC3 = new WidgetC(["text", /C -- 3/]);
+    await t.expect(widgetC3.selector.count).eql(1);
+    await t
+      .expect(widgetC3.selector.classNames)
+      .eql(["widgetC", "widgetC--cid_foo"]);
+    await t.expect(widgetC3.selector.textContent).eql("Widget C -- 3");
+
+    const widgetC4 = new WidgetC(["cid", "foo"], ["text", /C -- 4/]);
+    await t.expect(widgetC4.selector.count).eql(1);
+    await t
+      .expect(widgetC4.selector.classNames)
+      .eql(["widgetC", "widgetC--cid_foo"]);
+    await t.expect(widgetC4.selector.textContent).eql("Widget C -- 4");
+
+    const widgetC = new WidgetC(["cid", "bar"], ["text", /C -- 5/]);
+    await t.expect(widgetC.selector.count).eql(0);
+  }
+);

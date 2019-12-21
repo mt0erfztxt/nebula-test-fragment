@@ -1,0 +1,22 @@
+.widgetA,
+.widgetB,
+.widgetC {
+  margin: 4px 0;
+  padding: 2px;
+}
+
+.widgetA {
+  background-color: aliceblue;
+}
+
+.widgetB {
+  background-color: bisque;
+}
+
+.widgetC {
+  background-color: #e3fbd8;
+}
+
+.widgetB .widgetA {
+  margin-left: 16px;
+}
