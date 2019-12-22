@@ -1,16 +1,4 @@
-import { asArray, testCafeAssertion } from "../../main/utils";
-
-describe("asArray()", function() {
-  it("returns passed in value as-is when it is already an array", () => {
-    const v = ["foo", "bar"];
-    expect(asArray(v)).toBe(v);
-  });
-
-  it("returns passed in value wrapped in an array when it's not an array", () => {
-    const v = 42;
-    expect(asArray(v)).toEqual([v]);
-  });
-});
+import { testCafeAssertion } from "../../main/utils";
 
 describe("testCafeAssertion()", () => {
   it("returns correct value when isNot option is false", () => {

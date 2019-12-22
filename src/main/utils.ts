@@ -12,16 +12,6 @@ export function valid<T>(validationResult: ValidationResult<T>): boolean {
 }
 
 /**
- * When `value` is an array it returned as-is, otherwise it returned wrapped
- * in an array.
- *
- * @todo Unused and not work as type guard. Remove?
- */
-export function asArray<T>(value: T | T[]): T[] {
-  return is.array(value) ? value : [value];
-}
-
-/**
  * TestCafe's assertion.
  */
 export type TestCafeAssertion = keyof ReturnType<typeof t.expect>;
