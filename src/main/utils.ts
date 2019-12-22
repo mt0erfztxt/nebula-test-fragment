@@ -12,7 +12,7 @@ export function valid<T>(validationResult: ValidationResult<T>): boolean {
 }
 
 /**
- * TestCafe's assertion.
+ * Represents TestCafe's assertion.
  */
 export type TestCafeAssertion = keyof ReturnType<typeof t.expect>;
 
