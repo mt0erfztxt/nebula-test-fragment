@@ -1,15 +1,10 @@
 import { lcFirst, ucFirst } from "change-case";
 import { t } from "testcafe";
-import is from "@sindresorhus/is";
 
 /**
  * Represents result of validation.
  */
 export type ValidationResult<T> = { error?: string; value: T };
-
-export function valid<T>(validationResult: ValidationResult<T>): boolean {
-  return is.undefined(validationResult.error);
-}
 
 /**
  * Represents TestCafe's assertion.
