@@ -12,32 +12,6 @@ describe("asArray()", function() {
   });
 });
 
-// describe("toTestCafeAssertion()", () => {
-//   it("returns correct assertion name when options.isNot is false", () => {
-//     expect(toTestCafeAssertion(TestCafeAssertion.Eql)).toBe("eql");
-//     expect(toTestCafeAssertion(TestCafeAssertion.NotEql)).toBe("notEql");
-//     expect(toTestCafeAssertion(TestCafeAssertion.Match)).toBe("match");
-//     expect(
-//       toTestCafeAssertion(TestCafeAssertion.NotMatch, { isNot: false })
-//     ).toBe("notMatch");
-//   });
-//
-//   it("returns correct assertion name when options.isNot is true", () => {
-//     for (const [value, result] of [
-//       [TestCafeAssertion.NotEql, "eql"],
-//       [TestCafeAssertion.Eql, "notEql"],
-//       [TestCafeAssertion.Match, "notMatch"],
-//       [TestCafeAssertion.NotMatch, "match"]
-//     ]) {
-//       expect(
-//         toTestCafeAssertion(value as TestCafeAssertion, {
-//           isNot: true
-//         })
-//       ).toBe(result as string);
-//     }
-//   });
-// });
-
 describe("testCafeAssertion()", () => {
   it("returns correct value when isNot option is false", () => {
     expect(testCafeAssertion("eql")).toEqual("eql");
