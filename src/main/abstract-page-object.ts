@@ -246,6 +246,10 @@ export abstract class AbstractPageObject {
   /**
    * Hovers on page object's selector.
    *
+   * When selector returns more than one DOM element hover is done on first.
+   *
+   * Throws when selector doesn't return DOM elements.
+   *
    * @param [options] Options
    * @param [options.selector=this.selector] Selector to hover on
    * @param [options.wait] Wait specified number of milliseconds after hover is done
