@@ -244,6 +244,18 @@ export abstract class AbstractPageObject {
   }
 
   /**
+   * Asserts that page object not exists -- its selector returns zero DOM
+   * elements.
+   *
+   * @param [options] Options
+   * @param [options.message] Custom message for error
+   */
+  async expectIsNotExist(options?: { message?: string }): Promise<void> {
+    options = options || {};
+    await this.expectIsExist({ isNot: true, message: options.message });
+  }
+
+  /**
    * Hovers on page object's selector.
    *
    * When selector returns more than one DOM element hover is done on first.
