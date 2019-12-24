@@ -167,14 +167,13 @@ export abstract class AbstractPageObject {
   }
 
   /**
-   * Asserts that page object exists -- its selector returns one DOM element.
+   * Asserts that page object exists -- its selector returns DOM element(-s).
    *
    * @param [options] Options
-   * @param [options.allowMultiple=false] By default When `true` then selector allowed to return more than one DOM element to pass assertion
-   * @param {Boolean} [options.hover=false] When truthy and `isNot` is falsey then `#hover()` would be called additionally
-   * @param {Boolean} [options.isNot=false] When truthy fragment's selector must not exist (return zero DOM elements) to pass assertion
-   * @param {String} [options.message] Custom message for error
-   * @return {Promise<void>}
+   * @param [options.allowMultiple=false] Most of the time testing is done against page objects with selector returning exactly one DOM element -- pass `true` to allow selector to pass assertion even when it returns more than one element
+   * @param [options.hover=false] When `true` and `isNot` is `false` then {@link AbstractPageObject#hover} would be called additionally
+   * @param [options.isNot=false] When `true` page object's selector must not exist (return zero DOM elements) to pass assertion
+   * @param [options.message] Custom message for error
    */
   async expectIsExist(options?: {
     allowMultiple?: boolean;
@@ -196,22 +195,24 @@ export abstract class AbstractPageObject {
     const { allowMultiple, hover, isNot, message } = options;
 
     // ---------------------------------------------------------------------------
-    // Handling case when selector must not exist
+    // Handling case when selector must not exist (return zero DOM elements)
     // ---------------------------------------------------------------------------
 
     if (isNot) {
+      const elementsCount = await this.selector.count;
       await t
         .expect(this.selector.exists)
         .notOk(
           is.string(message) && message.trim().length > 0
             ? message
-            : `${this.displayName} selector must not return DOM elements but it does`
+            : `${this.displayName}'s selector must not return DOM elements ` +
+                `but it returned ${elementsCount} of them`
         );
       return;
     }
 
     // ---------------------------------------------------------------------------
-    // Handling case when selector must exist
+    // Handling case when selector must exist (return one or more DOM elements)
     // ---------------------------------------------------------------------------
 
     const elementsCount = await this.selector.count;
@@ -222,8 +223,8 @@ export abstract class AbstractPageObject {
           1,
           is.string(message) && message.trim().length > 0
             ? message
-            : `${this.displayName} selector must return one or more DOM ` +
-                `elements but it return '${elementsCount}' of them`
+            : `${this.displayName}'s selector must return one or more DOM ` +
+                `elements but it returned ${elementsCount} of them`
         );
     } else {
       await t
@@ -232,8 +233,8 @@ export abstract class AbstractPageObject {
           1,
           is.string(message) && message.trim().length > 0
             ? message
-            : `${this.displayName} selector must return exactly one DOM ` +
-                `element but it return '${elementsCount}' of them`
+            : `${this.displayName}'s selector must return exactly one DOM ` +
+                `element but it returned ${elementsCount} of them`
         );
     }
 
