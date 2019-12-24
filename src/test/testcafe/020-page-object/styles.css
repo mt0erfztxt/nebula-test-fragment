@@ -13,6 +13,10 @@
   background-color: bisque;
 }
 
+.widgetB--disabled {
+  background-color: beige;
+}
+
 .widgetC {
   background-color: #e3fbd8;
 }

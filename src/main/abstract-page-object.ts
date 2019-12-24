@@ -1,6 +1,6 @@
 import is from "@sindresorhus/is";
 import { Selector, t } from "testcafe";
-import { BemBase } from "./bem";
+import { BemBase, BemModifier } from "./bem";
 
 /**
  * Represents selector transformation.
@@ -278,5 +278,41 @@ export abstract class AbstractPageObject {
     if (wait) {
       await t.wait(wait);
     }
+  }
+
+  /**
+   * Asserts that DOM element returned by page object's selector has specified
+   * BEM modifier.
+   *
+   * Throws if selector returned zero or more than one DOM elements.
+   *
+   * @param bemModifier BEM modifier that must present for assertion to pass
+   *
+   * @example
+   * expectHasBemModifier(['foo']);
+   * expectHasBemModifier(['foo', null], ['foo', 'bar']);
+   */
+  async expectHasBemModifier(bemModifier: BemModifier) {
+    // We don't use `getBemModifier()` here as page may not have DOM element or
+    // element may not have modifier right now, for example, remote operation
+    // is in progress. Instead TestCafe's `expect` used directly as it has
+    // auto waiting feature.
+
+    await this.expectIsExist({
+      message:
+        `${this.displayName}#expectHasBemModifier() failed because its ` +
+        `selector returned 0 DOM elements`
+    });
+
+    const className = this.bemBase
+      .clone()
+      .setMod(bemModifier)
+      .toString();
+    await t
+      .expect(this.selector.hasClass(className))
+      .ok(
+        `DOM element returned by ${this.displayName}'s selector must have ` +
+          `'${bemModifier}' BEM modifier but it doesn't`
+      );
   }
 }
