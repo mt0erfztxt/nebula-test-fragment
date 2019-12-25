@@ -382,4 +382,44 @@ export abstract class AbstractPageObject {
 
     return bemMods;
   }
+
+  /**
+   * Asserts that page object is equal another page object.
+   *
+   * @param that A page object to which page object must be equal to pass assertion
+   * @param [options] Options
+   * @param [options.equalityCheck] Allows to provide custom implementation of equality check. A default implementation uses equality of `this` and `that` text contents. Custom implementation must be an async function which would be called with `this` and `that` page objects and it must throw when they aren't equal
+   */
+  async expectIsEqual(
+    that: AbstractPageObject,
+    options?: {
+      equalityCheck?: (
+        l: AbstractPageObject,
+        r: AbstractPageObject
+      ) => Promise<void>;
+    }
+  ): Promise<void> {
+    if (!(that instanceof this.constructor)) {
+      throw new Error(
+        `'that' argument must be a ${this.displayName} page object but it ` +
+          `is a ${that.displayName} page object`
+      );
+    }
+
+    options = options || {};
+
+    if (options.equalityCheck) {
+      await options.equalityCheck(this, that);
+    } else {
+      const thisTextContent = await this.selector.textContent;
+      const thatTextContent = await that.selector.textContent;
+      await t
+        .expect(thisTextContent)
+        .eql(
+          thatTextContent,
+          `${this.displayName} at left doesn't equal ${this.displayName} at ` +
+            `right because their text contents not equal`
+        );
+    }
+  }
 }
