@@ -290,9 +290,9 @@ export abstract class AbstractPageObject {
    *
    * @example
    * expectHasBemModifier(['foo']);
-   * expectHasBemModifier(['foo', null], ['foo', 'bar']);
+   * expectHasBemModifier(['foo', 'bar']);
    */
-  async expectHasBemModifier(bemModifier: BemModifier) {
+  async expectHasBemModifier(bemModifier: BemModifier): Promise<void> {
     // We don't use `getBemModifier()` here as page may not have DOM element or
     // element may not have modifier right now, for example, remote operation
     // is in progress. Instead TestCafe's `expect` used directly as it has
