@@ -306,4 +306,29 @@ export abstract class AbstractPageObject {
           `'${bemModifier}' BEM modifier but it doesn't`
       );
   }
+
+  /**
+   * Asserts that DOM element returned by page object's selector has no
+   * specified BEM modifier.
+   *
+   * @example
+   * expectHasNoBemModifier(['foo']);
+   * expectHasNoBemModifier(['foo', 'bar']);
+   */
+  async expectHasNoBemModifier(bemModifier: BemModifier): Promise<void> {
+    // We don't use `getBemModifier()` here as page may not have DOM element or
+    // element may not have modifier right now, for example, remote operation
+    // is in progress. Instead we use TestCafe's `expect` directly as it has
+    // auto waiting feature.
+    const className = this.bemBase
+      .clone()
+      .setMod(bemModifier)
+      .toString();
+    await t
+      .expect(this.selector.hasClass(className))
+      .notOk(
+        `DOM element returned by ${this.displayName}'s selector must not ` +
+          `have '${bemModifier}' BEM modifier but it does`
+      );
+  }
 }
