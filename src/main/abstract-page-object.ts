@@ -1,6 +1,11 @@
 import is from "@sindresorhus/is";
 import { Selector, t } from "testcafe";
-import { BemBase, BemModifier } from "./bem";
+import {
+  BemBase,
+  BemModifier,
+  BemModifierName,
+  validateBemModifierName
+} from "./bem";
 
 /**
  * Represents selector transformation.
@@ -330,5 +335,51 @@ export abstract class AbstractPageObject {
         `DOM element returned by ${this.displayName}'s selector must not ` +
           `have '${bemModifier}' BEM modifier but it does`
       );
+  }
+
+  /**
+   * Returns Promise resolving with an array of BEM modifiers that DOM element,
+   * returned by page object's selector, have.
+   *
+   * @param [bemModifierName] If set only BEM modifiers with that name would be in resulting array
+   *
+   * @example
+   * // Having page object Foo in HTML
+   * // <div className="foo foo-cid_1 foo--bar">Foo</div>
+   * // a call to
+   * await this.getBemModifiers(); // returns [["cid", "1"], ["foo"]]
+   * await this.getBemModifiers("cid"); // returns [["cid", "1"]]
+   */
+  async getBemModifiers(
+    bemModifierName?: BemModifierName
+  ): Promise<BemModifier[]> {
+    let bmn: BemModifierName;
+    if (is.undefined(bemModifierName)) {
+      bmn = "";
+    } else {
+      const { error, value } = validateBemModifierName(bemModifierName);
+
+      if (error) {
+        throw new Error(error);
+      }
+
+      bmn = value;
+    }
+
+    const bemMods: BemModifier[] = [];
+
+    const bemBaseWithoutMod = this.bemBase.clone().setMod();
+    const bemBaseWithModName = `${bemBaseWithoutMod}--${bmn}`;
+    const classNames = await this.selector.classNames;
+    for (const className of classNames) {
+      if (className.startsWith(bemBaseWithModName)) {
+        const mod = new BemBase(className).mod;
+        if (mod) {
+          bemMods.push(mod);
+        }
+      }
+    }
+
+    return bemMods;
   }
 }
