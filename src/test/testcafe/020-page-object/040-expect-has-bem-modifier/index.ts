@@ -10,33 +10,33 @@ class DisabledWidgetB extends PageObject {
   static displayName = "DisabledWidgetB";
 }
 
+class WidgetC extends PageObject {
+  static bemBase = "widgetC";
+  static displayName = "WidgetC";
+}
+
 fixture("PageObject#expectHasBemModifier()").page(__dirname + "/index.html");
 
-test("010 fails when page object's selector not exists", async t => {
+test("010 fails when page object's selector returned zero DOM elements", async t => {
   let isThrown;
-  const widgetA9 = new WidgetA(["cid", 9]);
+  const widgetC = new WidgetC();
 
   // -- Pre-checks --
 
-  await t.expect(widgetA9.selector.count).eql(0);
+  await t.expect(widgetC.selector.count).eql(0);
 
   // -- Checks --
 
   isThrown = false;
   try {
-    await widgetA9.expectHasBemModifier(["bar"]);
+    await widgetC.expectHasBemModifier(["bar"]);
   } catch (e) {
     isThrown = true;
-    await t
-      .expect(e.errMsg)
-      .match(
-        /.*WidgetA#expectHasBemModifier\(\) failed because its selector returned 0 DOM elements.*/
-      );
   }
   await t.expect(isThrown).ok();
 });
 
-test("020 fails when page object's selector must have specified BEM modifier but it doesn't -- case of simple modifier", async t => {
+test("020 fails when DOM element returned by page object's selector must have specified BEM modifier but it doesn't -- case of simple modifier", async t => {
   let isThrown;
   const widgetA1 = new WidgetA();
 
@@ -60,7 +60,7 @@ test("020 fails when page object's selector must have specified BEM modifier but
   await t.expect(isThrown).ok();
 });
 
-test("030 fails when page object's selector must have specified BEM modifier but it doesn't -- case of full modifier", async t => {
+test("030 fails when DOM element returned by page object's selector must have specified BEM modifier but it doesn't -- case of full modifier", async t => {
   let isThrown;
   const widgetA1 = new WidgetA();
 
@@ -84,7 +84,7 @@ test("030 fails when page object's selector must have specified BEM modifier but
   await t.expect(isThrown).ok();
 });
 
-test("040 succeeded when page object's selector have specified BEM modifier -- case of simple modifier", async t => {
+test("040 succeeded when DOM element returned by page object's selector have specified BEM modifier -- case of simple modifier", async t => {
   let isThrown;
   const widgetA1 = new WidgetA();
   const disabledWidgetB1 = new DisabledWidgetB();

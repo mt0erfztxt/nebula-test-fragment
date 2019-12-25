@@ -284,8 +284,6 @@ export abstract class AbstractPageObject {
    * Asserts that DOM element returned by page object's selector has specified
    * BEM modifier.
    *
-   * Throws if selector returned zero or more than one DOM elements.
-   *
    * @param bemModifier BEM modifier that must present for assertion to pass
    *
    * @example
@@ -297,13 +295,6 @@ export abstract class AbstractPageObject {
     // element may not have modifier right now, for example, remote operation
     // is in progress. Instead TestCafe's `expect` used directly as it has
     // auto waiting feature.
-
-    await this.expectIsExist({
-      message:
-        `${this.displayName}#expectHasBemModifier() failed because its ` +
-        `selector returned 0 DOM elements`
-    });
-
     const className = this.bemBase
       .clone()
       .setMod(bemModifier)
