@@ -15,7 +15,7 @@
   "scripts": {
     "test": "npm run jasmine-tests && npm run testcafe-tests",
     "jasmine-tests": "npx jasmine --config=jasmine.json",
-    "testcafe-tests": "npx testcafe chromium src/test/testcafe"
+    "testcafe-tests": "npx testcafe --selector-timeout=3500 chromium src/test/testcafe"
   },
   "dependencies": {
     "@sindresorhus/is": "^1.2.0",
