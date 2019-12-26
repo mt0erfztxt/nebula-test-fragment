@@ -1,13 +1,16 @@
-import { SelectorTransformationAlias } from "../../../../main/abstract-page-object";
 import { BemBase } from "../../../../main/bem";
-import { PageObject } from "../../../../main/page-object";
+import {
+  PageObject,
+  SelectorTransformationAlias
+} from "../../../../main/page-object";
 import { filterByText } from "../../../../main/selector";
 
 const appRootPath = require("app-root-path");
 
 function buildPagePath(testId: string): string {
   return (
-    appRootPath.path + `/src/test/testcafe/020-page-object/010-constructor/${testId}.html`
+    appRootPath.path +
+    `/src/test/testcafe/020-page-object/010-constructor/${testId}.html`
   );
 }
 

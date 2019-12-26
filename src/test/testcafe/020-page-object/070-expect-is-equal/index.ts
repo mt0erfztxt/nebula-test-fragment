@@ -1,5 +1,4 @@
 import { t } from "testcafe";
-import { AbstractPageObject } from "../../../../main/abstract-page-object";
 import { PageObject } from "../../../../main/page-object";
 
 fixture("PageObject#expectIsEqual()").page(`${__dirname}/index.html`);
@@ -38,8 +37,8 @@ class WidgetC extends PageObject {
  * attribute.
  */
 const customEqualityCheck = async (
-  l: AbstractPageObject,
-  r: AbstractPageObject
+  l: PageObject,
+  r: PageObject
 ): Promise<void> => {
   const lValue = await l.selector.hasAttribute("data-fiz");
   const rValue = await r.selector.hasAttribute("data-fiz");
