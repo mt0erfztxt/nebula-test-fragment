@@ -24,6 +24,11 @@ export type SelectorTransformationFn = (s: Selector, b: BemBase) => Selector;
  */
 export type SelectorTransformationAlias = [string, unknown];
 
+/**
+ * Represents arguments for page object constructor.
+ */
+export type PageObjectConstructorArgs = (PageObject | SelectorTransformation)[];
+
 export class PageObject {
   /**
    * Page object's BEM base -- used to map page object to DOM element with
@@ -70,7 +75,7 @@ export class PageObject {
    * Accepts variable number of selector transformations that need ot be
    * applied to locate page object. To specify parent page object pass it as first selector transformation.
    */
-  constructor(...args: (PageObject | SelectorTransformation)[]) {
+  constructor(...args: PageObjectConstructorArgs) {
     let parentSelector = Selector("body");
     for (let i = 0; i < args.length; i++) {
       const selectorTransformation = args[i];
@@ -490,5 +495,27 @@ export class PageObject {
       ["idx", idx]
     );
     await this.expectIsEqual(pageObjectAtIdx, options);
+  }
+
+  /**
+   * Returns page object of specified page object class contained anywhere
+   * inside this page object.
+   *
+   * @param PageObjectClass Class of page object to be returned
+   * @param args Arguments to be passed when constructing instance of `PageObjectClass`
+   */
+  getPageObject<T extends PageObject>(
+    PageObjectClass: new (...args: PageObjectConstructorArgs) => T,
+    ...args: PageObjectConstructorArgs
+  ): T {
+    // Remove provided parent (if any).
+    if (args[0] instanceof PageObject) {
+      args.shift();
+    }
+
+    // Add this page object as parent.
+    args.unshift(this);
+
+    return new PageObjectClass(...args);
   }
 }
