@@ -61,4 +61,33 @@ export class PageObject extends AbstractPageObject {
 
     return selector;
   }
+
+  /**
+   * Asserts that page object is found in specified parent at specified index.
+   *
+   * @param parent Parent page object
+   * @param idx Position at which this page object must be found in parent to pass assertion. Must be an integer greater or equal zero
+   * @param [options] Options
+   * @param [options.equalityCheck] Same as in {@link PageObject#expectIsEqual}
+   */
+  async expectIndexInParentIs(
+    parent: PageObject,
+    idx: number,
+    options?: {
+      equalityCheck?: (l: PageObject, r: PageObject) => Promise<void>;
+    }
+  ) {
+    if (!(is.integer(idx) && idx >= 0)) {
+      throw new Error(
+        `'idx' of ${this.displayName} must be an integer greater or equal ` +
+          `zero but it is ${idx}`
+      );
+    }
+
+    const pageObjectAtIdx = new (this.constructor as typeof PageObject)(
+      parent,
+      ["idx", idx]
+    );
+    await this.expectIsEqual(pageObjectAtIdx, options);
+  }
 }
