@@ -25,7 +25,7 @@ export type SelectorTransformationFn = (s: Selector, b: BemBase) => Selector;
 export type SelectorTransformationAlias = [string, unknown];
 
 /**
- * Represents arguments for page object constructor.
+ * Represents arguments for {@link PageObject#constructor}.
  */
 export type PageObjectConstructorArgs = (PageObject | SelectorTransformation)[];
 
