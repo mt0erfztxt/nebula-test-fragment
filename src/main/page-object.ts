@@ -34,6 +34,27 @@ export type PageObjectConstructorArgs = (PageObject | SelectorTransformation)[];
  */
 export type GetPageObjectArgs = SelectorTransformation[];
 
+/**
+ * Represents function used to check two page objects for equality.
+ */
+export type EqualityCheckFn = (l: PageObject, r: PageObject) => Promise<void>;
+
+/**
+ * Represents options for {@link PageObject#expectHasPageObject}
+ */
+export type ExpectHasPageObjectOptions = {
+  equalityCheck?: EqualityCheckFn;
+  idx?: number;
+};
+
+/**
+ * Represents args for {@link PageObject#expectHasPageObject}.
+ */
+export type ExpectHasPageObjectArgs = (
+  | SelectorTransformation
+  | ExpectHasPageObjectOptions
+)[];
+
 export class PageObject {
   /**
    * Page object's BEM base -- used to map page object to DOM element with
@@ -519,9 +540,39 @@ export class PageObject {
     return new PageObjectClass(this, ...args);
   }
 
-    // Add this page object as parent.
-    args.unshift(this);
+  /**
+   * Asserts that this page object has specified page object inside it.
+   *
+   * @param getPageObject Function that accepts any number of {@link SelectorTransformation}s and returns page object, see {@link PageObject#getPageObject} for example implementation
+   * @param args Arguments to be passed when constructing instance of `PageObjectClass`. Last argument can be an object with properties: `equalityCheck` -- allows to use custom logic for equality check (see {@link PageObject#expectIsEqual}), `idx` -- allows to assert that object found at specified position (see {@link PageObject#expectIndexInParentIs}).
+   * @returns Found page object.
+   */
+  async expectHasPageObject<T extends PageObject>(
+    getPageObject: (...args: GetPageObjectArgs) => T,
+    ...args: ExpectHasPageObjectArgs
+  ): Promise<T> {
+    let options: ExpectHasPageObjectOptions = {};
+    let selectorTransformations: SelectorTransformation[] = [];
+    const argsLen = args.length;
+    const optionsArgIdx = argsLen - 1;
+    for (let i = 0; i < argsLen; i++) {
+      const item = args[i];
+      if (is.array(item) || is.function_(item)) {
+        selectorTransformations.push(item);
+      } else if (i === optionsArgIdx) {
+        options = item;
+      }
+    }
 
-    return new PageObjectClass(...args);
+    const pageObject = getPageObject.call(this, ...selectorTransformations);
+
+    const { equalityCheck, idx } = options;
+    if (is.integer(idx)) {
+      await pageObject.expectIndexInParentIs(this, idx, { equalityCheck });
+    } else {
+      await pageObject.expectIsExist();
+    }
+
+    return pageObject;
   }
 }
