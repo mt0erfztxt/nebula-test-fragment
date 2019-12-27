@@ -29,6 +29,11 @@ export type SelectorTransformationAlias = [string, unknown];
  */
 export type PageObjectConstructorArgs = (PageObject | SelectorTransformation)[];
 
+/**
+ * Represents args for {@link PageObject#getPageObject}.
+ */
+export type GetPageObjectArgs = SelectorTransformation[];
+
 export class PageObject {
   /**
    * Page object's BEM base -- used to map page object to DOM element with
@@ -498,20 +503,21 @@ export class PageObject {
   }
 
   /**
-   * Returns page object of specified page object class contained anywhere
-   * inside this page object.
+   * Returns page object (instantiated from specified page object class)
+   * contained anywhere inside this page object.
+   *
+   * Note: 'inside this page object' means this page object would be set as
+   * parent for returned page object.
    *
    * @param PageObjectClass Class of page object to be returned
-   * @param args Arguments to be passed when constructing instance of `PageObjectClass`
+   * @param args Any number of selector transformations to be used when constructing instance of `PageObjectClass`
    */
   getPageObject<T extends PageObject>(
     PageObjectClass: new (...args: PageObjectConstructorArgs) => T,
-    ...args: PageObjectConstructorArgs
+    ...args: GetPageObjectArgs
   ): T {
-    // Remove provided parent (if any).
-    if (args[0] instanceof PageObject) {
-      args.shift();
-    }
+    return new PageObjectClass(this, ...args);
+  }
 
     // Add this page object as parent.
     args.unshift(this);

@@ -1,6 +1,6 @@
 import {
   PageObject,
-  PageObjectConstructorArgs
+  SelectorTransformation
 } from "../../../../main/page-object";
 
 class WidgetA extends PageObject {
@@ -12,14 +12,9 @@ class WidgetB extends PageObject {
   static bemBase = "widgetB";
   static displayName = "WidgetB";
 
-  getWidgetA(...args: PageObjectConstructorArgs) {
+  getWidgetA(...args: SelectorTransformation[]) {
     return this.getPageObject(WidgetA, ...args);
   }
-}
-
-class WidgetC extends PageObject {
-  static bemBase = "widgetC";
-  static displayName = "WidgetC";
 }
 
 fixture("PageObject#getPageObject()").page(`${__dirname}/index.html`);
@@ -72,32 +67,4 @@ test("020 returns correct page object -- case of specific method", async t => {
   // Check this page object set as parent and non-existing page object returned.
   const widgetA3OutsideB = widgetB.getWidgetA(["cid", "4"]);
   await t.expect(widgetA3OutsideB.selector.count).eql(0);
-});
-
-test("030 replaces provided parent page object by this page object", async t => {
-  const widgetA1 = new WidgetA(["cid", "4"]);
-  const widgetB = new WidgetB();
-  const widgetC = new WidgetC();
-
-  // -- Pre-checks --
-
-  await t.expect(widgetA1.selector.count).eql(1);
-  await t.expect(widgetB.selector.count).eql(1);
-  await t.expect(widgetC.selector.count).eql(1);
-
-  // -- Checks --
-
-  // Check case of direct call.
-  const widgetA1InsideB = widgetB.getPageObject(WidgetA, widgetC, ["cid", "1"]);
-  await t.expect(widgetA1InsideB.selector.count).eql(1);
-  await t
-    .expect(widgetA1InsideB.selector.textContent)
-    .eql("Widget A -- 1 inside Widget B");
-
-  // Check case of specific method.
-  const widgetA2InsideB = widgetB.getWidgetA(widgetC, ["cid", "2"]);
-  await t.expect(widgetA2InsideB.selector.count).eql(1);
-  await t
-    .expect(widgetA2InsideB.selector.textContent)
-    .eql("Widget A -- 2 inside Widget B");
 });
