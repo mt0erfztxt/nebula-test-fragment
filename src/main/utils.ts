@@ -1,3 +1,4 @@
+import is from "@sindresorhus/is";
 import { lcFirst, ucFirst } from "change-case";
 import { t } from "testcafe";
 
@@ -15,8 +16,8 @@ export type TestCafeAssertion = keyof ReturnType<typeof t.expect>;
  * Returns name of TestCafe's assertion.
  *
  * @param assertion TestCafe's assertion
- * @param options Options
- * @param options.isNot If `true` assertion is negated
+ * @param [options] Options
+ * @param [options.isNot] If `true` assertion is negated
  *
  * @example
  * testCafeAssertion("ok") // "ok"
@@ -25,8 +26,13 @@ export type TestCafeAssertion = keyof ReturnType<typeof t.expect>;
  */
 export function testCafeAssertion(
   assertion: TestCafeAssertion,
-  options: { isNot: boolean } = { isNot: false }
+  options?: { isNot?: boolean }
 ): TestCafeAssertion {
+  options = options || {};
+  if (is.undefined(options.isNot)) {
+    options.isNot = false;
+  }
+
   if (options.isNot) {
     if (assertion === "gt") {
       return "lte";
