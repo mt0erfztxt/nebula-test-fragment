@@ -5,7 +5,7 @@ import { filterByAttribute } from "../../../../main/selector";
 
 fixture("selector.filterByAttribute()").page(
   appRootPath.path +
-    "/src/test/testcafe/010-selector/filter-by-attribute/index.html"
+    "/src/test/testcafe/010-selector/010-filter-by-attribute/index.html"
 );
 
 test("010 It should allow filter selector by absence of attribute", async t => {

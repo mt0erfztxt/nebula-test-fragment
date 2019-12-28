@@ -5,7 +5,7 @@ const appRootPath = require("app-root-path");
 
 fixture("selector.expectHasCssClasses()").page(
   appRootPath.path +
-    "/src/test/testcafe/010-selector/expect-has-css-classes/index.html"
+    "/src/test/testcafe/010-selector/030-expect-has-css-classes/index.html"
 );
 
 test("010 It should fail when selector does not return DOM elements", async t => {
