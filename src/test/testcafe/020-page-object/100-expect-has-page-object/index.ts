@@ -1,6 +1,6 @@
 import { t } from "testcafe";
 import {
-  ExpectHasPageObjectArgs,
+  ExpectHasPageObjectExtraArgs,
   PageObject,
   SelectorTransformation
 } from "../../../../main/page-object";
@@ -18,7 +18,7 @@ class WidgetB extends PageObject {
     return this.getPageObject(WidgetA, ...args);
   }
 
-  async expectHasWidgetA(...args: ExpectHasPageObjectArgs): Promise<WidgetA> {
+  async expectHasWidgetA(...args: ExpectHasPageObjectExtraArgs): Promise<WidgetA> {
     return this.expectHasPageObject(this.getWidgetA, ...args);
   }
 }

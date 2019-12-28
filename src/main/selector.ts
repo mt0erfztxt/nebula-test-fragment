@@ -284,9 +284,26 @@ export function filterByText(
 }
 
 /**
- * Represents `options` parameter of {@link expectDomElementsCountIs}.
+ * Represents {@link expectDomElementsCountIs} function.
  */
-export type ExpectDomElementsCountIsOptionsArg = {
+export type ExpectDomElementsCountIs = (
+  selector: Selector,
+  count: number,
+  options?: ExpectDomElementsCountIsOptions
+) => Promise<void>;
+
+/**
+ * Represents specialized version of {@link expectDomElementsCountIs} function.
+ */
+export type SpecializedExpectDomElementsCountIs = (
+  count: number,
+  options?: ExpectDomElementsCountIsOptions
+) => Promise<void>;
+
+/**
+ * Represents `options` parameter of {@link expectDomElementsCountIs} function.
+ */
+export type ExpectDomElementsCountIsOptions = {
   assertion?: TestCafeAssertion;
   isNot?: NegationFlag;
 };
@@ -310,7 +327,7 @@ export type ExpectDomElementsCountIsOptionsArg = {
 export async function expectDomElementsCountIs(
   selector: Selector,
   count: number,
-  options?: ExpectDomElementsCountIsOptionsArg
+  options?: ExpectDomElementsCountIsOptions
 ): Promise<void> {
   options = options || {};
   if (is.undefined(options.assertion)) {

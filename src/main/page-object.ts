@@ -6,6 +6,7 @@ import {
   BemModifierName,
   validateBemModifierName
 } from "./bem";
+import { SpecializedExpectDomElementsCountIs } from "./selector";
 
 /**
  * Represents selector transformation.
@@ -25,35 +26,112 @@ export type SelectorTransformationFn = (s: Selector, b: BemBase) => Selector;
 export type SelectorTransformationAlias = [string, unknown];
 
 /**
- * Represents arguments for {@link PageObject#constructor}.
+ * Represents page object class.
+ */
+export type PageObjectClass<T extends PageObject> = new (
+  ...args: PageObjectConstructorArgs
+) => T;
+
+/**
+ * Represents parameters of {@link PageObject#constructor} function.
  */
 export type PageObjectConstructorArgs = (PageObject | SelectorTransformation)[];
 
 /**
- * Represents args for {@link PageObject#getPageObject}.
+ * Represents {@link PageObject#getPageObject} function.
  */
-export type GetPageObjectArgs = SelectorTransformation[];
+export type GetPageObject<T extends PageObject> = (
+  PageObjectClass: PageObjectClass<T>,
+  ...extraArgs: GetPageObjectExtraArgs
+) => T;
 
 /**
- * Represents function used to check two page objects for equality.
+ * Represents specialized version of {@link PageObject#getPageObject} function.
  */
-export type EqualityCheckFn = (l: PageObject, r: PageObject) => Promise<void>;
+export type SpecializedGetPageObject<T extends PageObject> = (
+  ...args: GetPageObjectExtraArgs
+) => T;
 
 /**
- * Represents options for {@link PageObject#expectHasPageObject}
+ * Represents `extraArgs` parameter of {@link PageObject#getPageObject}
+ * function.
  */
-export type ExpectHasPageObjectOptions = {
-  equalityCheck?: EqualityCheckFn;
+export type GetPageObjectExtraArgs = SelectorTransformation[];
+
+/**
+ * Represents {@link PageObject#expectHasPageObject} function.
+ */
+export type ExpectHasPageObject<T extends PageObject> = (
+  getPageObject: GetPageObject<T>,
+  ...extraArgs: ExpectHasPageObjectExtraArgs
+) => Promise<T>;
+
+/**
+ * Represents specialized version of {@link PageObject#expectHasPageObject}
+ * function.
+ */
+export type SpecializedExpectHasPageObject<T extends PageObject> = (
+  ...args: ExpectHasPageObjectExtraArgs
+) => Promise<T>;
+
+/**
+ * Represents `extraArgs` parameter of {@link PageObject#expectHasPageObject}
+ * function.
+ */
+export type ExpectHasPageObjectExtraArgs = (
+  | SelectorTransformation
+  | ExpectHasPageObjectExtraArgsOptions
+)[];
+
+/**
+ * Represents `options` parameter of {@link PageObject#expectHasPageObject}
+ * function.
+ */
+export type ExpectHasPageObjectExtraArgsOptions = {
+  equalityCheck?: EqualityCheck;
   idx?: number;
 };
 
 /**
- * Represents args for {@link PageObject#expectHasPageObject}.
+ * Represents function used to check two page objects for equality.
  */
-export type ExpectHasPageObjectArgs = (
-  | SelectorTransformation
-  | ExpectHasPageObjectOptions
+export type EqualityCheck = (l: PageObject, r: PageObject) => Promise<void>;
+
+/**
+ * Represents {@link PageObject#expectHasPageObjects} function.
+ */
+export type ExpectHasPageObjects<T extends PageObject> = (
+  specializedExpectHasPageObject: SpecializedExpectHasPageObject<T>,
+  specializedExpectDomElementsCountIs: SpecializedExpectDomElementsCountIs,
+  ...extraArgs: ExpectHasPageObjectsExtraArgs
+) => Promise<T>;
+
+/**
+ * Represents specialized version of {@link PageObject#expectHasPageObjects}
+ * function.
+ */
+export type SpecializedExpectHasPageObjects<T extends PageObject> = (
+  ...args: ExpectHasPageObjectsExtraArgs
+) => Promise<T>;
+
+/**
+ * Represents `extraArgs` parameter of {@link PageObject#expectHasPageObjects}
+ * function.
+ */
+export type ExpectHasPageObjectsExtraArgs = (
+  | SelectorTransformation[]
+  | ExpectHasPageObjectsExtraArgsOptions
 )[];
+
+/**
+ * Represents `options` parameter of {@link PageObject#expectHasPageObjects}
+ * function.
+ */
+export type ExpectHasPageObjectsExtraArgsOptions = {
+  equalityCheck?: EqualityCheck;
+  only?: boolean;
+  sameOrder?: boolean;
+};
 
 export class PageObject {
   /**
@@ -531,32 +609,32 @@ export class PageObject {
    * parent for returned page object.
    *
    * @param PageObjectClass Class of page object to be returned
-   * @param args Any number of selector transformations to be used when constructing instance of `PageObjectClass`
+   * @param extraArgs Any number of selector transformations to be used when constructing instance of `PageObjectClass`
    */
   getPageObject<T extends PageObject>(
-    PageObjectClass: new (...args: PageObjectConstructorArgs) => T,
-    ...args: GetPageObjectArgs
+    PageObjectClass: PageObjectClass<T>,
+    ...extraArgs: GetPageObjectExtraArgs
   ): T {
-    return new PageObjectClass(this, ...args);
+    return new PageObjectClass(this, ...extraArgs);
   }
 
   /**
    * Asserts that this page object has specified page object inside it.
    *
-   * @param getPageObject Function that accepts any number of {@link SelectorTransformation}s and returns page object, see {@link PageObject#getPageObject} for example implementation
-   * @param args Arguments to be passed when constructing instance of `PageObjectClass`. Last argument can be an object with properties: `equalityCheck` -- allows to use custom logic for equality check (see {@link PageObject#expectIsEqual}), `idx` -- allows to assert that object found at specified position (see {@link PageObject#expectIndexInParentIs}).
+   * @param specializedGetPageObject Specialized version of {@link PageObject#getPageObject} function that accepts any number of {@link SelectorTransformation}s and returns page object, see {@link PageObject#getPageObject} for implementation of not specialized version
+   * @param extraArgs Arguments to be passed when constructing instance of `PageObjectClass`. Last argument can be an object with properties: `equalityCheck` -- allows to use custom logic for equality check (see {@link PageObject#expectIsEqual}), `idx` -- allows to assert that object found at specified position (see {@link PageObject#expectIndexInParentIs}).
    * @returns Found page object.
    */
   async expectHasPageObject<T extends PageObject>(
-    getPageObject: (...args: GetPageObjectArgs) => T,
-    ...args: ExpectHasPageObjectArgs
+    specializedGetPageObject: SpecializedGetPageObject<T>,
+    ...extraArgs: ExpectHasPageObjectExtraArgs
   ): Promise<T> {
-    let options: ExpectHasPageObjectOptions = {};
+    let options: ExpectHasPageObjectExtraArgsOptions = {};
     let selectorTransformations: SelectorTransformation[] = [];
-    const argsLen = args.length;
+    const argsLen = extraArgs.length;
     const optionsArgIdx = argsLen - 1;
     for (let i = 0; i < argsLen; i++) {
-      const item = args[i];
+      const item = extraArgs[i];
       if (is.array(item) || is.function_(item)) {
         selectorTransformations.push(item);
       } else if (i === optionsArgIdx) {
@@ -564,7 +642,10 @@ export class PageObject {
       }
     }
 
-    const pageObject = getPageObject.call(this, ...selectorTransformations);
+    const pageObject = specializedGetPageObject.call(
+      this,
+      ...selectorTransformations
+    );
 
     const { equalityCheck, idx } = options;
     if (is.integer(idx)) {
@@ -574,5 +655,67 @@ export class PageObject {
     }
 
     return pageObject;
+  }
+
+  /**
+   * Asserts that this page object has specified page objects inside it.
+   *
+   * This a convenience version of {@link PageObject#expectHasPageObject} to
+   * assert on multiple page objects at once.
+   *
+   * @param specializedExpectHasPageObject Specialized version of {@link PageObject#expectHasPageObject}
+   * @param specializedExpectDomElementsCountIs Specialized version of {@link expectDomElementsCountIs}
+   * @param extraArgs Array of arguments to be passed to `specializedExpectHasPageObject` when creating page objects. Last argument can be an options object with properties: `equalityCheck` -- allows to use custom logic for equality check (see {@link PageObject#expectIsEqual}), `only` -- if `true` this page object must have only specified page objects, otherwise it can have more page objects than specified, `sameOrder` -- if `true` page objects must be found in specified order, otherwise order doesn't matter.
+   * @returns List of found page objects.
+   */
+  async expectHasPageObjects<T extends PageObject>(
+    specializedExpectHasPageObject: SpecializedExpectHasPageObject<T>,
+    specializedExpectDomElementsCountIs: SpecializedExpectDomElementsCountIs,
+    ...extraArgs: ExpectHasPageObjectsExtraArgs
+  ): Promise<T[]> {
+    let options: ExpectHasPageObjectsExtraArgsOptions = {};
+    let selectorTransformationsArgs: SelectorTransformation[][] = [];
+    const extraArgsLen = extraArgs.length;
+    const optionsArgIdx = extraArgsLen - 1;
+    for (let i = 0; i < extraArgsLen; i++) {
+      const item = extraArgs[i];
+      if (is.array(item)) {
+        selectorTransformationsArgs.push(item);
+      } else if (i === optionsArgIdx) {
+        options = item;
+      }
+    }
+
+    const pageObjectsCount = selectorTransformationsArgs.length;
+    const { equalityCheck, only, sameOrder } = options;
+
+    if (only || sameOrder) {
+      await specializedExpectDomElementsCountIs.call(this, pageObjectsCount);
+    }
+
+    const pageObjects: T[] = [];
+
+    for (let i = 0; i < pageObjectsCount; i++) {
+      const options: ExpectHasPageObjectExtraArgsOptions = {
+        equalityCheck
+      };
+      if (sameOrder) {
+        options.idx = i;
+      }
+
+      const specializedExpectHasPageObjectArgs: ExpectHasPageObjectExtraArgs = [
+        ...selectorTransformationsArgs[i],
+        options
+      ];
+
+      pageObjects.push(
+        await specializedExpectHasPageObject.call(
+          this,
+          ...specializedExpectHasPageObjectArgs
+        )
+      );
+    }
+
+    return pageObjects;
   }
 }

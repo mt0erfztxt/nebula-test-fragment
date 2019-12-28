@@ -1,15 +1,19 @@
 .widgetA,
 .widgetB,
-.widgetC {
-  margin: 4px 0;
-  padding: 2px;
+.widgetC,
+.foo,
+.bar {
+  margin: 2px 0;
+  padding: 2px 4px;
 }
 
-.widgetA {
+.widgetA,
+.foo {
   background-color: aliceblue;
 }
 
-.widgetB {
+.widgetB,
+.bar {
   background-color: bisque;
 }
 
@@ -21,6 +25,7 @@
   background-color: #e3fbd8;
 }
 
-.widgetB .widgetA {
+.widgetB .widgetA,
+.foo .bar {
   margin-left: 16px;
 }
