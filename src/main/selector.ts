@@ -1,6 +1,10 @@
 import is from "@sindresorhus/is";
 import { Selector, t } from "testcafe";
-import { testCafeAssertion, ValidationResult } from "./utils";
+import {
+  TestCafeAssertion,
+  testCafeAssertion,
+  ValidationResult
+} from "./utils";
 
 const escapeStringRegexp = require("escape-string-regexp");
 
@@ -277,4 +281,48 @@ export function filterByText(
     : new RegExp(`^${escapeStringRegexp("" + text)}$`);
 
   return Selector(selectorInitializer).withText(textAsRegExp);
+}
+
+/**
+ * Represents `options` parameter of {@link expectDomElementsCountIs}.
+ */
+export type ExpectDomElementsCountIsOptionsArg = {
+  assertion?: TestCafeAssertion;
+  isNot?: NegationFlag;
+};
+
+/**
+ * Asserts that count of DOM elements returned by specified selector equal
+ * specified value.
+ *
+ * @param selector TestCafe's selector
+ * @param count `selector` must return that number of DOM elements to pass assertion
+ * @param [options] Options
+ * @param [options.assertion="eql"] TestCafe's assertion to use
+ * @param [options.isNot=false] Whether assertion must be negated or not
+ *
+ * @example
+ * const sel = Selector(".foo");
+ * expectDomElementsCountIs(sel, 5); // fails if `sel` returned not 5 DOM elements
+ * expectDomElementsCountIs(sel, 5, { assertion: "lt" }); // fails if `sel` returned 5 or more DOM elements
+ * expectDomElementsCountIs(sel, 5, { assertion: "lt", isNot: true }); // fails if `sel` returned less than 5 DOM elements
+ */
+export async function expectDomElementsCountIs(
+  selector: Selector,
+  count: number,
+  options?: ExpectDomElementsCountIsOptionsArg
+): Promise<void> {
+  options = options || {};
+  if (is.undefined(options.assertion)) {
+    options.assertion = "eql";
+  }
+  if (is.undefined(options.isNot)) {
+    options.isNot = false;
+  }
+
+  const { assertion, isNot } = options;
+  const assertionMethod = testCafeAssertion(assertion, { isNot });
+
+  // @ts-ignore
+  await t.expect(selector.count)[assertionMethod](count);
 }
