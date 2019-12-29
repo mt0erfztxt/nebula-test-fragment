@@ -149,13 +149,17 @@ export async function expectHasCssClasses(
 export type NegationFlag = boolean;
 
 /**
- * Represents attribute.
+ * Represents attribute requirement.
  *
  * @example
  * ["foo"] // same as ["foo", undefined, false]
  * ["bar", 1, true] // same as ["bar", "1", true]
  */
-export type Attribute = [AttributeName, AttributeValue?, NegationFlag?];
+export type AttributeRequirement = [
+  AttributeName,
+  AttributeValue?,
+  NegationFlag?
+];
 
 /**
  * Represents attribute name.
@@ -187,15 +191,15 @@ export function validateAttributeName(
   return result;
 }
 
-export function validateAttribute(
-  attribute: Attribute
-): ValidationResult<Attribute> {
-  const [attrName, attrValue, isNot = false] = attribute;
+export function validateAttributeRequirement(
+  attributeRequirement: AttributeRequirement
+): ValidationResult<AttributeRequirement> {
+  const [attrName, attrValue, isNot = false] = attributeRequirement;
   const { error } = validateAttributeName(attrName);
   if (is.undefined(error)) {
     return {
       error,
-      value: attribute
+      value: attributeRequirement
     };
   } else {
     return { value: [attrName, attrValue, isNot] };
@@ -203,11 +207,11 @@ export function validateAttribute(
 }
 
 /**
- * Accepts TestCafe's `Selector` initializer and creates new selector filtered
- * by attribute specified attribute spec.
+ * Accepts TestCafe's `Selector` initializer and returns new selector filtered
+ * using specified attribute requirement.
  *
  * @param selectorInitializer Anything TestCafe's `Selector` accepts as initializer
- * @param attribute Used to filter TestCafe's `Selector` created using `selectorInitializer` parameter so it returns only DOM elements with(out) specified `Attribute` [N, V?, F?]. When V is `undefined` -- filtering would be done by presence of N in element attributes, when regular expression -- filtering would be done by matching element attribute's value to V, otherwise filtering would be done by strict equality of element attribute's value to string version of V. When V is `undefined` and F is `false` then just N can be passed.
+ * @param attributeRequirement Used to filter TestCafe's `Selector` created using `selectorInitializer` parameter so it returns only DOM elements with(out) attribute specified using {@link AttributeRequirement} [N, V?, F?]. When V is `undefined` -- filtering would be done by presence of N in element attributes, when regular expression -- filtering would be done by matching element attribute's value to V, otherwise filtering would be done by strict equality of element attribute's value to string version of V. When V is `undefined` and F is `false` then just N can be passed.
  *
  * @example
  * // Filter selector to return DOM nodes that have attribute named 'foo' with value equal '1'
@@ -227,12 +231,16 @@ export function validateAttribute(
  */
 export function filterByAttribute(
   selectorInitializer: any,
-  attribute: AttributeName | Attribute
+  attributeRequirement: AttributeRequirement | AttributeName
 ): Selector {
   const {
     error,
     value: [attrName, attrValue, isNot = false]
-  } = validateAttribute(is.string(attribute) ? [attribute] : attribute);
+  } = validateAttributeRequirement(
+    is.string(attributeRequirement)
+      ? [attributeRequirement]
+      : attributeRequirement
+  );
   if (!is.undefined(error)) {
     throw new Error(error);
   }
