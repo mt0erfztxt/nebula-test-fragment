@@ -17,7 +17,7 @@ test("010 It should fail when selector does not return DOM elements", async t =>
     await t
       .expect(e.errMsg)
       .match(
-        /.*Selector must return exactly one DOM element but '0' of them returned.*/
+        /.*Selector must return exactly one DOM element but it returned 0 of them.*/
       );
   }
   await t.expect(isThrown).ok();
@@ -32,7 +32,7 @@ test("020 It should fail when selector return more than one DOM element", async 
     await t
       .expect(e.errMsg)
       .match(
-        /.*Selector must return exactly one DOM element but '2' of them returned.*/
+        /.* Selector must return exactly one DOM element but it returned 2 of them.*/
       );
   }
   await t.expect(isThrown).ok();
@@ -50,7 +50,7 @@ test("030 It should fail when selector must have no class names at all but it do
     await t
       .expect(e.errMsg)
       .match(
-        /.*Selector must have no class names but it have 'something, other'.*/
+        /.*DOM element returned by selector must have no CSS classes but it have 'something, other'.*/
       );
   }
   await t.expect(isThrown).ok();
@@ -78,7 +78,9 @@ test("050 It should fail when selector must have CSS class but it doesn't", asyn
     isThrown = true;
     await t
       .expect(e.errMsg)
-      .match(/.*Selector must have 'foo' CSS class but it doesn't.*/);
+      .match(
+        /.*DOM element returned by selector must have 'foo' CSS class but it doesn't.*/
+      );
   }
   await t.expect(isThrown).ok();
 });
@@ -101,7 +103,7 @@ test("070 It should fail when selector must have no CSS class but it does", asyn
     isThrown = true;
     await t
       .expect(e.errMsg)
-      .match(/.*Selector must have no 'bar1' CSS class but it does.*/);
+      .match(/.*DOM element returned by selector must not have 'bar1' CSS class but it does.*/);
   }
   await t.expect(isThrown).ok();
 });
@@ -127,7 +129,7 @@ test("090 It should fail when selector must have only specified class names but 
     await t
       .expect(e.errMsg)
       .match(
-        /.*Selector must have only 'b, bar, bar0, bar1' class names but it have 'b, bar, bar0, bar1, bar2'.*/
+        /.*DOM element returned by selector must have only 'b, bar, bar0, bar1' CSS class\(es\) but it have 'b, bar, bar0, bar1, bar2'.*/
       );
   }
   await t.expect(isThrown).ok();

@@ -82,7 +82,8 @@ export async function expectHasCssClasses(
     .expect(selLen)
     .eql(
       1,
-      `Selector must return exactly one DOM element but '${selLen}' of them returned`
+      `Selector must return exactly one DOM element but it returned ` +
+        `${selLen} of them`
     );
 
   // ---------------------------------------------------------------------------
@@ -95,8 +96,8 @@ export async function expectHasCssClasses(
       .expect(selectorCssClasses)
       .eql(
         [""],
-        "Selector must have no class names but it have '" +
-          `${selectorCssClasses.join(", ")}'`
+        "DOM element returned by selector must have no CSS classes but it " +
+          `have '${selectorCssClasses.join(", ")}'`
       );
 
     return;
@@ -106,7 +107,7 @@ export async function expectHasCssClasses(
   // Handling case when selector must have/haven't specified class names
   // ---------------------------------------------------------------------------
 
-  const mustPresentCssClasses = [];
+  const mustPresentCssClasses: CssClass[] = [];
 
   for (const item of CssClasses) {
     const cssClassSpec: CssClassSpec = is.string(item) ? [item] : item;
@@ -116,18 +117,17 @@ export async function expectHasCssClasses(
     }
 
     const [cssClass, isNot = false] = value;
-    const assertion = testCafeAssertion("ok", { isNot });
-    const message =
-      "Selector must have" +
-      (isNot ? " no " : " ") +
-      `'${cssClass}' CSS class but it ` +
-      (isNot ? "does" : "doesn't");
 
     if (!isNot) {
       mustPresentCssClasses.push(cssClass);
     }
 
-    // @ts-ignore
+    const message =
+      "DOM element returned by selector must " +
+      (isNot ? "not " : "") +
+      `have '${cssClass}' CSS class but it ` +
+      (isNot ? "does" : "doesn't");
+    const assertion = isNot ? "notOk" : "ok";
     await t.expect(sel.hasClass(cssClass))[assertion](message);
   }
 
@@ -139,8 +139,9 @@ export async function expectHasCssClasses(
       .expect(selectorCssClasses.length)
       .eql(
         mustPresentCssClasses.length,
-        `Selector must have only '${mustPresentCssClassText}' class names ` +
-          `but it have '${selectorCssClassesText}'`
+        `DOM element returned by selector must have only ` +
+          `'${mustPresentCssClassText}' CSS class(es) but it have ` +
+          `'${selectorCssClassesText}'`
       );
   }
 }
