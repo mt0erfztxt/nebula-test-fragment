@@ -1,5 +1,5 @@
 import is from "@sindresorhus/is";
-
+import { NegationFlag } from "./selector";
 import { ValidationResult } from "./utils";
 
 /**
@@ -39,6 +39,15 @@ export type BemElement = BemName;
  * BEM modifier name and second is an optional BEM modifier value.
  */
 export type BemModifier = [BemModifierName, BemModifierValue?];
+
+/**
+ * Represents BEM modifier requirement.
+ */
+export type BemModifierRequirement = [
+  BemModifierName,
+  BemModifierValue?,
+  NegationFlag?
+];
 
 /**
  * Represents BEM modifier name.
@@ -191,6 +200,19 @@ export function validateBemModifier(
   }
 
   return result;
+}
+
+export function validateBemModifierRequirement(
+  bemModifierRequirement: BemModifierRequirement
+): ValidationResult<BemModifierRequirement> {
+  const [modName, modValue, isNot = false] = bemModifierRequirement;
+
+  const { error } = validateBemModifier([modName, modValue]);
+  if (error) {
+    return { error, value: bemModifierRequirement };
+  }
+
+  return { value: [modName, modValue, isNot] };
 }
 
 function validateBemObjectOrVector(

@@ -1,6 +1,7 @@
 import {
   BemBase,
   BemModifier,
+  BemModifierRequirement,
   BemObject,
   BemString,
   BemVector,
@@ -9,6 +10,7 @@ import {
   toBemVector,
   validateBemBlock,
   validateBemModifier,
+  validateBemModifierRequirement,
   validateBemName,
   validateBemObject,
   validateBemString,
@@ -140,6 +142,67 @@ describe("validateBemModifier()", () => {
     ];
     for (const value of input) {
       expect(validateBemModifier(value)).toEqual({ value });
+    }
+  });
+});
+
+describe("validateBemModifierRequirement()", () => {
+  it("fails when value is an array but its first element is not valid BEM name", () => {
+    const error = "BEM modifier's name must be valid BEM name";
+    const value: BemModifierRequirement = ["1"];
+    expect(validateBemModifierRequirement(value)).toEqual({
+      error,
+      value
+    });
+  });
+
+  it("fails when value is an array but its second element is not valid BEM value", () => {
+    const input: BemModifierRequirement[] = [
+      ["fiz", ""],
+      ["fiz", " "],
+      ["fiz", "-buz"],
+      ["fiz", "buz-"],
+      ["fiz", "biz--buz"]
+    ];
+    for (const value of input) {
+      expect(validateBemModifierRequirement(value)).toEqual({
+        error:
+          "BEM modifier's value is optional but must be valid BEM value when provided",
+        value
+      });
+    }
+  });
+
+  it("succeeds when value is a BEM modifier requirement", () => {
+    const input: [BemModifierRequirement, BemModifierRequirement][] = [
+      [["fiz"], ["fiz", undefined, false]],
+      [
+        ["fiz", undefined],
+        ["fiz", undefined, false]
+      ],
+      [
+        ["fiz", undefined, true],
+        ["fiz", undefined, true]
+      ],
+      [
+        ["fiz", "1"],
+        ["fiz", "1", false]
+      ],
+      [
+        ["fiz", "buz"],
+        ["fiz", "buz", false]
+      ],
+      [
+        ["fiz", "biz-buz"],
+        ["fiz", "biz-buz", false]
+      ],
+      [
+        ["fiz", "biz-buz", false],
+        ["fiz", "biz-buz", false]
+      ]
+    ];
+    for (const [value, result] of input) {
+      expect(validateBemModifierRequirement(value)).toEqual({ value: result });
     }
   });
 });
