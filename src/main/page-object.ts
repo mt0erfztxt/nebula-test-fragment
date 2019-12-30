@@ -734,7 +734,7 @@ export class PageObject {
    *
    * @param [requirements] Requirements
    * @param [requirements.attributes] Allows to assert that page object's selector returned DOM element have or have no attributes specified by {@link AttributeRequirement} -- uses same syntax as {@link filterByAttribute}
-   * @param [requirements.bemModifiers] Allows to assert that page object's selector returned DOM element have or have no BEM modifiers specified by {@link BemModifierRequirement}. Same as for `requirements.attributes` but instead of attribute's name and value BEM modifier's name and value used.
+   * @param [requirements.bemModifiers] Allows to assert that page object's selector returned DOM element have or have no BEM modifiers specified by {@link BemModifierRequirement}. Same as for `requirements.attributes` but instead of attribute's name and value BEM modifier's name and value used. Note: must not be used with `selector` option.
    * @param [requirements.tagName] Allows to assert that page object's selector returned DOM element rendered using specified HTML tag
    * @param [requirements.text] Allows to assert that page object's selector returned DOM element's text equal or matches specified value. Condition of assertion can be reversed by passing `Array` where first element is a text and second is a flag that specifies whether condition must be negated or not
    * @param [requirements.textContent] Allows to assert that page object's selector returned DOM element's text content equal or matches specified value. Condition of assertion can be reversed by passing `Array` where first element is a text content and second is a flag that specifies whether condition must be negated or not
@@ -751,12 +751,12 @@ export class PageObject {
     },
     options?: { selector?: Selector }
   ): Promise<void> {
-    options = options || {};
-    if (is.undefined(options.selector)) {
-      options.selector = this.selector;
+    const opts = options || {};
+    if (is.undefined(opts.selector)) {
+      opts.selector = this.selector;
     }
 
-    let { selector } = options;
+    let { selector } = opts;
     const elementsCount = await selector.count;
     await t
       .expect(elementsCount)
@@ -766,11 +766,10 @@ export class PageObject {
           `${elementsCount} of them`
       );
 
-    if (is.nullOrUndefined(requirements)) {
+    if (is.undefined(requirements)) {
       return;
     }
 
-    // Attributes asserted by one at a time.
     for (const item of requirements.attributes || []) {
       const [attrName, attrValue, isNot = false] = is.array(item)
         ? item
@@ -780,14 +779,27 @@ export class PageObject {
         .expect(selector.count)
         .eql(
           1,
-          `Expected ${this.displayName}'s selector to ` +
-            (isNot ? "not" : "") +
-            `return DOM element with attribute '${attrName}'` +
-            (is.undefined(attrValue) ? "" : ` valued '${attrValue}'`)
+          `DOM element returned by selector must ` +
+            (isNot ? "not " : "") +
+            `have '${attrName}` +
+            (is.undefined(attrValue) ? "" : `,${attrValue}`) +
+            "' attribute but it does" +
+            (isNot ? "" : "n't")
         );
     }
 
-    // BEM modifiers asserted by one at a time.
+    if (
+      requirements.bemModifiers &&
+      requirements.bemModifiers.length &&
+      options &&
+      options.selector
+    ) {
+      throw new Error(
+        "`bemModifier` requirements can't be used together with  `selector` " +
+          "option"
+      );
+    }
+
     for (const item of requirements.bemModifiers || []) {
       const [modName, modValue, isNot = false] = is.array(item) ? item : [item];
       if (isNot) {
@@ -798,26 +810,35 @@ export class PageObject {
     }
 
     if (requirements.tagName) {
-      await t.expect(selector.tagName).eql(requirements.tagName);
+      const tagName = await selector.tagName;
+      await t
+        .expect(selector.tagName)
+        .eql(
+          requirements.tagName,
+          `Tag of DOM element returned by selector must be ` +
+            `'${requirements.tagName}' but it is '${tagName}'`
+        );
     }
 
     const { text } = requirements;
     if (!is.undefined(text)) {
-      const [textOrRegExp, isNot = false] = is.array(text) ? text : [text];
+      const [stringOrRegExp, isNot = false] = is.array(text) ? text : [text];
 
       // XXX TestCafe (v0.16.2) always converts `withText` argument to `RegExp`
       // and so we must use workaround to use string equality.
-      const expectedValueAsRegExp = is.regExp(textOrRegExp)
-        ? textOrRegExp
-        : new RegExp(`^${escapeStringRegexp("" + textOrRegExp)}$`);
+      const expectedValueAsRegExp = is.regExp(stringOrRegExp)
+        ? stringOrRegExp
+        : new RegExp(`^${escapeStringRegexp("" + stringOrRegExp)}$`);
+      const isRegExp = is.regExp(stringOrRegExp);
       await t
         .expect(selector.withText(expectedValueAsRegExp).count)
         .eql(
           isNot ? 0 : 1,
-          `${this.displayName}'s selector returned DOM element text must ` +
+          `Text of DOM element returned by selector must ` +
             (isNot ? "not " : "") +
-            (is.regExp(textOrRegExp) ? "match" : "equal") +
-            ` ${expectedValueAsRegExp}`
+            (isRegExp ? "match " : "be equal '") +
+            `${stringOrRegExp}` +
+            (isRegExp ? "" : "'")
         );
     }
 
@@ -826,12 +847,19 @@ export class PageObject {
       const [stringOrRegExp, isNot = false] = is.array(textContent)
         ? textContent
         : [textContent];
+      const isRegExp = is.regExp(stringOrRegExp);
+      const msg =
+        `Text content of DOM element returned by selector must ` +
+        (isNot ? "not " : "") +
+        (isRegExp ? "match " : "be equal '") +
+        `${stringOrRegExp}` +
+        (isRegExp ? "" : "'");
       if (is.regExp(stringOrRegExp)) {
         const assertion = isNot ? "notMatch" : "match";
-        await t.expect(selector.textContent)[assertion](stringOrRegExp);
+        await t.expect(selector.textContent)[assertion](stringOrRegExp, msg);
       } else {
         const assertion = isNot ? "notEql" : "eql";
-        await t.expect(selector.textContent)[assertion](stringOrRegExp);
+        await t.expect(selector.textContent)[assertion](stringOrRegExp, msg);
       }
     }
   }
