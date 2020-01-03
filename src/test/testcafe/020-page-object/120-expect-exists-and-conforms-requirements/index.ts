@@ -11,8 +11,6 @@ class Foo extends PageObject {
   static displayName = "Foo";
 }
 
-// TODO Split long tests.
-// TODO Use "Bar 0Buz 0" for 'text' requirements testing.
 fixture("PageObject#expectExistsAndConformsRequirements()").page(
   `${__dirname}/index.html`
 );
@@ -638,7 +636,7 @@ test("170 allows to assert that page object's selector returned DOM element's ta
   await t.expect(isThrown).ok();
 });
 
-test("180 allows to assert that page object's selector returned DOM element have specified text", async t => {
+test("180 allows to assert that page object's selector returned DOM element have specified text -- case of string", async t => {
   let isThrown;
   const bar = new Bar();
 
@@ -648,7 +646,7 @@ test("180 allows to assert that page object's selector returned DOM element have
 
   // -- Checks --
 
-  // Check success -- string.
+  // Check success.
   isThrown = false;
   try {
     await bar.expectExistsAndConformsRequirements({ text: "Bar 0\nBuz 0" });
@@ -657,7 +655,7 @@ test("180 allows to assert that page object's selector returned DOM element have
   }
   await t.expect(isThrown).notOk();
 
-  // Check failure -- string.
+  // Check failure.
   isThrown = false;
   try {
     await bar.expectExistsAndConformsRequirements({ text: "Bar 0" });
@@ -670,8 +668,19 @@ test("180 allows to assert that page object's selector returned DOM element have
       );
   }
   await t.expect(isThrown).ok();
+});
 
-  // Check success -- RegExp.
+test("185 allows to assert that page object's selector returned DOM element have specified text -- case of regular expression", async t => {
+  let isThrown;
+  const bar = new Bar();
+
+  // -- Pre-checks --
+
+  await t.expect(bar.selector.count).eql(1);
+
+  // -- Checks --
+
+  // Check success.
   isThrown = false;
   try {
     await bar.expectExistsAndConformsRequirements({
@@ -682,7 +691,7 @@ test("180 allows to assert that page object's selector returned DOM element have
   }
   await t.expect(isThrown).notOk();
 
-  // Check failure -- RegExp.
+  // Check failure.
   isThrown = false;
   try {
     await bar.expectExistsAndConformsRequirements({
@@ -699,7 +708,7 @@ test("180 allows to assert that page object's selector returned DOM element have
   }
   await t.expect(isThrown).ok();
 
-  // Check failure -- regular expression literal.
+  // Check failure (literal).
   isThrown = false;
   try {
     await bar.expectExistsAndConformsRequirements({
@@ -717,7 +726,7 @@ test("180 allows to assert that page object's selector returned DOM element have
   await t.expect(isThrown).ok();
 });
 
-test("190 allows to assert that page object's selector returned DOM element have no specified text", async t => {
+test("190 allows to assert that page object's selector returned DOM element have no specified text -- case of string", async t => {
   let isThrown;
   const foo = new Bar();
 
@@ -727,7 +736,7 @@ test("190 allows to assert that page object's selector returned DOM element have
 
   // -- Checks --
 
-  // Check success -- string.
+  // Check success.
   isThrown = false;
   try {
     await foo.expectExistsAndConformsRequirements({
@@ -738,7 +747,7 @@ test("190 allows to assert that page object's selector returned DOM element have
   }
   await t.expect(isThrown).notOk();
 
-  // Check failure -- string.
+  // Check failure.
   isThrown = false;
   try {
     await foo.expectExistsAndConformsRequirements({
@@ -753,8 +762,19 @@ test("190 allows to assert that page object's selector returned DOM element have
       );
   }
   await t.expect(isThrown).ok();
+});
 
-  // Check success -- RegExp.
+test("195 allows to assert that page object's selector returned DOM element have no specified text -- case of regular expression", async t => {
+  let isThrown;
+  const foo = new Bar();
+
+  // -- Pre-checks --
+
+  await t.expect(foo.selector.count).eql(1);
+
+  // -- Checks --
+
+  // Check success.
   isThrown = false;
   try {
     await foo.expectExistsAndConformsRequirements({
@@ -765,7 +785,7 @@ test("190 allows to assert that page object's selector returned DOM element have
   }
   await t.expect(isThrown).notOk();
 
-  // Check failure -- RegExp.
+  // Check failure.
   isThrown = false;
   try {
     await foo.expectExistsAndConformsRequirements({
@@ -782,7 +802,7 @@ test("190 allows to assert that page object's selector returned DOM element have
   }
   await t.expect(isThrown).ok();
 
-  // Check failure -- regular expression literal.
+  // Check failure (literal).
   isThrown = false;
   try {
     await foo.expectExistsAndConformsRequirements({
