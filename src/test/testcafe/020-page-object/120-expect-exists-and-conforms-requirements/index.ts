@@ -640,18 +640,18 @@ test("170 allows to assert that page object's selector returned DOM element's ta
 
 test("180 allows to assert that page object's selector returned DOM element have specified text", async t => {
   let isThrown;
-  const foo = new Foo();
+  const bar = new Bar();
 
   // -- Pre-checks --
 
-  await t.expect(foo.selector.count).eql(1);
+  await t.expect(bar.selector.count).eql(1);
 
   // -- Checks --
 
   // Check success -- string.
   isThrown = false;
   try {
-    await foo.expectExistsAndConformsRequirements({ text: "Button 42" });
+    await bar.expectExistsAndConformsRequirements({ text: "Bar 0\nBuz 0" });
   } catch (e) {
     isThrown = true;
   }
@@ -660,13 +660,13 @@ test("180 allows to assert that page object's selector returned DOM element have
   // Check failure -- string.
   isThrown = false;
   try {
-    await foo.expectExistsAndConformsRequirements({ text: "Button 0" });
+    await bar.expectExistsAndConformsRequirements({ text: "Bar 0" });
   } catch (e) {
     isThrown = true;
     await t
       .expect(e.errMsg)
       .match(
-        /.*Text of DOM element returned by selector must be equal 'Button 0'.*/
+        /.*Text of DOM element returned by selector must be equal 'Bar 0'.*/
       );
   }
   await t.expect(isThrown).ok();
@@ -674,8 +674,8 @@ test("180 allows to assert that page object's selector returned DOM element have
   // Check success -- RegExp.
   isThrown = false;
   try {
-    await foo.expectExistsAndConformsRequirements({
-      text: new RegExp("\\w+ton 42$")
+    await bar.expectExistsAndConformsRequirements({
+      text: new RegExp("^\\w+ 0\\n\\w+ 0$")
     });
   } catch (e) {
     isThrown = true;
@@ -685,8 +685,8 @@ test("180 allows to assert that page object's selector returned DOM element have
   // Check failure -- RegExp.
   isThrown = false;
   try {
-    await foo.expectExistsAndConformsRequirements({
-      text: new RegExp("\\w+ton 0$")
+    await bar.expectExistsAndConformsRequirements({
+      text: new RegExp("^\\w+ 1\\n\\w+ 1$")
     });
   } catch (e) {
     isThrown = true;
@@ -694,7 +694,7 @@ test("180 allows to assert that page object's selector returned DOM element have
       .expect(e.errMsg)
       .eql(
         "AssertionError: Text of DOM element returned by selector must " +
-          "match /\\w+ton 0$/: expected 0 to deeply equal 1"
+          "match /^\\w+ 1\\n\\w+ 1$/: expected 0 to deeply equal 1"
       );
   }
   await t.expect(isThrown).ok();
@@ -702,8 +702,8 @@ test("180 allows to assert that page object's selector returned DOM element have
   // Check failure -- regular expression literal.
   isThrown = false;
   try {
-    await foo.expectExistsAndConformsRequirements({
-      text: /\w+ton 0$/
+    await bar.expectExistsAndConformsRequirements({
+      text: /^\w+ 1\n\w+ 1$/
     });
   } catch (e) {
     isThrown = true;
@@ -711,7 +711,7 @@ test("180 allows to assert that page object's selector returned DOM element have
       .expect(e.errMsg)
       .eql(
         "AssertionError: Text of DOM element returned by selector must " +
-          "match /\\w+ton 0$/: expected 0 to deeply equal 1"
+          "match /^\\w+ 1\\n\\w+ 1$/: expected 0 to deeply equal 1"
       );
   }
   await t.expect(isThrown).ok();
@@ -719,7 +719,7 @@ test("180 allows to assert that page object's selector returned DOM element have
 
 test("190 allows to assert that page object's selector returned DOM element have no specified text", async t => {
   let isThrown;
-  const foo = new Foo();
+  const foo = new Bar();
 
   // -- Pre-checks --
 
@@ -731,7 +731,7 @@ test("190 allows to assert that page object's selector returned DOM element have
   isThrown = false;
   try {
     await foo.expectExistsAndConformsRequirements({
-      text: ["Button 0", true]
+      text: ["Bar 1\nBuz 1", true]
     });
   } catch (e) {
     isThrown = true;
@@ -742,14 +742,14 @@ test("190 allows to assert that page object's selector returned DOM element have
   isThrown = false;
   try {
     await foo.expectExistsAndConformsRequirements({
-      text: ["Button 42", true]
+      text: ["Bar 0\nBuz 0", true]
     });
   } catch (e) {
     isThrown = true;
     await t
       .expect(e.errMsg)
       .match(
-        /.*Text of DOM element returned by selector must not be equal 'Button 42'.*/
+        /.*Text of DOM element returned by selector must not be equal 'Bar 0\nBuz 0'.*/
       );
   }
   await t.expect(isThrown).ok();
@@ -758,7 +758,7 @@ test("190 allows to assert that page object's selector returned DOM element have
   isThrown = false;
   try {
     await foo.expectExistsAndConformsRequirements({
-      text: [new RegExp("\\w+ton 0$"), true]
+      text: [new RegExp("^Bar 0\\nBuz 1$"), true]
     });
   } catch (e) {
     isThrown = true;
@@ -769,7 +769,7 @@ test("190 allows to assert that page object's selector returned DOM element have
   isThrown = false;
   try {
     await foo.expectExistsAndConformsRequirements({
-      text: [new RegExp("\\w+ton 42$"), true]
+      text: [new RegExp("^Bar 0\\nBuz 0$"), true]
     });
   } catch (e) {
     isThrown = true;
@@ -777,7 +777,7 @@ test("190 allows to assert that page object's selector returned DOM element have
       .expect(e.errMsg)
       .eql(
         "AssertionError: Text of DOM element returned by selector must not " +
-          "match /\\w+ton 42$/: expected 1 to deeply equal 0"
+          "match /^Bar 0\\nBuz 0$/: expected 1 to deeply equal 0"
       );
   }
   await t.expect(isThrown).ok();
@@ -786,7 +786,7 @@ test("190 allows to assert that page object's selector returned DOM element have
   isThrown = false;
   try {
     await foo.expectExistsAndConformsRequirements({
-      text: [/\w+ton 42$/, true]
+      text: [/^Bar 0\nBuz 0$/, true]
     });
   } catch (e) {
     isThrown = true;
@@ -794,175 +794,7 @@ test("190 allows to assert that page object's selector returned DOM element have
       .expect(e.errMsg)
       .eql(
         "AssertionError: Text of DOM element returned by selector must not " +
-          "match /\\w+ton 42$/: expected 1 to deeply equal 0"
-      );
-  }
-  await t.expect(isThrown).ok();
-});
-
-test("200 allows to assert that page object's selector returned DOM element have specified text content", async t => {
-  let isThrown;
-  const bar = new Bar();
-
-  // -- Pre-checks --
-
-  await t.expect(bar.selector.count).eql(1);
-
-  // -- Checks --
-
-  // Check success -- string.
-  isThrown = false;
-  try {
-    await bar.expectExistsAndConformsRequirements({
-      textContent: "Bar 0Buz 0"
-    });
-  } catch (e) {
-    isThrown = true;
-  }
-  await t.expect(isThrown).notOk();
-
-  // Check failure -- string.
-  isThrown = false;
-  try {
-    await bar.expectExistsAndConformsRequirements({
-      textContent: "Bar 1Buz 0"
-    });
-  } catch (e) {
-    isThrown = true;
-    await t
-      .expect(e.errMsg)
-      .match(
-        /.*Text content of DOM element returned by selector must be equal 'Bar 1Buz 0'.*/
-      );
-  }
-  await t.expect(isThrown).ok();
-
-  // Check success -- RegExp.
-  isThrown = false;
-  try {
-    await bar.expectExistsAndConformsRequirements({
-      textContent: new RegExp("r 0Buz \\d$")
-    });
-  } catch (e) {
-    isThrown = true;
-  }
-  await t.expect(isThrown).notOk();
-
-  // Check failure -- RegExp.
-  isThrown = false;
-  try {
-    await bar.expectExistsAndConformsRequirements({
-      textContent: new RegExp("r \\dBuz 1$")
-    });
-  } catch (e) {
-    isThrown = true;
-    await t
-      .expect(e.errMsg)
-      .eql(
-        "AssertionError: Text content of DOM element returned by selector " +
-          "must match /r \\dBuz 1$/: expected 'Bar 0Buz 0' to match /r \\dBuz 1$/"
-      );
-  }
-  await t.expect(isThrown).ok();
-
-  // Check failure -- regular expression literal.
-  isThrown = false;
-  try {
-    await bar.expectExistsAndConformsRequirements({
-      textContent: /r \dBuz 1$/
-    });
-  } catch (e) {
-    isThrown = true;
-    await t
-      .expect(e.errMsg)
-      .eql(
-        "AssertionError: Text content of DOM element returned by selector " +
-          "must match /r \\dBuz 1$/: expected 'Bar 0Buz 0' to match /r \\dBuz 1$/"
-      );
-  }
-  await t.expect(isThrown).ok();
-});
-
-test("210 allows to assert that page object's selector returned DOM element have no specified text content", async t => {
-  let isThrown;
-  const bar = new Bar();
-
-  // -- Pre-checks --
-
-  await t.expect(bar.selector.count).eql(1);
-
-  // -- Checks --
-
-  // Check success -- string.
-  isThrown = false;
-  try {
-    await bar.expectExistsAndConformsRequirements({
-      textContent: ["Bar 1Buz 1", true]
-    });
-  } catch (e) {
-    isThrown = true;
-  }
-  await t.expect(isThrown).notOk();
-
-  // Check failure -- string.
-  isThrown = false;
-  try {
-    await bar.expectExistsAndConformsRequirements({
-      textContent: ["Bar 0Buz 0", true]
-    });
-  } catch (e) {
-    isThrown = true;
-    await t
-      .expect(e.errMsg)
-      .match(
-        /.*Text content of DOM element returned by selector must not be equal 'Bar 0Buz 0'.*/
-      );
-  }
-  await t.expect(isThrown).ok();
-
-  // Check success -- RegExp.
-  isThrown = false;
-  try {
-    await bar.expectExistsAndConformsRequirements({
-      textContent: [new RegExp("r 1Buz \\d$"), true]
-    });
-  } catch (e) {
-    isThrown = true;
-  }
-  await t.expect(isThrown).notOk();
-
-  // Check failure -- RegExp.
-  isThrown = false;
-  try {
-    await bar.expectExistsAndConformsRequirements({
-      textContent: [new RegExp("r \\dBuz 0$"), true]
-    });
-  } catch (e) {
-    isThrown = true;
-    await t
-      .expect(e.errMsg)
-      .eql(
-        "AssertionError: Text content of DOM element returned by selector " +
-          "must not match /r \\dBuz 0$/: expected 'Bar 0Buz 0' not to match " +
-          "/r \\dBuz 0$/"
-      );
-  }
-  await t.expect(isThrown).ok();
-
-  // Check failure -- regular expression literal.
-  isThrown = false;
-  try {
-    await bar.expectExistsAndConformsRequirements({
-      textContent: [/r \dBuz 0$/, true]
-    });
-  } catch (e) {
-    isThrown = true;
-    await t
-      .expect(e.errMsg)
-      .eql(
-        "AssertionError: Text content of DOM element returned by selector " +
-          "must not match /r \\dBuz 0$/: expected 'Bar 0Buz 0' not to match " +
-          "/r \\dBuz 0$/"
+          "match /^Bar 0\\nBuz 0$/: expected 1 to deeply equal 0"
       );
   }
   await t.expect(isThrown).ok();

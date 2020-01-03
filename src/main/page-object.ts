@@ -15,8 +15,6 @@ import {
   SpecializedExpectDomElementsCountIs
 } from "./selector";
 
-const escapeStringRegexp = require("escape-string-regexp");
-
 /**
  * Represents selector transformation.
  */
@@ -737,7 +735,6 @@ export class PageObject {
    * @param [requirements.bemModifiers] Allows to assert that page object's selector returned DOM element have or have no BEM modifiers specified by {@link BemModifierRequirement}. Same as for `requirements.attributes` but instead of attribute's name and value BEM modifier's name and value used. Note: must not be used with `selector` option.
    * @param [requirements.tagName] Allows to assert that page object's selector returned DOM element rendered using specified HTML tag
    * @param [requirements.text] Allows to assert that page object's selector returned DOM element's text equal or matches specified value. Condition of assertion can be reversed by passing `Array` where first element is a text and second is a flag that specifies whether condition must be negated or not
-   * @param [requirements.textContent] Allows to assert that page object's selector returned DOM element's text content equal or matches specified value. Condition of assertion can be reversed by passing `Array` where first element is a text content and second is a flag that specifies whether condition must be negated or not
    * @param [options] Options
    * @param [options.selector=this.selector] TestCafe's `Selector` to assert on, page object's selector by default
    */
@@ -747,7 +744,6 @@ export class PageObject {
       bemModifiers?: (BemModifierRequirement | BemModifierName)[];
       tagName?: string;
       text?: string | RegExp | [string | RegExp, NegationFlag?];
-      textContent?: string | RegExp | [string | RegExp, NegationFlag?];
     },
     options?: { selector?: Selector }
   ): Promise<void> {
@@ -823,15 +819,12 @@ export class PageObject {
     const { text } = requirements;
     if (!is.undefined(text)) {
       const [stringOrRegExp, isNot = false] = is.array(text) ? text : [text];
-
-      // XXX TestCafe (v0.16.2) always converts `withText` argument to `RegExp`
-      // and so we must use workaround to use string equality.
-      const expectedValueAsRegExp = is.regExp(stringOrRegExp)
-        ? stringOrRegExp
-        : new RegExp(`^${escapeStringRegexp("" + stringOrRegExp)}$`);
+      const selectorWithText: Selector = is.regExp(stringOrRegExp)
+        ? selector.withText(stringOrRegExp)
+        : selector.withExactText(stringOrRegExp);
       const isRegExp = is.regExp(stringOrRegExp);
       await t
-        .expect(selector.withText(expectedValueAsRegExp).count)
+        .expect(selectorWithText.count)
         .eql(
           isNot ? 0 : 1,
           `Text of DOM element returned by selector must ` +
@@ -840,27 +833,6 @@ export class PageObject {
             `${stringOrRegExp}` +
             (isRegExp ? "" : "'")
         );
-    }
-
-    const { textContent } = requirements;
-    if (!is.undefined(textContent)) {
-      const [stringOrRegExp, isNot = false] = is.array(textContent)
-        ? textContent
-        : [textContent];
-      const isRegExp = is.regExp(stringOrRegExp);
-      const msg =
-        `Text content of DOM element returned by selector must ` +
-        (isNot ? "not " : "") +
-        (isRegExp ? "match " : "be equal '") +
-        `${stringOrRegExp}` +
-        (isRegExp ? "" : "'");
-      if (is.regExp(stringOrRegExp)) {
-        const assertion = isNot ? "notMatch" : "match";
-        await t.expect(selector.textContent)[assertion](stringOrRegExp, msg);
-      } else {
-        const assertion = isNot ? "notEql" : "eql";
-        await t.expect(selector.textContent)[assertion](stringOrRegExp, msg);
-      }
     }
   }
 }
