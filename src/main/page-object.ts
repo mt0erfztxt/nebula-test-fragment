@@ -142,35 +142,31 @@ export type ExpectHasPageObjectsExtraArgsOptions = {
 
 export type PageObjectState = { cid?: string };
 
-// TODO Tests.
 export async function getPartOfState<T extends PageObject>(
   pageObject: T,
-  partName: string | [string, string],
+  partName: string,
   options?: {
     simple?: boolean;
     src?: "attribute" | "bemModifier";
   }
 ): Promise<boolean | string | undefined> {
   const { simple = false, src = "bemModifier" } = options || {};
-  const [pName, pAlias] = is.array(partName) ? partName : [partName];
-  const name = pAlias || pName;
-
   if (src === "bemModifier") {
     if (simple) {
       return pageObject.selector.hasClass(
         pageObject.bemBase
           .clone()
-          .setMod([name])
+          .setMod([partName])
           .toString()
       );
     } else {
-      const modifiers = await pageObject.getBemModifiers(name);
+      const modifiers = await pageObject.getBemModifiers(partName);
       return modifiers.length ? modifiers[0][1] : undefined;
     }
   } else {
     return simple
-      ? pageObject.selector.hasAttribute(name)
-      : pageObject.selector.getAttribute(name);
+      ? pageObject.selector.hasAttribute(partName)
+      : pageObject.selector.getAttribute(partName);
   }
 }
 
