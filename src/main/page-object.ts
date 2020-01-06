@@ -1,4 +1,5 @@
 import is from "@sindresorhus/is";
+import { detailedDiff } from "deep-object-diff";
 import { Selector, t } from "testcafe";
 import {
   BemBase,
@@ -885,5 +886,44 @@ export class PageObject {
    */
   async getCid(): Promise<string | undefined> {
     return (await getPartOfState(this, "cid")) as string | undefined;
+  }
+
+  /**
+   * Asserts that page object's state equal specified.
+   *
+   * @param state Expected page object's state
+   * @param [debug=false] If `true` then detailed diff would be logged to console on assertion failure
+   */
+  async expectStateIs<T extends { [key: string]: any }>(
+    state: T,
+    debug?: boolean
+  ): Promise<void> {
+    const curState = await this.getState();
+
+    if (debug) {
+      console.log(
+        "// --------------------------------- Actual -----------------------------------"
+      );
+      console.log(JSON.stringify(curState, null, "\t"));
+      console.log(
+        "// ----------------------------------------------------------------------------"
+      );
+      console.log();
+      console.log(
+        "// -------------------------------- Expected ----------------------------------"
+      );
+      console.log(JSON.stringify(state, null, "\t"));
+      console.log(
+        "// ----------------------------------------------------------------------------"
+      );
+    }
+
+    await t
+      .expect(curState)
+      .eql(
+        state,
+        `${this.displayName}'s state doesn't equal expected\n` +
+          `${JSON.stringify(detailedDiff(state, curState), null, "\t")}\n`
+      );
   }
 }
