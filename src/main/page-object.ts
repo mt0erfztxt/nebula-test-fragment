@@ -876,6 +876,11 @@ export class PageObject {
   }
 
   /**
+   * Sets page object's state to specified value.
+   */
+  async setState(_value: PageObjectState): Promise<void> {}
+
+  /**
    * Returns 'cid' part of page object's state.
    */
   async getCid(): Promise<string | undefined> {
