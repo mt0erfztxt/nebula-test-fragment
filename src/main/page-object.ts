@@ -11,6 +11,7 @@ import {
 import {
   AttributeName,
   AttributeRequirement,
+  AttributeValue,
   filterByAttribute,
   NegationFlag,
   SpecializedExpectDomElementsCountIs
@@ -948,6 +949,31 @@ export class PageObject {
     const { selector, text } = options || {};
     await this.expectExistsAndConformsRequirements(
       { tagName: "button", text },
+      { selector }
+    );
+  }
+
+  /**
+   * Asserts that page object's selector returned DOM element's tag is `A`.
+   *
+   * @param [options] Options
+   * @param [options.href] `href` attribute of returned DOM element must conform this attribute requirement, see `attributes` requirement of {@link PageObject#expectExistsAndConformsRequirements}
+   * @param [options.text] Text of returned DOM element must conform this text requirement, see `text` requirement of {@link PageObject#expectExistsAndConformsRequirements}
+   * @param [options.selector=this.selector] Same as `selector` option of {@link PageObject#expectExistsAndConformsRequirements}
+   */
+  async expectIsLink(options?: {
+    href?: AttributeValue | [AttributeValue, NegationFlag?];
+    selector?: Selector;
+    text?: TextRequirement;
+  }): Promise<void> {
+    const { href, selector, text } = options || {};
+    const [hrefVal, isNot = false] = is.array(href) ? href : [href];
+    await this.expectExistsAndConformsRequirements(
+      {
+        attributes: href ? [["href", hrefVal, isNot]] : [],
+        tagName: "a",
+        text
+      },
       { selector }
     );
   }
