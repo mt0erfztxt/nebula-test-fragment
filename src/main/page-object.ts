@@ -171,6 +171,13 @@ export async function getPartOfState<T extends PageObject>(
   }
 }
 
+export type TextRequirement =
+  | boolean
+  | number
+  | RegExp
+  | string
+  | [boolean | number | RegExp | string, NegationFlag?];
+
 export class PageObject {
   /**
    * Page object's BEM base -- used to map page object to DOM element with
@@ -760,7 +767,7 @@ export class PageObject {
    * @param [requirements.attributes] Allows to assert that page object's selector returned DOM element have or have no attributes specified by {@link AttributeRequirement} -- uses same syntax as {@link filterByAttribute}
    * @param [requirements.bemModifiers] Allows to assert that page object's selector returned DOM element have or have no BEM modifiers specified by {@link BemModifierRequirement}. Same as for `requirements.attributes` but instead of attribute's name and value BEM modifier's name and value used. Note: must not be used with `selector` option.
    * @param [requirements.tagName] Allows to assert that page object's selector returned DOM element rendered using specified HTML tag
-   * @param [requirements.text] Allows to assert that page object's selector returned DOM element's text equal or matches specified value. Condition of assertion can be reversed by passing `Array` where first element is a text and second is a flag that specifies whether condition must be negated or not
+   * @param [requirements.text] Allows to assert that page object's selector returned DOM element's text conforms specified text requirement
    * @param [options] Options
    * @param [options.selector=this.selector] TestCafe's `Selector` to assert on, page object's selector by default
    */
@@ -769,7 +776,7 @@ export class PageObject {
       attributes?: (AttributeRequirement | AttributeName)[];
       bemModifiers?: (BemModifierRequirement | BemModifierName)[];
       tagName?: string;
-      text?: string | RegExp | [string | RegExp, NegationFlag?];
+      text?: TextRequirement;
     },
     options?: { selector?: Selector }
   ): Promise<void> {
@@ -847,7 +854,7 @@ export class PageObject {
       const [stringOrRegExp, isNot = false] = is.array(text) ? text : [text];
       const selectorWithText: Selector = is.regExp(stringOrRegExp)
         ? selector.withText(stringOrRegExp)
-        : selector.withExactText(stringOrRegExp);
+        : selector.withExactText("" + stringOrRegExp);
       const isRegExp = is.regExp(stringOrRegExp);
       await t
         .expect(selectorWithText.count)
@@ -925,5 +932,23 @@ export class PageObject {
         `${this.displayName}'s state doesn't equal expected\n` +
           `${JSON.stringify(detailedDiff(state, curState), null, "\t")}\n`
       );
+  }
+
+  /**
+   * Asserts that page object's selector returned DOM element's tag is `BUTTON`.
+   *
+   * @param [options] Options
+   * @param [options.text] Text of returned DOM element must conform this text requirement, see `text` requirement of {@link PageObject#expectExistsAndConformsRequirements}
+   * @param [options.selector=this.selector] Same as `selector` option of {@link PageObject#expectExistsAndConformsRequirements}
+   */
+  async expectIsButton(options?: {
+    selector?: Selector;
+    text?: TextRequirement;
+  }): Promise<void> {
+    const { selector, text } = options || {};
+    await this.expectExistsAndConformsRequirements(
+      { tagName: "button", text },
+      { selector }
+    );
   }
 }
