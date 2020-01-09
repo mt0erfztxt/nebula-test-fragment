@@ -977,4 +977,19 @@ export class PageObject {
       { selector }
     );
   }
+
+  /**
+   * Asserts that page object's selector returned DOM element's text conforms
+   * specified text requirement.
+   *
+   * @param text
+   * @param [options] Options
+   * @param [options.selector=this.selector] Same as `selector` option of {@link PageObject#expectExistsAndConformsRequirements}
+   */
+  async expectTextIs(
+    text: TextRequirement,
+    options?: { selector?: Selector }
+  ): Promise<void> {
+    await this.expectExistsAndConformsRequirements({ text }, options);
+  }
 }
