@@ -1,6 +1,6 @@
 {
-  "name": "nebula-test-fragment",
-  "version": "0.2.0",
+  "name": "nebula-test-fragment-ts",
+  "version": "0.3.0",
   "description": "Page object and utilities for e2e testing",
   "license": "Apache-2.0",
   "repository": {
@@ -8,15 +8,19 @@
     "url": "https://github.com/mt0erfztxt/nebula-test-fragment.git"
   },
   "author": "Sergey Kozhevnikov <mt0erfztxt@gmail.com>",
-  "main": "dist/index.js",
+  "main": "dist/page-object.js",
   "directories": {
     "test": "src/test"
   },
   "scripts": {
+    "clean": "rm -rf dist",
+    "compile": "./node_modules/.bin/tsc",
+    "prepare": "npm run clean && npm run compile && mv dist/main lib && rm -rf dist",
     "test": "npm run jasmine-tests && npm run testcafe-tests",
     "jasmine-tests": "npx jasmine --config=jasmine.json",
     "testcafe-tests": "npx testcafe --selector-timeout=3500 chromium src/test/testcafe"
   },
+  "files": ["lib"],
   "dependencies": {
     "@sindresorhus/is": "^1.2.0",
     "app-root-path": "^2.2.1",

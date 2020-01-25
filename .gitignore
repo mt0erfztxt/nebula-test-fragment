@@ -1,10 +1,2 @@
-/.idea
-/.nyc_output
-/.vscode
-/coverage
-/dist
-/js-src
-/js-test
-/node_modules
-
-jsconfig.json
+.idea
+node_modules
