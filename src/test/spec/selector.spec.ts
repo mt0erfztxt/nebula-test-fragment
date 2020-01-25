@@ -1,26 +1,59 @@
-import { validateClassName, validateClassNameSpec } from "../../main/selector";
+import {
+  ClassName,
+  ClassNameSpec,
+  validateClassName,
+  validateClassNameSpec
+} from "../../main/selector";
 
 describe("validateClassName()", () => {
   it("returns failed validation result when class name is not valid", () => {
-    expect(validateClassName("").valid).toBe(false);
-    expect(validateClassName(" ").valid).toBe(false);
+    const values: [ClassName, string][] = [
+      ["", ""],
+      [" ", " "],
+      ["\t", "\t"]
+    ];
+    for (const [value, error] of values) {
+      expect(validateClassName(value)).toEqual({
+        error: `Class name must be non-blank string but it is '${error}'`,
+        value
+      });
+    }
   });
 
   it("returns successful validation result when class name is valid", () => {
-    expect(validateClassName("f").valid).toBe(true);
-    expect(validateClassName("foo").valid).toBe(true);
+    const values: ClassName[] = ["f", "foo"];
+    for (const value of values) {
+      expect(validateClassName(value)).toEqual({ value });
+    }
   });
 });
 
 describe("validateClassNameSpec()", () => {
   it("returns failed validation result when class name spec is not valid", () => {
-    expect(validateClassNameSpec([""]).valid).toBe(false);
-    expect(validateClassNameSpec([" "]).valid).toBe(false);
+    const values: [ClassNameSpec, string][] = [
+      [[""], ""],
+      [[" "], " "],
+      [["\t"], "\t"]
+    ];
+    for (const [value, error] of values) {
+      expect(validateClassNameSpec(value)).toEqual({
+        error: `Class name spec -- Class name must be non-blank string but it is '${error}'`,
+        value
+      });
+    }
   });
 
   it("returns successful validation result when class name spec is valid", () => {
-    expect(validateClassNameSpec(["f"]).valid).toBe(true);
-    expect(validateClassNameSpec(["foo"]).valid).toBe(true);
-    expect(validateClassNameSpec(["foo", true]).valid).toBe(true);
+    const values: [ClassNameSpec, ClassNameSpec][] = [
+      [["f"], ["f", false]],
+      [["foo"], ["foo", false]],
+      [
+        ["foo", true],
+        ["foo", true]
+      ]
+    ];
+    for (const [value, classNameSpec] of values) {
+      expect(validateClassNameSpec(value)).toEqual({ value: classNameSpec });
+    }
   });
 });

@@ -172,28 +172,25 @@ export function validateBemModifier(
   bemModifier: BemModifier
 ): ValidationResult<BemModifier> {
   const [modName, modValue] = bemModifier;
+  const result: ValidationResult<BemModifier> = { value: bemModifier };
 
   const { error } = validateBemModifierName(modName);
   if (error) {
-    return {
-      error: "BEM modifier's name must be valid BEM name",
-      value: bemModifier
-    };
+    result.error = "BEM modifier's name must be valid BEM name";
+    return result;
   }
 
-  if (modValue) {
+  if (!is.undefined(modValue)) {
     const { error } = validateBemModifierValue(modValue);
     if (error) {
-      return {
-        error:
-          "BEM modifier's value is optional but must be valid BEM " +
-          "value when provided",
-        value: bemModifier
-      };
+      result.error =
+        "BEM modifier's value is optional but must be valid BEM " +
+        "value when provided";
+      return result;
     }
   }
 
-  return { value: bemModifier };
+  return result;
 }
 
 function validateBemObjectOrVector(
@@ -260,7 +257,7 @@ export function validateBemString(
   });
 
   if (is.emptyString(bemString) || bemString.trim().length === 0) {
-    return f("BEM string -- must have at least block part");
+    return f("must have at least block part");
   }
 
   // Advancing from end of `value` in following steps:
@@ -279,8 +276,7 @@ export function validateBemString(
   // BEM string can have at most one modifier part...
   if (modPartsLength > 1) {
     return f(
-      `BEM string -- can have only one modifier but '${modPartsLength}' of ` +
-        "them found -- " +
+      `can have only one modifier but '${modPartsLength}' of them found -- ` +
         modParts.join(", ")
     );
   }
@@ -296,7 +292,7 @@ export function validateBemString(
     if (modNameValuePartsLength > 2) {
       return f(
         `modifier can have only one value but ` +
-          `${modNameValuePartsLength - 1} of them found -- ` +
+          `'${modNameValuePartsLength - 1}' of them found -- ` +
           modNameValueParts.slice(1).join(", ")
       );
     }
@@ -328,7 +324,7 @@ export function validateBemString(
   // BEM string can have at most one element part...
   if (eltPartsLength > 1) {
     return f(
-      `only one element allowed but ${eltPartsLength} of them found -- ` +
+      `only one element allowed but '${eltPartsLength}' of them found -- ` +
         eltParts.join(", ")
     );
   }
