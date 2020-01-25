@@ -1,6 +1,12 @@
 import { lcFirst } from "change-case";
 
 /**
+ * Represents result of validation -- `null` on successful and error message
+ * on failed validation.
+ */
+export type ValidationResult = null | string;
+
+/**
  * When `value` is an array it returned as-is, otherwise it returned wrapped
  * in an array.
  */
