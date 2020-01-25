@@ -391,3 +391,137 @@ export function toBemVector(value: BemStructure): BemVector {
   const { blk, elt, mod } = toBemObject(value);
   return [blk, elt, mod];
 }
+
+export class BemBase {
+  private _blk: BemBlock;
+  private _elt?: BemElement;
+  private _mod?: BemModifier;
+
+  private _frozen: boolean = false;
+
+  constructor(
+    initializer: BemStructure,
+    options: { frozen: boolean } = { frozen: false }
+  ) {
+    const { blk, elt, mod } = toBemObject(initializer);
+
+    this._blk = blk;
+    this._elt = elt;
+    this._mod = mod;
+
+    this._frozen = options.frozen;
+  }
+
+  private _throwIfFrozen(errorMessage?: string): void {
+    if (this._frozen) {
+      throw new Error(
+        "Instance is frozen and can not be changed" +
+          (errorMessage ? ` -- ${errorMessage}` : "")
+      );
+    }
+  }
+
+  get blk(): BemBlock {
+    return this._blk;
+  }
+
+  set blk(value: BemBlock) {
+    this._throwIfFrozen("failed to set block part");
+
+    const { valid, error } = validateBemObject({
+      blk: value,
+      elt: this.elt,
+      mod: this.mod
+    });
+
+    if (!valid) {
+      throw new Error(error);
+    }
+
+    this._blk = value;
+  }
+
+  setBlk(value: BemBlock): this {
+    this.blk = value;
+    return this;
+  }
+
+  get elt() {
+    return this._elt;
+  }
+
+  set elt(value: BemElement | undefined) {
+    this._throwIfFrozen();
+
+    const { valid, error } = validateBemObject({
+      blk: this._blk,
+      elt: value,
+      mod: this.mod
+    });
+
+    if (!valid) {
+      throw new Error(error);
+    }
+
+    this._elt = value;
+  }
+
+  setElt(value?: BemBlock): this {
+    this.elt = value;
+    return this;
+  }
+
+  get mod() {
+    return this._mod;
+  }
+
+  set mod(value: BemModifier | undefined) {
+    this._throwIfFrozen();
+
+    const { valid, error } = validateBemObject({
+      blk: this._blk,
+      elt: this.elt,
+      mod: value
+    });
+
+    if (!valid) {
+      throw new Error(error);
+    }
+
+    this._mod = value;
+  }
+
+  setMod(value?: BemModifier): this {
+    this.mod = value;
+    return this;
+  }
+
+  get frozen() {
+    return this._frozen;
+  }
+
+  freeze(): this {
+    this._frozen = true;
+    return this;
+  }
+
+  toBemObject(): BemObject {
+    return { blk: this.blk, elt: this.elt, mod: this.mod };
+  }
+
+  toBemString(): BemString {
+    return toBemString(this.toBemObject());
+  }
+
+  toBemVector(): BemVector {
+    return toBemVector(this.toBemObject());
+  }
+
+  clone(): BemBase {
+    return new BemBase({ blk: this.blk, elt: this.elt, mod: this.mod });
+  }
+
+  toString() {
+    return this.toBemString();
+  }
+}
