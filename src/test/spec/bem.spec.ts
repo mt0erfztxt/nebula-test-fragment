@@ -1,5 +1,6 @@
 import {
   BemBase,
+  BemModifier,
   BemObject,
   BemVector,
   toBemObject,
@@ -14,83 +15,90 @@ import {
   validateBemValue,
   validateBemVector
 } from "../../main/bem";
-import { ValidationResult } from "../../main/utils";
-
-function expectValidationFailure(v: ValidationResult, error?: string): void {
-  expect(v.valid).toBe(false);
-
-  if (error != undefined) {
-    expect(v.error).toEqual(error);
-  }
-}
-
-function expectValidationSuccess(v: ValidationResult): void {
-  expect(v.valid).toBe(true);
-}
 
 describe("validateBemName()", () => {
+  const error = "BEM name does not conform constraints";
+
   it("validation fails when value is a string that starts not with a letter", () => {
-    expectValidationFailure(
-      validateBemName("1"),
-      "BEM name does not conform constraints"
-    );
+    const value = "1";
+    expect(validateBemName(value)).toEqual({ error, value });
   });
 
   it("validation fails when value is a string that ends with not a letter or a digit", () => {
-    expectValidationFailure(validateBemName("a1-"));
+    const value = "a1-";
+    expect(validateBemName(value)).toEqual({ error, value });
   });
 
   it("validation fails when value is a string but not an alpha-numeric-dashed string", () => {
-    expectValidationFailure(validateBemName("a__1"));
-    expectValidationFailure(validateBemName("a@1"));
+    for (const value of ["a__1", "a@1"]) {
+      expect(validateBemName(value)).toEqual({ error, value });
+    }
   });
 
   it("validation fails when value is an alpha-numeric-dashed string but have sibling dashes", () => {
-    expectValidationFailure(validateBemName("some--thing"));
+    const value = "some--thing";
+    expect(validateBemName(value)).toEqual({ error, value });
   });
 
   it("validation passes when value meet all criteria of valid BEM name", () => {
-    expectValidationSuccess(validateBemName("name"));
-    expectValidationSuccess(validateBemName("name-with-dashes"));
-    expectValidationSuccess(validateBemName("name-that-ends-with-digit-1"));
+    for (const value of [
+      "name",
+      "name-with-dashes",
+      "name-that-ends-with-digit-1"
+    ]) {
+      expect(validateBemName(value)).toEqual({ value });
+    }
   });
 });
 
 describe("validateBemValue()", () => {
+  const error = "BEM value does not conform constraints";
+
   it("validation fails when value is a string that ends with not a letter or a digit", () => {
-    expectValidationFailure(validateBemValue("a1-"));
+    const value = "a1-";
+    expect(validateBemValue(value)).toEqual({ error, value });
   });
 
   it("validation fails when value is a string but not an alpha-numeric-dashed string", () => {
-    expectValidationFailure(validateBemValue("a__1"));
-    expectValidationFailure(validateBemValue("a@1"));
+    for (const value of ["a__1", "a@1"]) {
+      expect(validateBemValue(value)).toEqual({ error, value });
+    }
   });
 
   it("validation fails when value is an alpha-numeric-dashed string but have sibling dashes", () => {
-    expectValidationFailure(validateBemValue("some--thing"));
+    const value = "some--thing";
+    expect(validateBemValue(value)).toEqual({ error, value });
   });
 
   it("validation passes when value meet all criteria of valid BEM name", () => {
-    expectValidationSuccess(validateBemValue("1"));
-    expectValidationSuccess(validateBemValue("value"));
-    expectValidationSuccess(validateBemValue("value-with-dashes"));
-    expectValidationSuccess(validateBemValue("value-that-ends-with-digit-1"));
-    expectValidationSuccess(validateBemValue("2-value-that-ends-with-digit"));
+    for (const value of [
+      "1",
+      "value",
+      "value-with-dashes",
+      "value-that-ends-with-digit-1",
+      "2-value-that-ends-with-digit"
+    ]) {
+      expect(validateBemValue(value)).toEqual({ value });
+    }
   });
 });
 
 describe("validateBemBlock()", () => {
+  const error = "BEM block does not conform constraints";
+
   it("validation fails when value is not valid BEM name", () => {
-    expectValidationFailure(
-      validateBemBlock("1"),
-      "BEM block does not conform constraints"
-    );
+    const value = "1";
+    expect(validateBemBlock(value)).toEqual({ error, value });
   });
 });
 
 describe("validateBemModifier()", () => {
   it("validation fails when value is an array but its first element is not valid BEM name", () => {
-    expectValidationFailure(validateBemModifier(["1"]));
+    const value: BemModifier = ["1"];
+    expect(validateBemModifier(value)).toEqual({
+      error: "BEM modifier's name must be valid BEM name",
+      value
+    });
   });
 
   it("validation fails when value is an array but its second element is not a nil or valid BEM value", () => {

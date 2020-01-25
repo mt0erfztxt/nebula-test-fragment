@@ -5,42 +5,20 @@ import is from "@sindresorhus/is";
 /**
  * Represents result of validation.
  */
-export type ValidationResult = { valid: boolean; error?: string };
+export type ValidationResult<T> = { error?: string; value: T };
 
-/**
- * Creates `ValidationResult`.
- * @param valid Determines whether validation was successful or not. When it's a `ValidationResult` its `valid` property is used.
- * @param error Overrides default error message, which is 'Validation error'
- */
-export function validationResult(
-  valid: boolean | ValidationResult,
-  error?: string
-): ValidationResult {
-  const result: ValidationResult = {
-    valid: is.boolean(valid) ? valid : valid.valid
-  };
-
-  if (!result.valid) {
-    result.error = is.undefined(error) ? "Validation error" : error;
-  }
-
-  return result;
-}
-
-export function failedValidationResult(error?: string): ValidationResult {
-  return validationResult(false, error);
-}
-
-export function successfulValidationResult(): ValidationResult {
-  return validationResult(true);
+export function valid<T>(validationResult: ValidationResult<T>): boolean {
+  return is.undefined(validationResult.error);
 }
 
 /**
  * When `value` is an array it returned as-is, otherwise it returned wrapped
  * in an array.
+ *
+ * @todo Unused and not work as type guard. Remove?
  */
 export function asArray<T>(value: T | T[]): T[] {
-  return Array.isArray(value) ? value : [value];
+  return is.array(value) ? value : [value];
 }
 
 // /**

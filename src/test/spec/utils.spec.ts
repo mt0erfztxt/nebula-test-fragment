@@ -1,4 +1,4 @@
-import { asArray, testCafeAssertion, validationResult } from "../../main/utils";
+import { asArray, testCafeAssertion } from "../../main/utils";
 
 describe("asArray()", function() {
   it("returns passed in value as-is when it is already an array", () => {
@@ -47,59 +47,5 @@ describe("testCafeAssertion()", () => {
   it("returns correct value when isNot option is true", () => {
     expect(testCafeAssertion("eql", { isNot: true })).toEqual("notEql");
     expect(testCafeAssertion("gte", { isNot: true })).toEqual("lt");
-  });
-});
-
-describe("validationResult()", () => {
-  describe("when valid parameter is boolean", () => {
-    it("returns ValidationResult", () => {
-      expect(validationResult(false)).toEqual({
-        valid: false,
-        error: "Validation error"
-      });
-
-      expect(validationResult(true)).toEqual({
-        valid: true
-      });
-    });
-
-    it("allows error to be overridden", () => {
-      expect(validationResult(false, "Some error")).toEqual({
-        valid: false,
-        error: "Some error"
-      });
-
-      expect(validationResult(true, "Some error")).toEqual({
-        valid: true
-      });
-    });
-  });
-
-  describe("when valid parameter is ValidationResult", () => {
-    it("returns ValidationResult", () => {
-      expect(validationResult({ valid: false })).toEqual({
-        valid: false,
-        error: "Validation error"
-      });
-
-      expect(validationResult({ valid: true })).toEqual({
-        valid: true
-      });
-    });
-
-    it("allows error to be overridden", () => {
-      expect(
-        validationResult({ valid: false, error: "Prev error" }, "Next error")
-      ).toEqual({
-        valid: false,
-        error: "Next error"
-      });
-
-      expect(
-        validationResult({ valid: true, error: "Prev error" }, "Next error")
-      ).toEqual({
-        valid: true
-      });
-    });
   });
 });
