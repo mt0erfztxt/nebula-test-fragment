@@ -140,14 +140,25 @@ export async function expectHasCssClasses(
   }
 }
 
+export type NegationFlag = boolean;
+
+/**
+ * Represents attribute.
+ *
+ * @example
+ * ["foo"] // same as ["foo", undefined, false]
+ * ["bar", 1, true] // same as ["bar", "1", true]
+ */
+export type Attribute = [AttributeName, AttributeValue?, NegationFlag?];
+
 /**
  * Represents attribute name.
  *
  * Valid attribute name is a non-blank string.
  *
  * @example
- * "id"
- * "data-foobar"
+ * "foo"
+ * "foo-bar"
  */
 export type AttributeName = string;
 
@@ -156,37 +167,32 @@ export type AttributeName = string;
  */
 export type AttributeValue = boolean | number | RegExp | string | undefined;
 
-/**
- * Represents attribute spec.
- */
-export type AttributeSpec = AttributeName | [AttributeName, AttributeValue?];
-
 export function validateAttributeName(
   attributeName: AttributeName
 ): ValidationResult<AttributeName> {
+  const result: ValidationResult<AttributeName> = { value: attributeName };
+
   if (is.string(attributeName) && attributeName.trim().length === 0) {
-    return {
-      error:
-        `Attribute name must be a non-blank string but it is ` +
-        `'${is(attributeName)}' -- ${attributeName}`,
-      value: attributeName
-    };
-  } else {
-    return {
-      value: attributeName
-    };
+    result.error =
+      `Attribute's name must be a non-blank string but it is ` +
+      `'${is(attributeName)}' -- ${attributeName}`;
   }
+
+  return result;
 }
 
-export function validateAttributeSpec(
-  attributeSpec: AttributeSpec
-): ValidationResult<AttributeSpec> {
-  const [attrName] = is.array(attributeSpec) ? attributeSpec : [attributeSpec];
-  const { error, value } = validateAttributeName(attrName);
+export function validateAttribute(
+  attribute: Attribute
+): ValidationResult<Attribute> {
+  const [attrName, attrValue, isNot = false] = attribute;
+  const { error } = validateAttributeName(attrName);
   if (is.undefined(error)) {
-    return { value };
+    return {
+      error,
+      value: attribute
+    };
   } else {
-    return { error, value: attributeSpec };
+    return { value: [attrName, attrValue, isNot] };
   }
 }
 
@@ -195,17 +201,15 @@ export function validateAttributeSpec(
  * by attribute specified attribute spec.
  *
  * @param selectorInitializer Anything TestCafe's `Selector` accepts as initializer
- * @param attributeSpec Used to filter TestCafe's `Selector` created using `selectorInitializer` parameter by specified attribute spec [N, V?]. When V is `undefined` -- filtering would be done by presence of N in selector's attributes, when regular expression -- filtering would be done by matching selector attribute's value to V, otherwise filtering would be done by strict equality of selector attribute's value to string version of V. When V is `undefined` just N can be passed.
- * @param [options] Options
- * @param [options.isNot=false] When `true` then filter condition would be negated, see examples
+ * @param attribute Used to filter TestCafe's `Selector` created using `selectorInitializer` parameter so it returns only DOM elements with(out) specified `Attribute` [N, V?, F?]. When V is `undefined` -- filtering would be done by presence of N in element attributes, when regular expression -- filtering would be done by matching element attribute's value to V, otherwise filtering would be done by strict equality of element attribute's value to string version of V. When V is `undefined` and F is `false` then just N can be passed.
  *
  * @example
- * // Filter selector to return DOM nodes that have attribute named 'cid' with value equal '1'
- * filterByAttribute(["cid", 1]) // same as calling with ["cid", "1"],
+ * // Filter selector to return DOM nodes that have attribute named 'foo' with value equal '1'
+ * filterByAttribute(["foo", 1]) // same as calling with ["foo", "1"],
  *
  * @example
- * // Filter selector to return DOM nodes that have attribute named 'disabled' with any value or even without it
- * filterByAttribute(["disabled", undefined]) // same as calling with ["disabled"] or "disabled"
+ * // Filter selector to return DOM nodes that have attribute named 'foo' with any value or even without it
+ * filterByAttribute(["foo", undefined]) // same as calling with ["foo"] or "foo"
  *
  * @example
  * // Filter selector to return DOM nodes that have attribute named 'foo' with value matches regular expression /.*bar$/
@@ -213,35 +217,33 @@ export function validateAttributeSpec(
  *
  * @example
  * // Filter selector to return only DOM nodes that have no attribute named 'value' with value equal '123'
- * filterByAttribute(["value", 123], { isNot: true })
+ * filterByAttribute(["value", "123", true])
  */
 export function filterByAttribute(
   selectorInitializer: any,
-  attributeSpec: AttributeSpec,
-  options: { isNot?: boolean } = { isNot: false }
+  attribute: AttributeName | Attribute
 ): Selector {
-  const { error, value } = validateAttributeSpec(attributeSpec);
+  const {
+    error,
+    value: [attrName, attrValue, isNot = false]
+  } = validateAttribute(is.string(attribute) ? [attribute] : attribute);
   if (!is.undefined(error)) {
     throw new Error(error);
   }
 
-  const { isNot } = options;
-  const attrName: AttributeName = value[0];
-  const attrValue: AttributeValue = value[1];
-
   return Selector(selectorInitializer).filter(
     node => {
       if (!node.hasAttribute(attrName)) {
-        return !!options.isNot;
+        return isNot;
       }
 
-      if (is.nullOrUndefined(attrValue)) {
-        return !options.isNot;
+      if (attrValue == null) {
+        return !isNot;
       }
 
       const val = node.getAttribute(attrName);
-      if (is.regExp(attrValue)) {
-        const matches = is.null_(val) ? false : attrValue.test(val);
+      if (attrValue instanceof RegExp) {
+        const matches = val === null ? false : attrValue.test(val);
         return isNot ? !matches : matches;
       } else {
         const attrValAsStr = attrValue + "";
