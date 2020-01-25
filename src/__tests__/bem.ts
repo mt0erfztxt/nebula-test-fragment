@@ -1,168 +1,268 @@
 import is from "@sindresorhus/is";
 
 import {
-  isValidBemModifier,
-  isValidBemName,
-  isValidBemObject,
-  isValidBemValue,
-  validateBemString
+  validateBemModifier,
+  validateBemName,
+  validateBemObject,
+  validateBemString,
+  validateBemStructure,
+  validateBemValue,
+  validateBemVector
 } from "../bem";
+import { ValidationResult } from "../utils";
 
-describe("isValidBemName()", () => {
+function expectIsValid(v: ValidationResult): void {
+  expect(v).toBeNull();
+}
+
+function expectIsNotValid(v: ValidationResult): void {
+  expect(is.string(v)).toBe(true);
+}
+
+describe("validateBemName()", () => {
   test("returns false when value is a string that starts not with a letter", () => {
-    expect(isValidBemName("1")).toBe(false);
+    expectIsNotValid(validateBemName("1"));
   });
 
   test("returns false when value is a string that ends with not a letter or a digit", () => {
-    expect(isValidBemName("a1-")).toBe(false);
+    expectIsNotValid(validateBemName("a1-"));
   });
 
   test("returns false when value is a string but not an alpha-numeric-dashed string", () => {
-    expect(isValidBemName("a__1")).toBe(false);
-    expect(isValidBemName("a@1")).toBe(false);
+    expectIsNotValid(validateBemName("a__1"));
+    expectIsNotValid(validateBemName("a@1"));
   });
 
   test("returns false when value is an alpha-numeric-dashed string but have sibling dashes", () => {
-    expect(isValidBemName("some--thing")).toBe(false);
+    expectIsNotValid(validateBemName("some--thing"));
   });
 
   test("returns true when value meet all criteria of valid BEM name", () => {
-    expect(isValidBemName("name")).toBe(true);
-    expect(isValidBemName("name-with-dashes")).toBe(true);
-    expect(isValidBemName("name-that-ends-with-digit-1")).toBe(true);
+    expectIsValid(validateBemName("name"));
+    expectIsValid(validateBemName("name-with-dashes"));
+    expectIsValid(validateBemName("name-that-ends-with-digit-1"));
   });
 });
 
-describe("isValidBemValue()", () => {
+describe("validateBemValue()", () => {
   test("returns false when value is a string that ends with not a letter or a digit", () => {
-    expect(isValidBemValue("a1-")).toBe(false);
+    expectIsNotValid(validateBemValue("a1-"));
   });
 
   test("returns false when value is a string but not an alpha-numeric-dashed string", () => {
-    expect(isValidBemValue("a__1")).toBe(false);
-    expect(isValidBemValue("a@1")).toBe(false);
+    expectIsNotValid(validateBemValue("a__1"));
+    expectIsNotValid(validateBemValue("a@1"));
   });
 
   test("returns false when value is an alpha-numeric-dashed string but have sibling dashes", () => {
-    expect(isValidBemValue("some--thing")).toBe(false);
+    expectIsNotValid(validateBemValue("some--thing"));
   });
 
   test("returns true when value meet all criteria of valid BEM name", () => {
-    expect(isValidBemValue("1")).toBe(true);
-    expect(isValidBemValue("value")).toBe(true);
-    expect(isValidBemValue("value-with-dashes")).toBe(true);
-    expect(isValidBemValue("value-that-ends-with-digit-1")).toBe(true);
-    expect(isValidBemValue("2-value-that-ends-with-digit")).toBe(true);
+    expectIsValid(validateBemValue("1"));
+    expectIsValid(validateBemValue("value"));
+    expectIsValid(validateBemValue("value-with-dashes"));
+    expectIsValid(validateBemValue("value-that-ends-with-digit-1"));
+    expectIsValid(validateBemValue("2-value-that-ends-with-digit"));
   });
 });
 
-describe("isValidBemModifier()", () => {
+describe("validateBemModifier()", () => {
   test("returns false when value is an array but its first element is not valid BEM name", () => {
-    expect(isValidBemModifier(["1"])).toBe(false);
+    expectIsNotValid(validateBemModifier(["1"]));
   });
 
   test("returns false when value is an array but its second element is not a nil or valid BEM value", () => {
-    expect(isValidBemModifier(["fiz", ""])).toBe(false);
-    expect(isValidBemModifier(["fiz", " "])).toBe(false);
-    expect(isValidBemModifier(["fiz", "\t"])).toBe(false);
-    expect(isValidBemModifier(["fiz", "-buz"])).toBe(false);
-    expect(isValidBemModifier(["fiz", "buz-"])).toBe(false);
-    expect(isValidBemModifier(["fiz", "biz--buz"])).toBe(false);
+    expectIsNotValid(validateBemModifier(["fiz", ""]));
+    expectIsNotValid(validateBemModifier(["fiz", " "]));
+    expectIsNotValid(validateBemModifier(["fiz", "\t"]));
+    expectIsNotValid(validateBemModifier(["fiz", "-buz"]));
+    expectIsNotValid(validateBemModifier(["fiz", "buz-"]));
+    expectIsNotValid(validateBemModifier(["fiz", "biz--buz"]));
   });
 
   test("returns true when value is a BEM modifier", () => {
-    expect(isValidBemModifier(["fiz"])).toBe(true);
-    expect(isValidBemModifier(["fiz", undefined])).toBe(true);
-    expect(isValidBemModifier(["fiz", "1"])).toBe(true);
-    expect(isValidBemModifier(["fiz", "buz"])).toBe(true);
-    expect(isValidBemModifier(["fiz", "biz-buz"])).toBe(true);
+    expectIsValid(validateBemModifier(["fiz"]));
+    expectIsValid(validateBemModifier(["fiz", undefined]));
+    expectIsValid(validateBemModifier(["fiz", "1"]));
+    expectIsValid(validateBemModifier(["fiz", "buz"]));
+    expectIsValid(validateBemModifier(["fiz", "biz-buz"]));
   });
 });
 
-describe("isValidBemObject()", () => {
+describe("validateBemObject()", () => {
   describe("returns false when", () => {
     test("'blk' property is not valid BEM block", () => {
-      expect(isValidBemObject({ blk: "1" })).toBe(false);
+      expectIsNotValid(validateBemObject({ blk: "1" }));
     });
 
     test("'elt' property is not valid BEM element", () => {
-      expect(isValidBemObject({ blk: "blk", elt: "1" }));
+      expectIsNotValid(validateBemObject({ blk: "blk", elt: "1" }));
     });
 
     test("'mod' property is not valid BEM modifier", () => {
-      expect(isValidBemObject({ blk: "blk", mod: ["1"] })).toBe(false);
-      expect(isValidBemObject({ blk: "blk", mod: ["mod", "foo--bar"] })).toBe(
-        false
+      expectIsNotValid(validateBemObject({ blk: "blk", mod: ["1"] }));
+      expectIsNotValid(
+        validateBemObject({ blk: "blk", mod: ["mod", "foo--bar"] })
       );
     });
   });
 
   describe("returns true when", () => {
     test("'blk' is valid BEM block and no 'elt' and 'mod' provided", () => {
-      expect(isValidBemObject({ blk: "blk" })).toBe(true);
+      expectIsValid(validateBemObject({ blk: "blk" }));
     });
 
     test("'blk' is valid BEM block, 'elt' is valid BEM element and no 'mod' is provided", () => {
-      expect(isValidBemObject({ blk: "blk", elt: "elt" })).toBe(true);
+      expectIsValid(validateBemObject({ blk: "blk", elt: "elt" }));
     });
 
     test("'blk' is valid BEM block, 'elt' is valid BEM element and 'mod' is valid BEM modifier", () => {
-      expect(
-        isValidBemObject({ blk: "blk", elt: "elt", mod: ["modNam"] })
-      ).toBe(true);
-      expect(
-        isValidBemObject({ blk: "blk", elt: "elt", mod: ["modNam", "modVal"] })
-      ).toBe(true);
+      expectIsValid(
+        validateBemObject({ blk: "blk", elt: "elt", mod: ["modNam"] })
+      );
+      expectIsValid(
+        validateBemObject({ blk: "blk", elt: "elt", mod: ["modNam", "modVal"] })
+      );
     });
+  });
+});
+
+describe("validateBemObject()", () => {
+  test("returns error message when value's block part is not valid BEM block", () => {
+    expectIsNotValid(validateBemObject({ blk: "1" }));
+  });
+
+  test("returns error message when value's element part is provided but not valid BEM element", () => {
+    expectIsNotValid(validateBemObject({ blk: "block", elt: "1" }));
+  });
+
+  test("returns error message when value's modifier part is provided but not valid BEM modifier", () => {
+    expectIsNotValid(
+      validateBemObject({ blk: "block", elt: "elt", mod: ["1"] })
+    );
+    expectIsNotValid(
+      validateBemObject({
+        blk: "block",
+        elt: "elt",
+        mod: ["modName", "foo--bar"]
+      })
+    );
+  });
+
+  test("returns null when value is valid BEM string", () => {
+    expectIsValid(validateBemObject({ blk: "blk" }));
+    expectIsValid(validateBemObject({ blk: "blk", elt: "elt" }));
+    expectIsValid(validateBemObject({ blk: "blk", mod: ["mod"] }));
+    expectIsValid(validateBemObject({ blk: "blk", elt: "elt", mod: ["mod"] }));
+    expectIsValid(
+      validateBemObject({ blk: "blk", mod: ["modName", "modValue"] })
+    );
+    expectIsValid(
+      validateBemObject({
+        blk: "blk",
+        elt: "elt",
+        mod: ["modName", "modValue"]
+      })
+    );
   });
 });
 
 describe("validateBemString()", () => {
   test("returns error message when value is an empty string", () => {
-    expect(is(validateBemString(""))).toBe("string");
+    expectIsNotValid(validateBemString(""));
   });
 
   test("returns error message when value is a blank string", () => {
-    expect(is(validateBemString(" "))).toBe("string");
-    expect(is(validateBemString("\t"))).toBe("string");
+    expectIsNotValid(validateBemString(" "));
+    expectIsNotValid(validateBemString("\t"));
   });
 
   test("returns error message when value have more than one BEM modifier parts", () => {
-    expect(is(validateBemString("blk--mod1--mod2_2"))).toBe("string");
+    expectIsNotValid(validateBemString("blk--mod1--mod2_2"));
   });
 
   test("returns error message when value's BEM modifier part have more than one BEM modifier values", () => {
-    expect(is(validateBemString("blk--mod_a_b"))).toBe("string");
+    expectIsNotValid(validateBemString("blk--mod_a_b"));
   });
 
   test("returns error message when value's BEM modifier part have not valid BEM modifier name", () => {
-    expect(is(validateBemString("blk--mod@name_val"))).toBe("string");
+    expectIsNotValid(validateBemString("blk--mod@name_val"));
   });
 
   test("returns error message when value's BEM modifier part have not valid BEM modifier value", () => {
-    expect(is(validateBemString("blk--mod-name_val-"))).toBe("string");
+    expectIsNotValid(validateBemString("blk--mod-name_val-"));
   });
 
   test("returns error message when value have more than one BEM element parts", () => {
-    expect(is(validateBemString("blk__elt1__elt2__elt3"))).toBe("string");
+    expectIsNotValid(validateBemString("blk__elt1__elt2__elt3"));
   });
 
   test("returns error message when value's BEM element part is not valid BEM element", () => {
-    expect(is(validateBemString("blk__elt2-"))).toBe("string");
+    expectIsNotValid(validateBemString("blk__elt2-"));
   });
 
   test("returns error message when value's BEM block part is not valid BEM block", () => {
-    expect(is(validateBemString("blk-"))).toBe("string");
-    expect(is(validateBemString("1blk"))).toBe("string");
-    expect(is(validateBemString("blk_1"))).toBe("string");
+    expectIsNotValid(validateBemString("blk-"));
+    expectIsNotValid(validateBemString("1blk"));
+    expectIsNotValid(validateBemString("blk_1"));
   });
 
   test("returns null when value is valid BEM string", () => {
-    expect(validateBemString("blk")).toBeNull();
-    expect(validateBemString("blk__elt")).toBeNull();
-    expect(validateBemString("blk--mod")).toBeNull();
-    expect(validateBemString("blk__elt--mod")).toBeNull();
-    expect(validateBemString("blk--mod-name_mod-value")).toBeNull();
-    expect(validateBemString("blk__elt--mod-name_mod-value")).toBeNull();
+    expectIsValid(validateBemString("blk"));
+    expectIsValid(validateBemString("blk__elt"));
+    expectIsValid(validateBemString("blk--mod"));
+    expectIsValid(validateBemString("blk__elt--mod"));
+    expectIsValid(validateBemString("blk--mod-name_mod-value"));
+    expectIsValid(validateBemString("blk__elt--mod-name_mod-value"));
+  });
+});
+
+describe("validateBemVector()", () => {
+  test("returns error message when value's block part is not valid BEM block", () => {
+    expectIsNotValid(validateBemVector(["1"]));
+  });
+
+  test("returns error message when value's element part is provided but not valid BEM element", () => {
+    expectIsNotValid(validateBemVector(["block", "1"]));
+  });
+
+  test("returns error message when value's modifier part is provided but not valid BEM modifier", () => {
+    expectIsNotValid(validateBemVector(["block", "elt", ["1"]]));
+    expectIsNotValid(
+      validateBemVector(["block", "elt", ["modName", "foo--bar"]])
+    );
+  });
+
+  test("returns null when value is valid BEM string", () => {
+    expectIsValid(validateBemVector(["blk"]));
+    expectIsValid(validateBemVector(["blk", "elt"]));
+    expectIsValid(validateBemVector(["blk", undefined, ["mod"]]));
+    expectIsValid(validateBemVector(["blk", "elt", ["mod"]]));
+    expectIsValid(
+      validateBemVector(["blk", undefined, ["modName", "modValue"]])
+    );
+    expectIsValid(validateBemVector(["blk", "elt", ["modName", "modValue"]]));
+  });
+});
+
+describe("validateBemStructure()", () => {
+  test("validates BEM string", () => {
+    expectIsNotValid(validateBemStructure("1"));
+    expectIsValid(validateBemStructure("block__elt--mod"));
+  });
+
+  test("validates BEM vector", () => {
+    expectIsNotValid(validateBemStructure(["block", "1"]));
+    expectIsValid(validateBemStructure(["block", "elt", ["mod"]]));
+  });
+
+  test("validates BEM object", () => {
+    expectIsNotValid(
+      validateBemStructure({ blk: "blk", elt: "1", mod: ["mod"] })
+    );
+    expectIsValid(
+      validateBemStructure({ blk: "blk", elt: "elt", mod: ["mod"] })
+    );
   });
 });
