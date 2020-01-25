@@ -59,15 +59,27 @@ export type BemModifierValue = BemValue;
  */
 export type BemObject = { blk: BemBlock; elt?: BemElement; mod?: BemModifier };
 
+export function isBemObject(value: BemStructure): value is BemObject {
+  return is.plainObject(value) && !isBemVector(value);
+}
+
 /**
  * Represents BEM string.
  */
 export type BemString = string;
 
+export function isBemString(value: BemStructure): value is BemString {
+  return is.string(value);
+}
+
 /**
  * Represents BEM vector.
  */
 export type BemVector = [BemBlock, BemElement?, BemModifier?];
+
+export function isBemVector(value: BemStructure): value is BemVector {
+  return is.array(value);
+}
 
 /**
  * Represents BEM structure.
@@ -283,11 +295,11 @@ export function validateBemVector(value: BemVector): ValidationResult {
 }
 
 export function validateBemStructure(value: BemStructure): ValidationResult {
-  if (is.string(value)) {
+  if (isBemString(value)) {
     return validateBemString(value);
-  } else if (is.array(value)) {
+  } else if (isBemVector(value)) {
     return validateBemVector(value);
-  } else if (is.plainObject(value)) {
+  } else if (isBemObject(value)) {
     return validateBemObject(value);
   } else {
     return (
@@ -303,10 +315,13 @@ export function toBemObject(value: BemStructure): BemObject {
     throw new Error(validationResult);
   }
 
-  if (is.string(value)) {
+  if (isBemObject(value)) {
+    return value;
+  }
+
+  if (isBemString(value)) {
     const [blkAndEltPart, modPart] = value.split("--");
     const [blk, elt] = blkAndEltPart.split("__");
-
     return {
       blk,
       elt,
@@ -314,12 +329,54 @@ export function toBemObject(value: BemStructure): BemObject {
         ? (modPart.split("_").filter(is.nonEmptyString) as BemModifier)
         : undefined
     };
-  } else if (is.array(value)) {
-    const [blk, elt, mod] = value;
-    return { blk, elt, mod };
-  } else if (is.plainObject(value)) {
-    return value;
-  } else {
-    throw new Error("That must not happen!");
   }
+
+  return { blk: value[0], elt: value[1], mod: value[2] };
+}
+
+export function toBemString(value: BemStructure): BemString {
+  const validationResult = validateBemStructure(value);
+  if (validationResult) {
+    throw new Error(validationResult);
+  }
+
+  if (isBemString(value)) {
+    return value;
+  }
+
+  const { blk, elt, mod } = isBemVector(value)
+    ? { blk: value[0], elt: value[1], mod: value[2] }
+    : value;
+
+  let bemStr = blk;
+
+  if (elt) {
+    bemStr += `__${elt}`;
+  }
+
+  if (mod) {
+    let [modName, modValue] = mod;
+
+    bemStr += `--${modName}`;
+
+    if (modValue) {
+      bemStr += `_${modValue}`;
+    }
+  }
+
+  return bemStr;
+}
+
+export function toBemVector(value: BemStructure): BemVector {
+  const validationResult = validateBemStructure(value);
+  if (validationResult) {
+    throw new Error(validationResult);
+  }
+
+  if (isBemVector(value)) {
+    return value;
+  }
+
+  const { blk, elt, mod } = toBemObject(value);
+  return [blk, elt, mod];
 }

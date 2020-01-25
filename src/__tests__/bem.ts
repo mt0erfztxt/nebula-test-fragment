@@ -1,6 +1,11 @@
 import is from "@sindresorhus/is";
 
 import {
+  BemObject,
+  BemVector,
+  toBemObject,
+  toBemString,
+  toBemVector,
   validateBemModifier,
   validateBemName,
   validateBemObject,
@@ -264,5 +269,61 @@ describe("validateBemStructure()", () => {
     expectIsValid(
       validateBemStructure({ blk: "blk", elt: "elt", mod: ["mod"] })
     );
+  });
+});
+
+describe("toBemObject()", () => {
+  const bemObj: BemObject = {
+    blk: "foo",
+    elt: "bar",
+    mod: ["fiz", "buz"]
+  };
+
+  test("returns BEM object as-is", () => {
+    expect(toBemObject(bemObj)).toBe(bemObj);
+  });
+
+  test("converts BEM string to BEM object", () => {
+    expect(toBemObject("foo__bar--fiz_buz")).toEqual(bemObj);
+  });
+
+  test("converts BEM vector to BEM object", () => {
+    expect(toBemObject(["foo", "bar", ["fiz", "buz"]])).toEqual(bemObj);
+  });
+});
+
+describe("toBemString()", () => {
+  const bemStr = "foo__bar--fiz_buz";
+
+  test("returns BEM string as-is", () => {
+    expect(toBemString(bemStr)).toBe(bemStr);
+  });
+
+  test("converts BEM object to BEM string", () => {
+    expect(
+      toBemString({ blk: "foo", elt: "bar", mod: ["fiz", "buz"] })
+    ).toEqual(bemStr);
+  });
+
+  test("converts BEM vector to BEM string", () => {
+    expect(toBemString(["foo", "bar", ["fiz", "buz"]])).toEqual(bemStr);
+  });
+});
+
+describe("toBemVector()", () => {
+  const bemVec: BemVector = ["foo", "bar", ["fiz", "buz"]];
+
+  test("returns BEM vector as-is", () => {
+    expect(toBemVector(bemVec)).toBe(bemVec);
+  });
+
+  test("converts BEM object to BEM vector", () => {
+    expect(
+      toBemVector({ blk: "foo", elt: "bar", mod: ["fiz", "buz"] })
+    ).toEqual(bemVec);
+  });
+
+  test("converts BEM string to BEM vector", () => {
+    expect(toBemVector("foo__bar--fiz_buz")).toEqual(bemVec);
   });
 });
