@@ -19,8 +19,8 @@ export function validationResult(
     valid: is.boolean(valid) ? valid : valid.valid
   };
 
-  if (!valid) {
-    result.error = is.undefined(error) ? error : "Validation error";
+  if (!result.valid) {
+    result.error = is.undefined(error) ? "Validation error" : error;
   }
 
   return result;

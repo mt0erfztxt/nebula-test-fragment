@@ -4,6 +4,7 @@ import {
   toBemObject,
   toBemString,
   toBemVector,
+  validateBemBlock,
   validateBemModifier,
   validateBemName,
   validateBemObject,
@@ -14,17 +15,24 @@ import {
 } from "../bem";
 import { ValidationResult } from "../utils";
 
+function expectValidationFailure(v: ValidationResult, error?: string): void {
+  expect(v.valid).toBe(false);
+
+  if (error != undefined) {
+    expect(v.error).toEqual(error);
+  }
+}
+
 function expectValidationSuccess(v: ValidationResult): void {
   expect(v.valid).toBe(true);
 }
 
-function expectValidationFailure(v: ValidationResult): void {
-  expect(v.valid).toBe(false);
-}
-
 describe("validateBemName()", () => {
   test("validation fails when value is a string that starts not with a letter", () => {
-    expectValidationFailure(validateBemName("1"));
+    expectValidationFailure(
+      validateBemName("1"),
+      "BEM name does not conform constraints"
+    );
   });
 
   test("validation fails when value is a string that ends with not a letter or a digit", () => {
@@ -67,6 +75,15 @@ describe("validateBemValue()", () => {
     expectValidationSuccess(validateBemValue("value-with-dashes"));
     expectValidationSuccess(validateBemValue("value-that-ends-with-digit-1"));
     expectValidationSuccess(validateBemValue("2-value-that-ends-with-digit"));
+  });
+});
+
+describe("validateBemBlock()", () => {
+  test("validation fails when value is not valid BEM name", () => {
+    expectValidationFailure(
+      validateBemBlock("1"),
+      "BEM block does not conform constraints"
+    );
   });
 });
 
