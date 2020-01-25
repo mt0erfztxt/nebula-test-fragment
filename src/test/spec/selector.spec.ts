@@ -1,50 +1,50 @@
 import {
-  ClassName,
-  ClassNameSpec,
-  validateClassName,
-  validateClassNameSpec
+  CssClass,
+  CssClassSpec,
+  validateCssClass,
+  validateCssClassSpec
 } from "../../main/selector";
 
-describe("validateClassName()", () => {
-  it("returns failed validation result when class name is not valid", () => {
-    const values: [ClassName, string][] = [
+describe("validateCssClass()", () => {
+  it("returns failed validation result when CSS class is not valid", () => {
+    const values: [CssClass, string][] = [
       ["", ""],
       [" ", " "],
       ["\t", "\t"]
     ];
     for (const [value, error] of values) {
-      expect(validateClassName(value)).toEqual({
-        error: `Class name must be non-blank string but it is '${error}'`,
+      expect(validateCssClass(value)).toEqual({
+        error: `CSS class must be a non-blank string but it is '${error}'`,
         value
       });
     }
   });
 
-  it("returns successful validation result when class name is valid", () => {
-    const values: ClassName[] = ["f", "foo"];
+  it("returns successful validation result when CSS class is valid", () => {
+    const values: CssClass[] = ["f", "foo"];
     for (const value of values) {
-      expect(validateClassName(value)).toEqual({ value });
+      expect(validateCssClass(value)).toEqual({ value });
     }
   });
 });
 
-describe("validateClassNameSpec()", () => {
-  it("returns failed validation result when class name spec is not valid", () => {
-    const values: [ClassNameSpec, string][] = [
+describe("validateCssClassSpec()", () => {
+  it("returns failed validation result when CSS class spec is not valid", () => {
+    const values: [CssClassSpec, string][] = [
       [[""], ""],
       [[" "], " "],
       [["\t"], "\t"]
     ];
     for (const [value, error] of values) {
-      expect(validateClassNameSpec(value)).toEqual({
-        error: `Class name spec -- Class name must be non-blank string but it is '${error}'`,
+      expect(validateCssClassSpec(value)).toEqual({
+        error: `CSS class spec -- CSS class must be a non-blank string but it is '${error}'`,
         value
       });
     }
   });
 
-  it("returns successful validation result when class name spec is valid", () => {
-    const values: [ClassNameSpec, ClassNameSpec][] = [
+  it("returns successful validation result when CSS class spec is valid", () => {
+    const values: [CssClassSpec, CssClassSpec][] = [
       [["f"], ["f", false]],
       [["foo"], ["foo", false]],
       [
@@ -52,8 +52,8 @@ describe("validateClassNameSpec()", () => {
         ["foo", true]
       ]
     ];
-    for (const [value, classNameSpec] of values) {
-      expect(validateClassNameSpec(value)).toEqual({ value: classNameSpec });
+    for (const [value, cssClassSpec] of values) {
+      expect(validateCssClassSpec(value)).toEqual({ value: cssClassSpec });
     }
   });
 });

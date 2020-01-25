@@ -1,10 +1,10 @@
-import { Selector } from "testcafe";
-import { expectHasClassNames } from "../../../../main/selector";
-
 const assert = require("assert");
 const appRootPath = require("app-root-path");
+import { Selector } from "testcafe";
 
-fixture("selector.expectHasClassNames()").page(
+import { expectHasCssClasses } from "../../../../main/selector";
+
+fixture("selector.expectHasCssClasses()").page(
   appRootPath.path +
     "/src/test/testcafe/selector/expect-has-class-names/index.html"
 );
@@ -12,7 +12,7 @@ fixture("selector.expectHasClassNames()").page(
 test("010 It should fail when selector does not return DOM elements", async t => {
   let isThrown = false;
   try {
-    await expectHasClassNames(".non-existent", ["foo"]);
+    await expectHasCssClasses(".non-existent", ["foo"]);
   } catch (e) {
     isThrown = true;
     await t
@@ -27,7 +27,7 @@ test("010 It should fail when selector does not return DOM elements", async t =>
 test("020 It should fail when selector return more than one DOM element", async t => {
   let isThrown = false;
   try {
-    await expectHasClassNames(".a", ["a"]);
+    await expectHasCssClasses(".a", ["a"]);
   } catch (e) {
     isThrown = true;
     await t
@@ -45,7 +45,7 @@ test("030 It should fail when selector must have no class names at all but it do
 
   let isThrown = false;
   try {
-    await expectHasClassNames(sel, []);
+    await expectHasCssClasses(sel);
   } catch (e) {
     isThrown = true;
     await t
@@ -64,53 +64,53 @@ test("040 It should succeed when selector must have no class names at all and it
 
   let isThrown = false;
   try {
-    await expectHasClassNames(sel, []);
+    await expectHasCssClasses(sel);
   } catch (e) {
     isThrown = true;
   }
   assert.strictEqual(isThrown, false);
 });
 
-test("050 It should fail when selector must have class name but it doesn't", async t => {
+test("050 It should fail when selector must have CSS class but it doesn't", async t => {
   let isThrown = false;
   try {
-    await expectHasClassNames(".b", [["bar"], ["foo"]]);
+    await expectHasCssClasses(".b", [["bar"], ["foo"]]);
   } catch (e) {
     isThrown = true;
     await t
       .expect(e.errMsg)
-      .match(/.*Selector must have 'foo' class name but it doesn't.*/);
+      .match(/.*Selector must have 'foo' CSS class but it doesn't.*/);
   }
   assert.ok(isThrown);
 });
 
-test("060 It should succeed when selector must have class name and it does", async () => {
+test("060 It should succeed when selector must have CSS class and it does", async () => {
   let isThrown = false;
   try {
-    await expectHasClassNames(".b", ["bar", "bar1"]);
+    await expectHasCssClasses(".b", ["bar", "bar1"]);
   } catch (e) {
     isThrown = true;
   }
   assert.strictEqual(isThrown, false);
 });
 
-test("070 It should fail when selector must have no class name but it does", async t => {
+test("070 It should fail when selector must have no CSS class but it does", async t => {
   let isThrown = false;
   try {
-    await expectHasClassNames(".b", [["bar1", true]]);
+    await expectHasCssClasses(".b", [["bar1", true]]);
   } catch (e) {
     isThrown = true;
     await t
       .expect(e.errMsg)
-      .match(/.*Selector must have no 'bar1' class name but it does.*/);
+      .match(/.*Selector must have no 'bar1' CSS class but it does.*/);
   }
   assert.ok(isThrown);
 });
 
-test("080 It should succeed when selector must have no class name and it doesn't", async () => {
+test("080 It should succeed when selector must have no CSS class and it doesn't", async () => {
   let isThrown = false;
   try {
-    await expectHasClassNames(".b", ["bar", "bar0", ["foo", true]]);
+    await expectHasCssClasses(".b", ["bar", "bar0", ["foo", true]]);
   } catch (e) {
     isThrown = true;
   }
@@ -120,7 +120,7 @@ test("080 It should succeed when selector must have no class name and it doesn't
 test("090 It should fail when selector must have only specified class names but it doesn't", async t => {
   let isThrown = false;
   try {
-    await expectHasClassNames(".b", ["b", "bar", "bar0", "bar1"], {
+    await expectHasCssClasses(".b", ["b", "bar", "bar0", "bar1"], {
       only: true
     });
   } catch (e) {
@@ -139,7 +139,7 @@ test("100 It should succeed when selector must have only specified class names a
 
   isThrown = false;
   try {
-    await expectHasClassNames(
+    await expectHasCssClasses(
       ".b",
       [["b"], ["bar"], ["bar0"], ["bar1"], ["bar2"]],
       {
@@ -155,7 +155,7 @@ test("100 It should succeed when selector must have only specified class names a
   // class names selector must only have.
   isThrown = false;
   try {
-    await expectHasClassNames(
+    await expectHasCssClasses(
       ".b",
       [["b"], ["bar"], ["bar0"], ["bar1"], ["bar2"], ["foo", true]],
       { only: true }
@@ -166,10 +166,28 @@ test("100 It should succeed when selector must have only specified class names a
   assert.strictEqual(isThrown, false);
 });
 
-test("110 It should allow each class name spec to be a class name or a tuple of class name and optional negation", async () => {
-  let isThrown = false;
+test("110 It should allow `cssClasses` argument to be CSS class, spec or mix of them", async () => {
+  let isThrown;
+
+  isThrown = false;
   try {
-    await expectHasClassNames(".b", [
+    await expectHasCssClasses(".b", "b");
+  } catch (e) {
+    isThrown = true;
+  }
+  assert.strictEqual(isThrown, false);
+
+  isThrown = false;
+  try {
+    await expectHasCssClasses(".b", ["b"]);
+  } catch (e) {
+    isThrown = true;
+  }
+  assert.strictEqual(isThrown, false);
+
+  isThrown = false;
+  try {
+    await expectHasCssClasses(".b", [
       "b",
       "bar",
       ["bar1"],

@@ -4,47 +4,55 @@ import is from "@sindresorhus/is";
 import { testCafeAssertion, ValidationResult } from "./utils";
 
 /**
- * Represents class name.
+ * Represents CSS class name.
  *
- * Valid class name is a non-blank string.
+ * Valid CSS class is a non-blank string.
  *
  * @example
  * "TextInput"
  */
-export type ClassName = string;
+export type CssClass = string;
 
-export function validateClassName(
-  className: ClassName
-): ValidationResult<ClassName> {
-  if (className.trim().length === 0) {
+export function validateCssClass(
+  cssClass: CssClass
+): ValidationResult<CssClass> {
+  if (cssClass.trim().length === 0) {
     return {
-      error: `Class name must be non-blank string but it is '${className}'`,
-      value: className
+      error: `CSS class must be a non-blank string but it is '${cssClass}'`,
+      value: cssClass
     };
   } else {
-    return { value: className };
+    return { value: cssClass };
   }
 }
 
 /**
- * Represents class name spec.
+ * Represents CSS class spec.
  *
- * Tuple variant allows form of **not** class name.
+ * Valid CSS class spec is a tuple where first element is required CSS class
+ * and second is optional negation (`false` by default).
  *
  * @example
- * "TextInput"
  * ["TextInput"] // same as ["TextInput", false]
  * ["TextInput", true] // not "TextInput"
  */
-export type ClassNameSpec = [ClassName, boolean?];
+export type CssClassSpec = [CssClass, boolean?];
 
-export function validateClassNameSpec(
-  classNameSpec: ClassNameSpec
-): ValidationResult<ClassNameSpec> {
-  const [className, isNot = false] = classNameSpec;
-  const { error, value } = validateClassName(className);
+/**
+ * Validates CSS class spec.
+ *
+ * On success `value` property of result is always boolean.
+ *
+ * @example
+ * validateCssClassSpec(["TextInput"]) // result is { value: ["TextInput", false] }
+ */
+export function validateCssClassSpec(
+  CssClassSpec: CssClassSpec
+): ValidationResult<CssClassSpec> {
+  const [cssClass, isNot = false] = CssClassSpec;
+  const { error, value } = validateCssClass(cssClass);
   if (error) {
-    return { error: `Class name spec -- ${error}`, value: classNameSpec };
+    return { error: `CSS class spec -- ${error}`, value: CssClassSpec };
   } else {
     return { value: [value, isNot] };
   }
@@ -52,13 +60,14 @@ export function validateClassNameSpec(
 
 /**
  * Asserts that selector have (no) specified class names.
+ *
  * @param selectorInitializer Anything TestCafe's `Selector` accepts as initializer
- * @param classNames
+ * @param CssClasses
  * @param options
  */
-export async function expectHasClassNames(
+export async function expectHasCssClasses(
   selectorInitializer: any,
-  classNames: [ClassName | ClassNameSpec],
+  CssClasses?: CssClass | (CssClass | CssClassSpec)[],
   options: { only: boolean } = { only: false }
 ): Promise<void> {
   const sel = Selector(selectorInitializer);
@@ -75,14 +84,14 @@ export async function expectHasClassNames(
   // Handling case when selector must not have class names at all
   // ---------------------------------------------------------------------------
 
-  if (is.emptyArray(classNames)) {
-    const selClassNames = await sel.classNames;
+  if (is.undefined(CssClasses)) {
+    const selectorCssClasses = await sel.classNames;
     await t
-      .expect(selClassNames)
+      .expect(selectorCssClasses)
       .eql(
         [""],
         "Selector must have no class names but it have '" +
-          `${selClassNames.join(", ")}'`
+          `${selectorCssClasses.join(", ")}'`
       );
 
     return;
@@ -92,41 +101,41 @@ export async function expectHasClassNames(
   // Handling case when selector must have/haven't specified class names
   // ---------------------------------------------------------------------------
 
-  const mustPresentClassNames = [];
+  const mustPresentCssClasses = [];
 
-  for (const item of classNames) {
-    const classNameSpec: ClassNameSpec = is.string(item) ? [item] : item;
-    const { error, value } = validateClassNameSpec(classNameSpec);
+  for (const item of CssClasses) {
+    const cssClassSpec: CssClassSpec = is.string(item) ? [item] : item;
+    const { error, value } = validateCssClassSpec(cssClassSpec);
     if (error) {
       throw new Error(error);
     }
 
-    const [className, isNot = false] = value;
+    const [cssClass, isNot = false] = value;
     const assertion = testCafeAssertion("ok", { isNot });
     const message =
       "Selector must have" +
       (isNot ? " no " : " ") +
-      `'${className}' class name but it ` +
+      `'${cssClass}' CSS class but it ` +
       (isNot ? "does" : "doesn't");
 
     if (!isNot) {
-      mustPresentClassNames.push(className);
+      mustPresentCssClasses.push(cssClass);
     }
 
     // @ts-ignore
-    await t.expect(sel.hasClass(className1))[assertion](message);
+    await t.expect(sel.hasClass(cssClass))[assertion](message);
   }
 
   if (options.only) {
-    const classNamesMustPresentTxt = mustPresentClassNames.join(", ");
-    const selClassNames = await sel.classNames;
-    const selClassNamesTxt = selClassNames.join(", ");
+    const mustPresentCssClassText = mustPresentCssClasses.join(", ");
+    const selectorCssClasses = await sel.classNames;
+    const selectorCssClassesText = selectorCssClasses.join(", ");
     await t
-      .expect(selClassNames.length)
+      .expect(selectorCssClasses.length)
       .eql(
-        mustPresentClassNames.length,
-        `Selector must have only '${classNamesMustPresentTxt}' class names ` +
-          `but it have '${selClassNamesTxt}'`
+        mustPresentCssClasses.length,
+        `Selector must have only '${mustPresentCssClassText}' class names ` +
+          `but it have '${selectorCssClassesText}'`
       );
   }
 }
