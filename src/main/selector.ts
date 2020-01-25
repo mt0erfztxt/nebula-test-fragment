@@ -51,10 +51,10 @@ export function validateCssClassSpec(
 ): ValidationResult<CssClassSpec> {
   const [cssClass, isNot = false] = CssClassSpec;
   const { error, value } = validateCssClass(cssClass);
-  if (error) {
-    return { error: `CSS class spec -- ${error}`, value: CssClassSpec };
-  } else {
+  if (is.undefined(error)) {
     return { value: [value, isNot] };
+  } else {
+    return { error: `CSS class spec -- ${error}`, value: CssClassSpec };
   }
 }
 
