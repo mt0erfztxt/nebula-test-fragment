@@ -2,7 +2,7 @@
 /.nyc_output
 /.vscode
 /coverage
-/lib
+/dist
 /node_modules
 
 jsconfig.json

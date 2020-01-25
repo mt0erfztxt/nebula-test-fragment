@@ -1,0 +1,14 @@
+{
+  "compilerOptions": {
+    "allowJs": false,
+    "declaration": true,
+    "module": "commonjs",
+    "noImplicitAny": true,
+    "noImplicitReturns": true,
+    "outDir": "./dist",
+    "rootDir": "./src",
+    "sourceMap": false,
+    "target": "es2018"
+  },
+  "exclude": ["dist", "node_modules", "**/__tests__/**/*"]
+}
