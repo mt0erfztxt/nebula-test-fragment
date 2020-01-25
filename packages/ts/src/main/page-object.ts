@@ -992,4 +992,21 @@ export class PageObject {
   ): Promise<void> {
     await this.expectExistsAndConformsRequirements({ text }, options);
   }
+
+  /**
+   * Clicks on page object's selector.
+   *
+   * @param [options] Options
+   * @param [options.selector=this.selector] Selector to click on
+   * @param [options.wait] Wait specified number of milliseconds after click is done
+   */
+  async click(options?: { selector?: Selector; wait?: number }): Promise<void> {
+    const { selector = this.selector, wait } = options || {};
+
+    await t.click(selector);
+
+    if (wait) {
+      await t.wait(wait);
+    }
+  }
 }
