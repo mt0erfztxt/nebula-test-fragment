@@ -1,6 +1,11 @@
 import is from "@sindresorhus/is";
 
-import { ValidationResult } from "./utils";
+import {
+  failedValidationResult,
+  successfulValidationResult,
+  validationResult,
+  ValidationResult
+} from "./utils";
 
 /**
  * Represents BEM name.
@@ -87,105 +92,129 @@ export function isBemVector(value: BemStructure): value is BemVector {
 export type BemStructure = BemObject | BemString | BemVector;
 
 export function validateBemName(value: BemName): ValidationResult {
-  if (
+  return validationResult(
     /^[a-zA-Z](:?[a-zA-Z0-9-]*[a-zA-Z0-9])$/.test(value) &&
-    !/-{2,}/.test(value)
-  ) {
-    return null;
-  }
-
-  return `BEM name does not conform constraints`;
+      !/-{2,}/.test(value),
+    "BEM name does not conform constraints"
+  );
 }
 
 export function validateBemValue(value: BemValue): ValidationResult {
-  if (
+  return validationResult(
     /^(:?[a-zA-Z0-9]|[a-zA-Z0-9](:?[a-zA-Z0-9-]*[a-zA-Z0-9]))$/.test(value) &&
-    !/-{2,}/.test(value)
-  ) {
-    return null;
-  }
-
-  return `BEM value does not conform constraints`;
+      !/-{2,}/.test(value),
+    "BEM value does not conform constraints`"
+  );
 }
 
 export function validateBemBlock(value: BemBlock): ValidationResult {
-  return validateBemName(value)
-    ? `BEM block does not conform constraints`
-    : null;
+  return validationResult(
+    validateBemName(value),
+    "BEM block does not conform constraints"
+  );
 }
 
 export function validateBemElement(value: BemElement): ValidationResult {
-  return validateBemName(value)
-    ? `BEM element does not conform constraints`
-    : null;
+  return validationResult(
+    validateBemName(value),
+    "BEM element does not conform constraints"
+  );
 }
 
 export function validateBemModifierName(value: BemName): ValidationResult {
-  return validateBemName(value)
-    ? `BEM modifier name does not conform constraints`
-    : null;
+  return validationResult(
+    validateBemName(value),
+    "BEM modifier's name does not conform constraints"
+  );
 }
 
 export function validateBemModifierValue(value: BemValue): ValidationResult {
-  return validateBemValue(value)
-    ? `BEM modifier value does not conform constraints`
-    : null;
+  return validationResult(
+    validateBemValue(value),
+    "BEM modifier's value does not conform constraints"
+  );
 }
 
 export function validateBemModifier(value: BemModifier): ValidationResult {
   if (!is.array(value)) {
-    return (
+    return failedValidationResult(
       "BEM modifier must be a tuple of required BEM modifier name and " +
-      "optional BEM modifier value"
+        "optional BEM modifier value"
     );
   }
 
-  const [modifierName, modifierValue] = value;
-
-  if (validateBemModifierName(modifierName)) {
-    return "BEM modifier name must be valid BEM name";
+  if (!validateBemModifierName(value[0]).valid) {
+    return failedValidationResult("BEM modifier's name must be valid BEM name");
   }
 
+  const modifierValue = value[1];
   if (
     !(
       is.undefined(modifierValue) ||
-      validateBemModifierValue(modifierValue) === null
+      validateBemModifierValue(modifierValue).valid
     )
   ) {
-    return "BEM modifier value is optional but must be valid BEM value when provided";
+    return failedValidationResult(
+      "BEM modifier's value is optional but must be valid BEM value when provided"
+    );
   }
 
-  return null;
+  return successfulValidationResult();
 }
 
-export function validateBemObject(value: BemObject): ValidationResult {
-  const { blk, elt, mod } = value;
+function validateBemObjectOrVector(
+  value: BemObject | BemVector
+): ValidationResult {
+  let blk, elt, mod, structure: string;
 
-  const blkError = validateBemBlock(blk);
-  if (blkError) {
-    return `BEM object - ${blkError}`;
+  if (isBemVector(value)) {
+    structure = "vector";
+    [blk, elt, mod] = value;
+  } else {
+    structure = "object";
+    blk = value.blk;
+    elt = value.elt;
+    mod = value.mod;
+  }
+
+  const fvr = (err?: string) =>
+    failedValidationResult(`BEM ${structure} -- ${err}`);
+
+  const { valid, error } = validateBemBlock(blk);
+  if (!valid) {
+    return fvr(error);
   }
 
   if (elt) {
-    const eltError = validateBemElement(elt);
-    if (eltError) {
-      return `BEM object - ${eltError}`;
+    const { valid, error } = validateBemElement(elt);
+    if (!valid) {
+      return fvr(error);
     }
   }
 
   if (mod) {
-    const modError = validateBemModifier(mod);
-    if (modError) {
-      return `BEM object - ${modError}`;
+    const { valid, error } = validateBemModifier(mod);
+    if (!valid) {
+      return fvr(error);
     }
   }
 
-  return null;
+  return successfulValidationResult();
+}
+
+export function validateBemObject(value: BemObject): ValidationResult {
+  return validateBemObjectOrVector(value);
+}
+
+export function validateBemVector(value: BemVector): ValidationResult {
+  return validateBemObjectOrVector(value);
 }
 
 export function validateBemString(value: BemString): ValidationResult {
+  const fvr = (err?: string) => failedValidationResult(`BEM string -- ${err}`);
+
   if (is.emptyString(value) || value.trim().length === 0) {
-    return "BEM string must have at least block part";
+    return fvr("must have at least block part");
   }
 
   // Advancing from end of `value` in following steps:
@@ -203,10 +232,9 @@ export function validateBemString(value: BemString): ValidationResult {
 
   // BEM string can have at most one modifier part...
   if (modPartsLength > 1) {
-    return (
-      `BEM string can have only one modifier but it has ${modPartsLength} of them '` +
-      modParts.join(", ") +
-      "'"
+    return fvr(
+      `can have only one modifier but ${modPartsLength} of them found -- ` +
+        modParts.join(", ")
     );
   }
 
@@ -219,21 +247,27 @@ export function validateBemString(value: BemString): ValidationResult {
     const modNameValuePartsLength = modNameValueParts.length;
 
     if (modNameValuePartsLength > 2) {
-      return `BEM modifier can have only one value but it has ${modNameValuePartsLength -
-        1} of them (${modNameValueParts.slice(1).join(", ")})`;
+      return fvr(
+        "modifier can have only one value but " +
+          `${modNameValuePartsLength - 1} of them found -- ` +
+          modNameValueParts.slice(1).join(", ")
+      );
     }
 
     const [modName, modValue] = modNameValueParts;
 
     // BEM modifier name must be valid BEM name.
-    if (validateBemName(modName)) {
-      return `BEM modifier name must be a valid BEM name but it is '${modName}'`;
+    if (!validateBemName(modName).valid) {
+      return fvr(`modifier's name must be a valid BEM name -- ${modName}`);
     }
 
     // BEM modifier value is optional or must be valid BEM name.
     if (modNameValuePartsLength === 2) {
-      if (validateBemValue(modValue)) {
-        return `BEM modifier value is optional or must be a BEM value but it is ${modValue}`;
+      if (!validateBemValue(modValue).valid) {
+        return fvr(
+          "modifier's value is optional but must be valid " +
+            `BEM value when provided -- ${modValue}`
+        );
       }
     }
   }
@@ -246,52 +280,30 @@ export function validateBemString(value: BemString): ValidationResult {
 
   // BEM string can have at most one element part...
   if (eltPartsLength > 1) {
-    return (
-      `BEM string can have only one element but it has ${eltPartsLength} of them ` +
-      eltParts.join(", ")
+    return fvr(
+      `only one element allowed but ${eltPartsLength} of them found -- ` +
+        eltParts.join(", ")
     );
   }
 
   // ...and that part is optional.
   if (eltPartsLength) {
     const elt = eltParts[0];
-    if (validateBemName(elt)) {
-      return `BEM element must be a BEM value but it is '${elt}'`;
+    if (!validateBemName(elt).valid) {
+      return validationResult(
+        false,
+        `element must be valid BEM name -- ${elt}`
+      );
     }
   }
 
   // 3. Block part
   const blk = parts[0];
-  if (validateBemName(blk)) {
-    return `BEM block must be a BEM name but it is '${blk}'`;
+  if (!validateBemName(blk).valid) {
+    return validationResult(false, `block must be valid BEM name -- ${blk}`);
   }
 
-  return null;
-}
-
-export function validateBemVector(value: BemVector): ValidationResult {
-  const [blk, elt, mod] = value;
-
-  const blkError = validateBemBlock(blk);
-  if (blkError) {
-    return `BEM vector - ${blkError}`;
-  }
-
-  if (elt) {
-    const eltError = validateBemElement(elt);
-    if (eltError) {
-      return `BEM vector - ${eltError}`;
-    }
-  }
-
-  if (mod) {
-    const modError = validateBemModifier(mod);
-    if (modError) {
-      return `BEM vector - ${modError}`;
-    }
-  }
-
-  return null;
+  return validationResult(true);
 }
 
 export function validateBemStructure(value: BemStructure): ValidationResult {
@@ -302,17 +314,16 @@ export function validateBemStructure(value: BemStructure): ValidationResult {
   } else if (isBemObject(value)) {
     return validateBemObject(value);
   } else {
-    return (
-      "value must be a BEM object, string or vector but it is " +
-      `'${is(value)}'`
+    return failedValidationResult(
+      `Value must be a BEM object|string|vector -- ${value}`
     );
   }
 }
 
 export function toBemObject(value: BemStructure): BemObject {
-  const validationResult = validateBemStructure(value);
-  if (validationResult) {
-    throw new Error(validationResult);
+  const { error } = validateBemStructure(value);
+  if (error) {
+    throw new Error(error);
   }
 
   if (isBemObject(value)) {
@@ -322,22 +333,22 @@ export function toBemObject(value: BemStructure): BemObject {
   if (isBemString(value)) {
     const [blkAndEltPart, modPart] = value.split("--");
     const [blk, elt] = blkAndEltPart.split("__");
-    return {
-      blk,
-      elt,
-      mod: modPart
-        ? (modPart.split("_").filter(is.nonEmptyString) as BemModifier)
-        : undefined
-    };
+
+    const bemObj: BemObject = { blk, elt };
+    if (modPart) {
+      bemObj.mod = modPart.split("_").filter(is.nonEmptyString) as BemModifier;
+    }
+
+    return bemObj;
   }
 
   return { blk: value[0], elt: value[1], mod: value[2] };
 }
 
 export function toBemString(value: BemStructure): BemString {
-  const validationResult = validateBemStructure(value);
-  if (validationResult) {
-    throw new Error(validationResult);
+  const { error } = validateBemStructure(value);
+  if (error) {
+    throw new Error(error);
   }
 
   if (isBemString(value)) {
@@ -368,9 +379,9 @@ export function toBemString(value: BemStructure): BemString {
 }
 
 export function toBemVector(value: BemStructure): BemVector {
-  const validationResult = validateBemStructure(value);
-  if (validationResult) {
-    throw new Error(validationResult);
+  const { error } = validateBemStructure(value);
+  if (error) {
+    throw new Error(error);
   }
 
   if (isBemVector(value)) {
