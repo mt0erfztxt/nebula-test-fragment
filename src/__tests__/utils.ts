@@ -1,4 +1,4 @@
-import { asArray, toTestCafeAssertionName, TestCafeAssertion } from "../utils";
+import { asArray, TestCafeAssertion, toTestCafeAssertionName } from "../utils";
 
 describe("asArray()", function() {
   test("returns passed in value as-is when it is already an array", () => {
@@ -13,33 +13,27 @@ describe("asArray()", function() {
 });
 
 describe("toTestCafeAssertionName()", () => {
-  describe("when options.isNot is false", () => {
-    test("returns correct assertion name", function() {
-      expect(toTestCafeAssertionName(TestCafeAssertion.Eql)).toBe("eql");
-      expect(toTestCafeAssertionName(TestCafeAssertion.NotEql)).toBe("notEql");
-      expect(toTestCafeAssertionName(TestCafeAssertion.Match)).toBe("match");
-      expect(toTestCafeAssertionName(TestCafeAssertion.NotMatch)).toBe(
-        "notMatch"
-      );
-    });
+  test("returns correct assertion name when options.isNot is false", function() {
+    expect(toTestCafeAssertionName(TestCafeAssertion.Eql)).toBe("eql");
+    expect(toTestCafeAssertionName(TestCafeAssertion.NotEql)).toBe("notEql");
+    expect(toTestCafeAssertionName(TestCafeAssertion.Match)).toBe("match");
+    expect(
+      toTestCafeAssertionName(TestCafeAssertion.NotMatch, { isNot: false })
+    ).toBe("notMatch");
   });
 
-  describe("when options.isNot is true", () => {
-    const options = { isNot: true };
-
-    test("returns correct assertion name", function() {
-      expect(toTestCafeAssertionName(TestCafeAssertion.Eql, options)).toBe(
-        "notEql"
-      );
-      expect(toTestCafeAssertionName(TestCafeAssertion.NotEql, options)).toBe(
-        "eql"
-      );
-      expect(toTestCafeAssertionName(TestCafeAssertion.Match, options)).toBe(
-        "notMatch"
-      );
-      expect(toTestCafeAssertionName(TestCafeAssertion.NotMatch, options)).toBe(
-        "match"
-      );
-    });
+  test("returns correct assertion name when options.isNot is true", function() {
+    for (const [value, result] of [
+      [TestCafeAssertion.NotEql, "eql"],
+      [TestCafeAssertion.Eql, "notEql"],
+      [TestCafeAssertion.Match, "notMatch"],
+      [TestCafeAssertion.NotMatch, "match"]
+    ]) {
+      expect(
+        toTestCafeAssertionName(value as TestCafeAssertion, {
+          isNot: true
+        })
+      ).toBe(result);
+    }
   });
 });
