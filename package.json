@@ -22,7 +22,7 @@
     "app-root-path": "^2.2.1",
     "change-case": "^3.0.1",
     "deep-object-diff": "^1.1.0",
-    "escape-string-regexp": "^1.0.5",
+    "escape-string-regexp": "^2.0.0",
     "lodash": "^4.17.15",
     "testcafe": "^1.7.0",
     "url-parse": "^1.4.7"

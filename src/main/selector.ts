@@ -1,7 +1,8 @@
-import { Selector, t } from "testcafe";
 import is from "@sindresorhus/is";
-
+import { Selector, t } from "testcafe";
 import { testCafeAssertion, ValidationResult } from "./utils";
+
+const escapeStringRegexp = require("escape-string-regexp");
 
 /**
  * Represents CSS class name.
@@ -252,4 +253,28 @@ export function filterByAttribute(
     },
     { attrName, attrValue, isNot } // dependencies
   );
+}
+
+/**
+ * Accepts TestCafe's `Selector` initializer and creates new selector filtered
+ * by specified text.
+ *
+ * It's a wrapper around TestCafe's `withText` that provides filtering by text
+ * equality -- added because currently (v0.16.2) TestCafe's `withText` always
+ * filters by regular expression matching.
+ *
+ * @param selectorInitializer Anything TestCafe's `Selector` accepts as initializer
+ * @param text Text to filter on
+ */
+export function filterByText(
+  selectorInitializer: any,
+  text: boolean | number | RegExp | string
+): Selector {
+  // TestCafe (v0.16.2) always converts `withText` argument to `RegExp` and so
+  // we must use workaround to use string equality.
+  const textAsRegExp = is.regExp(text)
+    ? text
+    : new RegExp(`^${escapeStringRegexp("" + text)}$`);
+
+  return Selector(selectorInitializer).withText(textAsRegExp);
 }
