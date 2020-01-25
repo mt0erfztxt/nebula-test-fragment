@@ -13,7 +13,9 @@
     "test": "src/test"
   },
   "scripts": {
-    "test": "npx jasmine --config=jasmine.json"
+    "test": "npm run jasmine-tests && npm run testcafe-tests",
+    "jasmine-tests": "npx jasmine --config=jasmine.json",
+    "testcafe-tests": "npx testcafe chromium src/test/testcafe"
   },
   "dependencies": {
     "@sindresorhus/is": "^1.2.0",
