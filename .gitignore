@@ -3,6 +3,8 @@
 /.vscode
 /coverage
 /dist
+/js-src
+/js-test
 /node_modules
 
 jsconfig.json

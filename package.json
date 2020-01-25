@@ -10,10 +10,10 @@
   "author": "Sergey Kozhevnikov <mt0erfztxt@gmail.com>",
   "main": "dist/index.js",
   "directories": {
-    "test": "test"
+    "test": "src/test"
   },
   "scripts": {
-    "test": "npx jest"
+    "test": "npx jasmine --config=jasmine.json"
   },
   "dependencies": {
     "@sindresorhus/is": "^1.2.0",
@@ -26,11 +26,19 @@
     "url-parse": "^1.4.7"
   },
   "devDependencies": {
-    "@types/jest": "^24.0.23",
-    "jest": "^24.9.0",
+    "@babel/cli": "^7.7.5",
+    "@babel/core": "^7.7.5",
+    "@babel/plugin-proposal-class-properties": "^7.7.4",
+    "@babel/plugin-proposal-object-rest-spread": "^7.7.4",
+    "@babel/preset-env": "^7.7.6",
+    "@babel/preset-typescript": "^7.7.4",
+    "@babel/register": "^7.7.4",
+    "@types/app-root-path": "^1.2.4",
+    "@types/jasmine": "^3.5.0",
+    "jasmine": "^3.5.0",
+    "jasmine-spec-reporter": "^4.2.1",
     "prettier": "^1.19.1",
-    "testcafe-browser-provider-browserstack": "^1.10.1",
-    "ts-jest": "^24.2.0",
+    "ts-node": "^8.5.4",
     "typescript": "^3.7.3"
   }
 }
