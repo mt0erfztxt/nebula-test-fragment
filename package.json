@@ -1,0 +1,47 @@
+{
+  "name": "nebula-test-fragment",
+  "version": "0.3.0",
+  "description": "Page object and utilities for testing",
+  "license": "Apache-2.0",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/mt0erfztxt/nebula-test-fragment.git"
+  },
+  "author": "Sergey Kozhevnikov <mt0erfztxt@gmail.com>",
+  "main": "dist/page-object.js",
+  "directories": {
+    "test": "src/test"
+  },
+  "scripts": {
+    "clean": "rm -rf dist",
+    "jasmine-tests": "npx jasmine --config=jasmine.json",
+    "test": "npm run jasmine-tests && npm run testcafe-tests",
+    "testcafe-tests": "npx testcafe --selector-timeout=3500 chromium src/test/testcafe"
+  },
+  "files": [
+    "dist"
+  ],
+  "dependencies": {
+    "@sindresorhus/is": "^1.2.0",
+    "app-root-path": "^2.2.1",
+    "change-case": "^3.0.1",
+    "deep-object-diff": "^1.1.0",
+    "escape-string-regexp": "^2.0.0",
+    "testcafe": "^1.7.1",
+    "url-parse": "^1.4.7"
+  },
+  "devDependencies": {
+    "@babel/cli": "^7.7.5",
+    "@babel/core": "^7.7.5",
+    "@babel/plugin-proposal-class-properties": "^7.7.4",
+    "@babel/plugin-proposal-object-rest-spread": "^7.7.4",
+    "@babel/plugin-proposal-private-methods": "^7.8.3",
+    "@babel/preset-env": "^7.7.6",
+    "@babel/register": "^7.7.4",
+    "@types/app-root-path": "^1.2.4",
+    "@types/jasmine": "^3.5.0",
+    "jasmine": "^3.5.0",
+    "jasmine-spec-reporter": "^4.2.1",
+    "prettier": "^1.19.1"
+  }
+}
