@@ -2,7 +2,7 @@ import is from "@sindresorhus/is";
 import { typeAndValue } from "./util";
 
 /**
- * Represents BEM name.
+ * Type representing BEM name.
  *
  * Valid BEM name is a non-empty alpha-numeric-dashed string that starts and
  * ends with a letter, and doesn't contain sibling dashes.
@@ -11,7 +11,7 @@ import { typeAndValue } from "./util";
  */
 
 /**
- * Represents BEM value.
+ * Type representing BEM value.
  *
  * Valid BEM value is a non-empty alpha-numeric-dashed string that starts and
  * ends with a letter or a digit and doesn't contain sibling dashes.
@@ -20,7 +20,7 @@ import { typeAndValue } from "./util";
  */
 
 /**
- * Represents BEM block.
+ * Type representing BEM block.
  *
  * Valid BEM block is a valid BEM name.
  *
@@ -28,7 +28,7 @@ import { typeAndValue } from "./util";
  */
 
 /**
- * Represents BEM element.
+ * Type representing BEM element.
  *
  * Valid BEM element is a valid BEM name.
  *
@@ -36,7 +36,7 @@ import { typeAndValue } from "./util";
  */
 
 /**
- * Represents BEM modifier name.
+ * Type representing BEM modifier name.
  *
  * Valid BEM modifier name is a valid BEM name.
  *
@@ -44,30 +44,30 @@ import { typeAndValue } from "./util";
  */
 
 /**
- * Represents BEM modifier value.
+ * Type representing BEM modifier's value.
  *
- * Valid BEM modifier value is a valid BEM value.
+ * Valid BEM modifier's value is a valid BEM value.
  *
  * @typedef {BemValue} BemModifierValue
  */
 
 /**
- * Represents BEM modifier.
+ * Type representing BEM modifier.
  *
  * Valid BEM modifier is a two-elements tuple where first element is a required
- * BEM modifier name and second is an optional BEM modifier value.
+ * BEM modifier's name and second is an optional BEM modifier's value.
  *
  * @typedef {[BemModifierName, BemModifierValue]} BemModifier
  */
 
 /**
- * Represents BEM modifier requirement.
+ * Type representing BEM modifier requirement.
  *
  * @typedef {[BemModifierName, BemModifierValue, NegationFlag]} BemModifierRequirement
  */
 
 /**
- * Represents BEM object.
+ * Type representing BEM object.
  *
  * @typedef BemObject
  * @type {Object}
@@ -77,24 +77,28 @@ import { typeAndValue } from "./util";
  */
 
 /**
- * Represents BEM string.
+ * Type representing BEM string.
  *
  * @typedef {string} BemString
  */
 
 /**
- * Represents BEM vector.
+ * Type representing BEM vector.
  *
  * @typedef {[BemBlock, BemElement, BemModifier]} BemVector
  */
 
 /**
- * Represents BEM structure.
+ * Type representing BEM structure.
  *
  * @typedef {(BemObject|BemString|BemVector)} BemStructure
  */
 
 /**
+ * Returns `true` when argument is a BEM object, otherwise returns `false`.
+ *
+ * Note: any plain object is a BEM object, for validation use
+ * {@link validateBemObject}.
  *
  * @param {BemStructure} bemStructure
  * @returns {boolean}
@@ -104,6 +108,10 @@ export function isBemObject(bemStructure) {
 }
 
 /**
+ * Returns `true` when argument is a BEM string, otherwise returns `false`.
+ *
+ * Note: any string is a BEM string, for validation use
+ * {@link validateBemString}.
  *
  * @param {BemStructure} bemStructure
  * @returns {boolean}
@@ -113,6 +121,10 @@ export function isBemString(bemStructure) {
 }
 
 /**
+ * Returns `true` when argument is a BEM vector, otherwise returns `false`.
+ *
+ * Note: any array is a BEM vector, for validation use
+ * {@link validateBemVector}.
  *
  * @param {BemStructure} bemStructure
  * @returns {boolean}
@@ -122,9 +134,10 @@ export function isBemVector(bemStructure) {
 }
 
 /**
+ * Validates that argument is valid BEM name.
  *
  * @param {BemName} bemName
- * @returns {{error: string, value: BemName}|{value: BemName}}
+ * @returns {{error: string, value: BemName}|{value: BemName}} Returns validation result.
  */
 export function validateBemName(bemName) {
   const result = { value: bemName };
@@ -146,9 +159,10 @@ export function validateBemName(bemName) {
 }
 
 /**
+ * Validates that argument is valid BEM value.
  *
  * @param {BemValue} bemValue
- * @returns {{error: string, value: BemValue}|{value: BemValue}}
+ * @returns {{error: string, value: BemValue}|{value: BemValue}} Returns validation result.
  */
 export function validateBemValue(bemValue) {
   const result = { value: bemValue };
@@ -174,9 +188,10 @@ export function validateBemValue(bemValue) {
 }
 
 /**
+ * Validates that argument is valid BEM block.
  *
  * @param {BemBlock} bemBlock
- * @returns {{error: string, value: BemBlock}|{value: BemBlock}}
+ * @returns {{error: string, value: BemBlock}|{value: BemBlock}} Returns validation result.
  */
 export function validateBemBlock(bemBlock) {
   const { error, value } = validateBemName(bemBlock);
@@ -191,9 +206,10 @@ export function validateBemBlock(bemBlock) {
 }
 
 /**
+ * Validates that argument is valid BEM element.
  *
  * @param {BemElement} bemElement
- * @returns {{error: string, value: BemElement}|{value: BemElement}}
+ * @returns {{error: string, value: BemElement}|{value: BemElement}} Returns validation result.
  */
 export function validateBemElement(bemElement) {
   const { error, value } = validateBemName(bemElement);
@@ -208,9 +224,10 @@ export function validateBemElement(bemElement) {
 }
 
 /**
+ * Validates that argument is valid BEM modifier's name.
  *
  * @param {BemModifierName} bemModifierName
- * @returns {{error: string, value: BemModifierName}|{value: BemModifierName}}
+ * @returns {{error: string, value: BemModifierName}|{value: BemModifierName}} Returns validation result.
  */
 export function validateBemModifierName(bemModifierName) {
   const { error, value } = validateBemName(bemModifierName);
@@ -225,9 +242,10 @@ export function validateBemModifierName(bemModifierName) {
 }
 
 /**
+ * Validates that argument is valid BEM modifier's value.
  *
  * @param {BemModifierValue} bemModifierValue
- * @returns {{error: string, value: BemModifierValue}|{value: BemModifierValue}}
+ * @returns {{error: string, value: BemModifierValue}|{value: BemModifierValue}} Returns validation result.
  */
 export function validateBemModifierValue(bemModifierValue) {
   const { error, value } = validateBemValue(bemModifierValue);
@@ -242,9 +260,10 @@ export function validateBemModifierValue(bemModifierValue) {
 }
 
 /**
+ * Validates that argument is valid BEM modifier.
  *
  * @param {BemModifier} bemModifier
- * @returns {{error: string, value: BemModifier}|{value: BemModifier}}
+ * @returns {{error: string, value: BemModifier}|{value: BemModifier}} Returns validation result.
  */
 export function validateBemModifier(bemModifier) {
   const result = { value: bemModifier };
@@ -289,9 +308,10 @@ export function validateBemModifier(bemModifier) {
 }
 
 /**
+ * Validates that argument is valid BEM modifier requirement.
  *
  * @param bemModifierRequirement
- * @returns {{error: string, value: BemModifierRequirement}|{value: BemModifierRequirement}}
+ * @returns {{error: string, value: BemModifierRequirement}|{value: BemModifierRequirement}} Returns validation result.
  */
 export function validateBemModifierRequirement(bemModifierRequirement) {
   const result = { value: bemModifierRequirement };
@@ -317,12 +337,13 @@ export function validateBemModifierRequirement(bemModifierRequirement) {
 }
 
 /**
+ * Just a common code used in BEM object and vector validation.
  *
  * @param {BemBlock} blk
  * @param {BemElement|undefined} elt
  * @param {BemModifier|undefined} mod
  * @param {boolean} isVector
- * @returns {string|undefined}
+ * @returns {string|undefined} Returns error on validation failure and `undefined` on validation success.
  */
 function validateBemParts(blk, elt, mod, isVector) {
   const { error } = validateBemBlock(blk);
@@ -346,9 +367,10 @@ function validateBemParts(blk, elt, mod, isVector) {
 }
 
 /**
+ * Validates that argument is valid BEM object.
  *
  * @param {BemObject} bemObject
- * @returns {{error: string, value: BemObject}|{value: BemObject}}
+ * @returns {{error: string, value: BemObject}|{value: BemObject}} Returns validation result.
  */
 export function validateBemObject(bemObject) {
   const result = { value: bemObject };
@@ -370,9 +392,10 @@ export function validateBemObject(bemObject) {
 }
 
 /**
+ * Validates that argument is valid BEM vector.
  *
  * @param {BemVector} bemVector
- * @returns {{error: string, value: BemVector}|{value: BemVector}}
+ * @returns {{error: string, value: BemVector}|{value: BemVector}} Returns validation result.
  */
 export function validateBemVector(bemVector) {
   const result = { value: bemVector };
@@ -394,9 +417,10 @@ export function validateBemVector(bemVector) {
 }
 
 /**
+ * Validates that argument is valid BEM string.
  *
  * @param bemString
- * @returns {{error: string, value: BemString}|{value: BemString}}
+ * @returns {{error: string, value: BemString}|{value: BemString}} Returns validation result.
  */
 export function validateBemString(bemString) {
   /**
@@ -478,9 +502,11 @@ export function validateBemString(bemString) {
 }
 
 /**
+ * Validates that argument is valid BEM structure.
+ *
  *
  * @param {BemStructure} bemStructure
- * @returns {{error: string, value: BemStructure}|{value: BemStructure}}
+ * @returns {{error: string, value: BemStructure}|{value: BemStructure}} Returns validation result.
  */
 export function validateBemStructure(bemStructure) {
   const f = result => {
@@ -512,6 +538,11 @@ export function validateBemStructure(bemStructure) {
 }
 
 /**
+ * Converts argument to BEM object.
+ *
+ * Note:
+ * - in case argument already a BEM object it is returned as-is and BEM
+ *   modifier is a subject to shallow copying
  *
  * @param {BemStructure} bemStructure
  * @returns {BemObject}
@@ -553,6 +584,10 @@ export function toBemObject(bemStructure) {
 }
 
 /**
+ * Converts argument to BEM string.
+ *
+ * Note:
+ * - in case argument already a BEM string it is returned as-is
  *
  * @param {BemStructure} bemStructure
  * @returns {BemString}
@@ -592,6 +627,11 @@ export function toBemString(bemStructure) {
 }
 
 /**
+ * Converts argument to BEM vector.
+ *
+ * Note:
+ * - in case argument already a BEM vector it is returned as-is and BEM
+ *   modifier is a subject to shallow copying
  *
  * @param {BemStructure} bemStructure
  * @returns {BemVector}
@@ -611,33 +651,44 @@ export function toBemVector(bemStructure) {
   return /** @type {BemVector} */ ([blk, elt, mod]);
 }
 
+/**
+ * Class representing BEM base.
+ */
 export class BemBase {
   /**
+   * A BEM block -- BEM base always must have valid BEM block.
+   *
    * @type {BemBlock}
    */
   #blk;
 
   /**
-   * @type {undefined|BemElement}
+   * A BEM element -- BEM base allowed to not to have BEM element.
+   *
+   * @type {BemElement|undefined}
    */
   #elt;
 
   /**
-   * @type {undefined|BemModifier}
+   * A BEM modifier -- BEM base allowed to not to have BEM modifier.
+   *
+   * @type {BemModifier|undefined}
    */
   #mod;
 
   /**
+   * Whether instance allowed to be changed or not.
    *
    * @type {boolean}
    */
   #frozen = false;
 
   /**
+   * Creates BEM base.
    *
-   * @param {BemStructure} initializer
-   * @param {Object} [options] Options
-   * @param {boolean} [options.frozen=false] Changes not allowed when `true`
+   * @param {BemStructure} initializer Any BEM structure can be used to initialize BEM base.
+   * @param {Object} [options] Options.
+   * @param {boolean} [options.frozen=false] Frozen instance would throw if change requested.
    */
   constructor(initializer, options) {
     const { blk, elt, mod } = toBemObject(initializer);
@@ -650,8 +701,10 @@ export class BemBase {
   }
 
   /**
+   * Utility used to throw error if change requested on frozen instance.
    *
    * @param {string} errorMessage
+   * @throws {Error}
    */
   #throwIfFrozen(errorMessage) {
     if (this.#frozen) {
@@ -663,6 +716,7 @@ export class BemBase {
   }
 
   /**
+   * Returns BEM block of BEM base.
    *
    * @returns {BemBlock}
    */
@@ -671,6 +725,7 @@ export class BemBase {
   }
 
   /**
+   * Sets BEM block of BEM base.
    *
    * @param {BemBlock} bemBlock
    * @throws {Error} Throws on invalid input or if instance is frozen.
@@ -692,6 +747,7 @@ export class BemBase {
   }
 
   /**
+   * Sets BEM block of BEM base.
    *
    * @param {BemBlock} bemBlock
    * @returns {BemBase}
@@ -702,14 +758,16 @@ export class BemBase {
   }
 
   /**
+   * Returns BEM element of BEM base.
    *
-   * @returns {BemElement}
+   * @returns {BemElement|undefined}
    */
   get elt() {
     return this.#elt;
   }
 
   /**
+   * Sets BEM element of BEM base.
    *
    * @param {BemElement|undefined} bemElement
    * @throws {Error} Throws on invalid input or if instance is frozen.
@@ -731,6 +789,7 @@ export class BemBase {
   }
 
   /**
+   * Sets BEM element of BEM base.
    *
    * @param {BemElement} [bemElement]
    * @returns {BemBase}
@@ -741,14 +800,16 @@ export class BemBase {
   }
 
   /**
+   * Returns BEM modifier of BEM base.
    *
-   * @returns {BemModifier}
+   * @returns {BemModifier|undefined}
    */
   get mod() {
     return this.#mod;
   }
 
   /**
+   * Sets BEM modifier of BEM base.
    *
    * @param {BemModifier|undefined} bemModifier
    * @throws {Error} Throws on invalid input or if instance is frozen.
@@ -770,6 +831,7 @@ export class BemBase {
   }
 
   /**
+   * Sets BEM modifier of BEM base.
    *
    * @param {BemModifier} [bemModifier]
    * @returns {BemBase}
@@ -780,6 +842,7 @@ export class BemBase {
   }
 
   /**
+   * Returns whether BEM base is frozen or not.
    *
    * @returns {boolean}
    */
@@ -788,6 +851,10 @@ export class BemBase {
   }
 
   /**
+   * Freezes BEM base to prevent any changes.
+   *
+   * Note:
+   * - there is no way to unfreeze instance, but it can be [cloned]{@link BemBase#clone}
    *
    * @returns {BemBase}
    */
@@ -797,6 +864,36 @@ export class BemBase {
   }
 
   /**
+   * Clones instance.
+   *
+   * Note:
+   * - cloned instance is not frozen even if callee is
+   *
+   * @returns {BemBase}
+   */
+  clone() {
+    const bemObj = { blk: this.#blk };
+
+    if (this.#elt) {
+      bemObj.elt = this.#elt;
+    }
+
+    // Don't shallow copy BEM modifier of callee!
+    if (this.#mod) {
+      const [n, v] = this.#mod;
+      const mod = [n];
+      if (v) {
+        mod.push(v);
+      }
+
+      bemObj.mod = mod;
+    }
+
+    return new BemBase(bemObj);
+  }
+
+  /**
+   * Returns BEM object representation of instance.
    *
    * @returns {BemObject}
    */
@@ -805,6 +902,7 @@ export class BemBase {
   }
 
   /**
+   * Returns BEM string representation of instance.
    *
    * @returns {BemString}
    */
@@ -813,6 +911,7 @@ export class BemBase {
   }
 
   /**
+   * Returns BEM vector representation of instance.
    *
    * @returns {BemVector}
    */
@@ -821,14 +920,7 @@ export class BemBase {
   }
 
   /**
-   *
-   * @returns {BemBase}
-   */
-  clone() {
-    return new BemBase({ blk: this.blk, elt: this.elt, mod: this.mod });
-  }
-
-  /**
+   * Same as {@link BemBase#toBemString}.
    *
    * @returns {BemString}
    */
@@ -837,6 +929,8 @@ export class BemBase {
   }
 
   /**
+   * Returns BEM string representation of BEM base with '.' prepended for
+   * convenient usage when CSS class selector needed.
    *
    * @returns {string}
    */
