@@ -247,17 +247,24 @@ export function validateBemModifierValue(bemModifierValue) {
  * @returns {{error: string, value: BemModifier}|{value: BemModifier}}
  */
 export function validateBemModifier(bemModifier) {
+  const result = { value: bemModifier };
+
   if (!is.array(bemModifier)) {
-    return {
-      error: `BEM modifier: must be an array but it doesn't -- ${typeAndValue(
-        bemModifier
-      )}`,
-      value: bemModifier
-    };
+    result.error =
+      "BEM modifier: must be an array but it doesn't -- " +
+      typeAndValue(bemModifier);
+    return result;
+  }
+
+  const bemModifierLength = bemModifier.length;
+  if (bemModifierLength > 2) {
+    result.error =
+      `BEM modifier: can have only one BEM modifier value but it ` +
+      `doesn't -- ${bemModifier[0]} ${bemModifier.slice(1).join(", ")}`;
+    return result;
   }
 
   const [modName, modValue] = bemModifier;
-  const result = { value: bemModifier };
   const value = [];
 
   const { error, value: n } = validateBemModifierName(modName);
@@ -287,13 +294,26 @@ export function validateBemModifier(bemModifier) {
  * @returns {{error: string, value: BemModifierRequirement}|{value: BemModifierRequirement}}
  */
 export function validateBemModifierRequirement(bemModifierRequirement) {
-  const [modName, modValue, isNot = false] = bemModifierRequirement;
-  const { error } = validateBemModifier([modName, modValue]);
-  if (error) {
-    return { error, value: bemModifierRequirement };
-  } else {
-    return { value: [modName, modValue, isNot] };
+  const result = { value: bemModifierRequirement };
+
+  if (!is.array(bemModifierRequirement) || bemModifierRequirement.length > 3) {
+    result.error =
+      `BEM modifier requirement: must be an array of one, two or three ` +
+      `elements but it doesn't -- ${typeAndValue(bemModifierRequirement)}`;
+    return result;
   }
+
+  const [modName, modValue, isNot = false] = bemModifierRequirement;
+  const {
+    error,
+    value: [n, v]
+  } = validateBemModifier([modName, modValue]);
+  if (error) {
+    result.error = `BEM modifier requirement: ${error}`;
+    return result;
+  }
+
+  return { value: [n, v, isNot] };
 }
 
 /**
@@ -331,9 +351,16 @@ function validateBemParts(blk, elt, mod, isVector) {
  * @returns {{error: string, value: BemObject}|{value: BemObject}}
  */
 export function validateBemObject(bemObject) {
-  const { blk, elt, mod } = bemObject;
   const result = { value: bemObject };
 
+  if (!isBemObject(bemObject)) {
+    result.error =
+      "BEM object: must be a plain object but it doesn't -- " +
+      typeAndValue(bemObject);
+    return result;
+  }
+
+  const { blk, elt, mod } = bemObject;
   const error = validateBemParts(blk, elt, mod, false);
   if (error) {
     result.error = `BEM object: ${error}`;
@@ -348,9 +375,16 @@ export function validateBemObject(bemObject) {
  * @returns {{error: string, value: BemVector}|{value: BemVector}}
  */
 export function validateBemVector(bemVector) {
-  const [blk, elt, mod] = bemVector;
   const result = { value: bemVector };
 
+  if (!isBemVector(bemVector) || bemVector.length > 3) {
+    result.error =
+      `BEM vector: must be an array of one, two or three elements but it ` +
+      `doesn't -- ${typeAndValue(bemVector)}`;
+    return result;
+  }
+
+  const [blk, elt, mod] = bemVector;
   const error = validateBemParts(blk, elt, mod, false);
   if (error) {
     result.error = `BEM vector: ${error}`;
@@ -375,8 +409,12 @@ export function validateBemString(bemString) {
     value: bemString
   });
 
-  if (is.emptyString(bemString) || bemString.trim().length === 0) {
-    return f("must have at least block part");
+  if (!isBemString(bemString)) {
+    return f(`must be a string but it doesn't -- ${typeAndValue(bemString)}`);
+  }
+
+  if (is.emptyStringOrWhitespace(bemString)) {
+    return f(validateBemBlock(bemString).error);
   }
 
   // Advancing from end of `value` in following steps:
@@ -386,80 +424,54 @@ export function validateBemString(bemString) {
 
   let parts;
 
-  // 1. Modifier part
+  // 1. BEM modifier part
   parts = bemString.split("--");
 
   const modParts = parts.slice(1);
   const modPartsLength = modParts.length;
 
-  // BEM string can have at most one modifier part...
+  // BEM string can have at most one BEM modifier...
   if (modPartsLength > 1) {
     return f(
-      `can have only one modifier but ${modPartsLength} of them found -- ` +
+      `can have only one BEM modifier but ${modPartsLength} of them found -- ` +
         modParts.join(", ")
     );
   }
 
-  // ...and that part is optional.
+  // ...and it is optional.
   if (modPartsLength) {
-    const mod = modParts[0];
-    const modNameValueParts = mod
-      .split("_")
-      .filter(s => !is.emptyStringOrWhitespace(s));
-    const modNameValuePartsLength = modNameValueParts.length;
-
-    if (modNameValuePartsLength > 2) {
-      return f(
-        `modifier can have only one value but ` +
-          `${modNameValuePartsLength - 1} of them found -- ` +
-          modNameValueParts.slice(1).join(", ")
-      );
-    }
-
-    // BEM modifier name must be valid BEM name.
-    const modName = modNameValueParts[0];
-    if (validateBemName(modName).error) {
-      return f(`modifier's name must be a valid BEM name -- ${modName}`);
-    }
-
-    // BEM modifier value is optional or must be valid BEM name.
-    const modValue = modNameValueParts[1];
-    if (modNameValuePartsLength === 2) {
-      if (validateBemValue(modValue).error) {
-        return f(
-          "modifier's value is optional but must be valid " +
-            `BEM value when provided -- ${modValue}`
-        );
-      }
+    const { error } = validateBemModifier(modParts[0].split("_"));
+    if (error) {
+      return f(error);
     }
   }
 
-  // 2. Element part
+  // 2. BEM element part
   parts = parts[0].split("__");
 
   const eltParts = parts.slice(1);
   const eltPartsLength = eltParts.length;
 
-  // BEM string can have at most one element part...
+  // BEM string can have at most one BEM element...
   if (eltPartsLength > 1) {
     return f(
-      `only one element allowed but '${eltPartsLength}' of them found -- ` +
+      `can have only one BEM element but ${eltPartsLength} of them found -- ` +
         eltParts.join(", ")
     );
   }
 
-  // ...and that part is optional.
+  // ...and it is optional.
   if (eltPartsLength) {
-    const elt = eltParts[0];
-    if (validateBemName(elt).error) {
-      return f(`element must be valid BEM name -- ${elt}`);
+    const { error } = validateBemElement(eltParts[0]);
+    if (error) {
+      return f(error);
     }
   }
 
-  // 3. Block part
-  const blk = parts[0];
-  if (validateBemName(blk).error) {
-    return f(`block must be valid BEM name -- ${blk}`);
+  // 3. BEM block.
+  const { error } = validateBemBlock(parts[0]);
+  if (error) {
+    return f(error);
   }
 
   return { value: bemString };
@@ -471,17 +483,31 @@ export function validateBemString(bemString) {
  * @returns {{error: string, value: BemStructure}|{value: BemStructure}}
  */
 export function validateBemStructure(bemStructure) {
+  const f = result => {
+    const { error, value } = result;
+    if (error) {
+      return {
+        error: `BEM structure: ${error}`,
+        value
+      };
+    } else {
+      return { value };
+    }
+  };
+
   if (isBemString(bemStructure)) {
-    return validateBemString(/** @type {BemString} */ (bemStructure));
+    return f(validateBemString(/** @type {BemString} */ (bemStructure)));
   } else if (isBemVector(bemStructure)) {
-    return validateBemVector(/** @type {BemVector} */ (bemStructure));
+    return f(validateBemVector(/** @type {BemVector} */ (bemStructure)));
   } else if (isBemObject(bemStructure)) {
-    return validateBemObject(/** @type {BemObject} */ (bemStructure));
+    return f(validateBemObject(/** @type {BemObject} */ (bemStructure)));
   } else {
-    return {
-      error: `Value must be a BEM object|string|vector -- ${bemStructure}`,
+    return f({
+      error: `must be a BEM object|string|vector but it doesn't -- ${typeAndValue(
+        bemStructure
+      )}`,
       value: bemStructure
-    };
+    });
   }
 }
 

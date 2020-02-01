@@ -180,20 +180,22 @@ describe("validateBemModifier()", () => {
       const error =
         "BEM modifier: must be an array but it doesn't -- string foo";
       const value = "foo";
-      expect(validateBemModifier(value)).toEqual({
-        error,
-        value
-      });
+      expect(validateBemModifier(value)).toEqual({ error, value });
+    });
+
+    it("has more than one BEM value", () => {
+      const error =
+        "BEM modifier: can have only one BEM modifier value but it " +
+        "doesn't -- foo bar, buz";
+      const value = ["foo", "bar", "buz"];
+      expect(validateBemModifier(value)).toEqual({ error, value });
     });
 
     it("first element is not valid BEM name", () => {
       const error =
         "BEM modifier: BEM modifier's name: BEM name: must conform constraints but it doesn't -- string 1";
       const value = ["1"];
-      expect(validateBemModifier(value)).toEqual({
-        error,
-        value
-      });
+      expect(validateBemModifier(value)).toEqual({ error, value });
     });
 
     it("second element is not valid BEM value", () => {
@@ -206,7 +208,9 @@ describe("validateBemModifier()", () => {
       ];
       for (const value of input) {
         expect(validateBemModifier(value)).toEqual({
-          error: `BEM modifier: optional BEM modifier's value: BEM value: must conform constraints but it doesn't -- string ${value[1]}`,
+          error:
+            `BEM modifier: optional BEM modifier's value: BEM value: ` +
+            `must conform constraints but it doesn't -- string ${value[1]}`,
           value
         });
       }
@@ -236,307 +240,382 @@ describe("validateBemModifier()", () => {
   });
 });
 
-// describe("validateBemModifierRequirement()", () => {
-//   it("fails when value is an array but its first element is not valid BEM name", () => {
-//     const error = "BEM modifier's name must be valid BEM name";
-//     const value: BemModifierRequirement = ["1"];
-//     expect(validateBemModifierRequirement(value)).toEqual({
-//       error,
-//       value
-//     });
-//   });
-//
-//   it("fails when value is an array but its second element is not valid BEM value", () => {
-//     const input: BemModifierRequirement[] = [
-//       ["fiz", ""],
-//       ["fiz", " "],
-//       ["fiz", "-buz"],
-//       ["fiz", "buz-"],
-//       ["fiz", "biz--buz"]
-//     ];
-//     for (const value of input) {
-//       expect(validateBemModifierRequirement(value)).toEqual({
-//         error:
-//           "BEM modifier's value is optional but must be valid BEM value when provided",
-//         value
-//       });
-//     }
-//   });
-//
-//   it("succeeds when value is a BEM modifier requirement", () => {
-//     const input: [BemModifierRequirement, BemModifierRequirement][] = [
-//       [["fiz"], ["fiz", undefined, false]],
-//       [
-//         ["fiz", undefined],
-//         ["fiz", undefined, false]
-//       ],
-//       [
-//         ["fiz", undefined, true],
-//         ["fiz", undefined, true]
-//       ],
-//       [
-//         ["fiz", "1"],
-//         ["fiz", "1", false]
-//       ],
-//       [
-//         ["fiz", "buz"],
-//         ["fiz", "buz", false]
-//       ],
-//       [
-//         ["fiz", "biz-buz"],
-//         ["fiz", "biz-buz", false]
-//       ],
-//       [
-//         ["fiz", "biz-buz", false],
-//         ["fiz", "biz-buz", false]
-//       ]
-//     ];
-//     for (const [value, result] of input) {
-//       expect(validateBemModifierRequirement(value)).toEqual({ value: result });
-//     }
-//   });
-// });
-//
+describe("validateBemModifierRequirement()", () => {
+  describe("validation fails when 'bemModifierRequirement'", () => {
+    it("is not an array", () => {
+      const error =
+        "BEM modifier requirement: must be an array of one, two or three " +
+        "elements but it doesn't -- string 1";
+      const value = "1";
+      expect(validateBemModifierRequirement(value)).toEqual({ error, value });
+    });
 
-// describe("validateBemObject()", () => {
-//   describe("validation fails when 'bemObject'", () => {
-//     it("'blk' property is not valid BEM block", () => {
-//       const value = { blk: "1" };
-//       expect(validateBemObject(value)).toEqual({
-//         error: "BEM object -- BEM block does not conform constraints",
-//         value
-//       });
-//     });
-//
-//     it("'elt' property is not valid BEM element", () => {
-//       const value = { blk: "blk", elt: "1" };
-//       expect(validateBemObject(value)).toEqual({
-//         error: "BEM object -- BEM element does not conform constraints",
-//         value
-//       });
-//     });
-//
-//     it("'mod' property is not valid BEM modifier", () => {
-//       const values: [BemObject, string][] = [
-//         [
-//           { blk: "blk", mod: ["1"] },
-//           "BEM object -- BEM modifier's name must be valid BEM name"
-//         ],
-//         [
-//           { blk: "blk", mod: ["mod", "foo--bar"] },
-//           "BEM object -- BEM modifier's value is optional but must be valid BEM value when provided"
-//         ]
-//       ];
-//       for (const [value, error] of values) {
-//         expect(validateBemObject(value)).toEqual({
-//           error,
-//           value
-//         });
-//       }
-//     });
-//   });
-//
-//   describe("validation succeeds when", () => {
-//     it("'blk' is valid BEM block and no 'elt' and 'mod' provided", () => {
-//       const value = { blk: "blk" };
-//       expect(validateBemObject(value)).toEqual({ value });
-//     });
-//
-//     it("'blk' is valid BEM block, 'elt' is valid BEM element and no 'mod' is provided", () => {
-//       const value = { blk: "blk", elt: "elt" };
-//       expect(validateBemObject(value)).toEqual({ value });
-//     });
-//
-//     it("'blk' is valid BEM block, 'elt' is valid BEM element and 'mod' is valid BEM modifier", () => {
-//       const values: BemObject[] = [
-//         { blk: "blk", elt: "elt", mod: ["modNam"] },
-//         { blk: "blk", elt: "elt", mod: ["modNam", "modVal"] }
-//       ];
-//       for (const value of values) {
-//         expect(validateBemObject(value)).toEqual({ value });
-//       }
-//     });
-//   });
-// });
-//
-// describe("validateBemString()", () => {
-//   it("validation fails when value is a blank string", () => {
-//     const values: BemString[] = ["", " ", "\t"];
-//     for (const value of values) {
-//       expect(validateBemString(value)).toEqual({
-//         error: "BEM string -- must have at least block part",
-//         value
-//       });
-//     }
-//   });
-//
-//   it("validation fails when value have more than one BEM modifier parts", () => {
-//     const value = "blk--mod1--mod2_2";
-//     expect(validateBemString(value)).toEqual({
-//       error:
-//         "BEM string -- can have only one modifier but '2' of them found -- mod1, mod2_2",
-//       value
-//     });
-//   });
-//
-//   it("validation fails when value's BEM modifier part have more than one BEM modifier values", () => {
-//     const value = "blk--mod_a_b";
-//     expect(validateBemString(value)).toEqual({
-//       error:
-//         "BEM string -- modifier can have only one value but '2' of them found -- a, b",
-//       value
-//     });
-//   });
-//
-//   it("validation fails when value's BEM modifier part have not valid BEM modifier name", () => {
-//     const value = "blk--mod@name_val";
-//     expect(validateBemString(value)).toEqual({
-//       error:
-//         "BEM string -- modifier's name must be a valid BEM name -- mod@name",
-//       value
-//     });
-//   });
-//
-//   it("validation fails when value's BEM modifier part have not valid BEM modifier value", () => {
-//     const value = "blk--mod-name_val-";
-//     expect(validateBemString(value)).toEqual({
-//       error:
-//         "BEM string -- modifier's value is optional but must be valid BEM value when provided -- val-",
-//       value
-//     });
-//   });
-//
-//   it("validation fails when value have more than one BEM element parts", () => {
-//     const value = "blk__elt1__elt2__elt3";
-//     expect(validateBemString(value)).toEqual({
-//       error:
-//         "BEM string -- only one element allowed but '3' of them found -- elt1, elt2, elt3",
-//       value
-//     });
-//   });
-//
-//   it("validation fails when value's BEM element part is not valid BEM element", () => {
-//     const value = "blk__elt2-";
-//     expect(validateBemString(value)).toEqual({
-//       error: "BEM string -- element must be valid BEM name -- elt2-",
-//       value
-//     });
-//   });
-//
-//   it("validation fails when value's BEM block part is not valid BEM block", () => {
-//     const values: [BemString, string][] = [
-//       ["blk-", "BEM string -- block must be valid BEM name -- blk-"],
-//       ["1blk", "BEM string -- block must be valid BEM name -- 1blk"],
-//       ["blk_1", "BEM string -- block must be valid BEM name -- blk_1"]
-//     ];
-//     for (const [value, error] of values) {
-//       expect(validateBemString(value)).toEqual({
-//         error,
-//         value
-//       });
-//     }
-//   });
-//
-//   it("validation succeeds when value is valid BEM string", () => {
-//     const values: BemString[] = [
-//       "blk",
-//       "blk__elt",
-//       "blk--mod",
-//       "blk__elt--mod",
-//       "blk--mod-name_mod-value",
-//       "blk__elt--mod-name_mod-value"
-//     ];
-//     for (const value of values) {
-//       expect(validateBemString(value)).toEqual({ value });
-//     }
-//   });
-// });
-//
-// describe("validateBemVector()", () => {
-//   it("validation fails when value's block part is not valid BEM block", () => {
-//     const value: BemVector = ["1"];
-//     expect(validateBemVector(value)).toEqual({
-//       error: "BEM vector -- BEM block does not conform constraints",
-//       value
-//     });
-//   });
-//
-//   it("validation fails when value's element part is provided but not valid BEM element", () => {
-//     const value: BemVector = ["block", "1"];
-//     expect(validateBemVector(value)).toEqual({
-//       error: "BEM vector -- BEM element does not conform constraints",
-//       value
-//     });
-//   });
-//
-//   it("validation fails when value's modifier part is provided but not valid BEM modifier", () => {
-//     const values: [BemVector, string][] = [
-//       [
-//         ["block", "elt", ["1"]],
-//         "BEM vector -- BEM modifier's name must be valid BEM name"
-//       ],
-//       [
-//         ["block", "elt", ["modName", "foo--bar"]],
-//         "BEM vector -- BEM modifier's value is optional but must be valid BEM value when provided"
-//       ]
-//     ];
-//     for (const [value, error] of values) {
-//       expect(validateBemVector(value)).toEqual({
-//         error,
-//         value
-//       });
-//     }
-//   });
-//
-//   it("validation succeeds when value is valid BEM string", () => {
-//     const values: BemVector[] = [
-//       ["blk"],
-//       ["blk", "elt"],
-//       ["blk", undefined, ["mod"]],
-//       ["blk", "elt", ["mod"]],
-//       ["blk", undefined, ["modName", "modValue"]],
-//       ["blk", "elt", ["modName", "modValue"]]
-//     ];
-//     for (const value of values) {
-//       expect(validateBemVector(value)).toEqual({ value });
-//     }
-//   });
-// });
-//
-// describe("validateBemStructure()", () => {
-//   it("validates BEM string", () => {
-//     expect(validateBemStructure("1")).toEqual({
-//       error: "BEM string -- block must be valid BEM name -- 1",
-//       value: "1"
-//     });
-//     expect(validateBemStructure("block__elt--mod")).toEqual({
-//       value: "block__elt--mod"
-//     });
-//   });
-//
-//   it("validates BEM vector", () => {
-//     expect(validateBemStructure(["block", "1"])).toEqual({
-//       error: "BEM vector -- BEM element does not conform constraints",
-//       value: ["block", "1"]
-//     });
-//     expect(validateBemStructure(["block", "elt", ["mod"]])).toEqual({
-//       value: ["block", "elt", ["mod"]]
-//     });
-//   });
-//
-//   it("validates BEM object", () => {
-//     expect(
-//       validateBemStructure({ blk: "blk", elt: "1", mod: ["mod"] })
-//     ).toEqual({
-//       error: "BEM object -- BEM element does not conform constraints",
-//       value: { blk: "blk", elt: "1", mod: ["mod"] }
-//     });
-//     expect(
-//       validateBemStructure({ blk: "blk", elt: "elt", mod: ["mod"] })
-//     ).toEqual({ value: { blk: "blk", elt: "elt", mod: ["mod"] } });
-//   });
-// });
-//
+    it("is an array with wrong number of elements", () => {
+      const error =
+        "BEM modifier requirement: must be an array of one, two or three " +
+        "elements but it doesn't -- Array foo,bar,true,42";
+      const value = ["foo", ["bar"], true, 42];
+      expect(validateBemModifierRequirement(value)).toEqual({ error, value });
+    });
+
+    it("is an array but its first element is not valid BEM modifier's name", () => {
+      const error =
+        "BEM modifier requirement: BEM modifier: BEM modifier's name: BEM name: must " +
+        "conform constraints but it doesn't -- string 1";
+      const value = ["1"];
+      expect(validateBemModifierRequirement(value)).toEqual({ error, value });
+    });
+
+    it("is an array but its second element is not valid BEM modifier's value", () => {
+      const error =
+        "BEM modifier requirement: BEM modifier: optional BEM modifier's " +
+        "value: BEM value: must conform constraints but it doesn't -- string ";
+      const value = ["fiz", ""];
+      expect(validateBemModifierRequirement(value)).toEqual({ error, value });
+    });
+  });
+
+  it("succeeds when 'bemModifierRequirement' is valid", () => {
+    const input = [
+      [["fiz"], ["fiz", undefined, false]],
+      [
+        ["fiz", undefined],
+        ["fiz", undefined, false]
+      ],
+      [
+        ["fiz", undefined, true],
+        ["fiz", undefined, true]
+      ],
+      [
+        ["fiz", "1"],
+        ["fiz", "1", false]
+      ],
+      [
+        ["fiz", "buz"],
+        ["fiz", "buz", false]
+      ],
+      [
+        ["fiz", "biz-buz"],
+        ["fiz", "biz-buz", false]
+      ],
+      [
+        ["fiz", "biz-buz", false],
+        ["fiz", "biz-buz", false]
+      ]
+    ];
+    for (const [value, result] of input) {
+      expect(validateBemModifierRequirement(value)).toEqual({ value: result });
+    }
+  });
+});
+
+describe("validateBemObject()", () => {
+  describe("validation fails when 'bemObject'", () => {
+    it("is not a plain object", () => {
+      const error =
+        "BEM object: must be a plain object but it doesn't -- boolean true";
+      const value = true;
+      expect(validateBemObject(value)).toEqual({ error, value });
+    });
+
+    it("'blk' property is not valid BEM block", () => {
+      const value = { blk: "1" };
+      expect(validateBemObject(value)).toEqual({
+        error:
+          "BEM object: BEM block: BEM name: must conform constraints but it " +
+          "doesn't -- string 1",
+        value
+      });
+    });
+
+    it("'elt' property is not valid BEM element", () => {
+      const value = { blk: "blk", elt: "1" };
+      expect(validateBemObject(value)).toEqual({
+        error:
+          "BEM object: BEM element: BEM name: must conform constraints but " +
+          "it doesn't -- string 1",
+        value
+      });
+    });
+
+    it("'mod' property is not valid BEM modifier", () => {
+      const values = [
+        [
+          { blk: "blk", mod: ["1"] },
+          "BEM object: BEM modifier: BEM modifier's name: BEM name: must " +
+            "conform constraints but it doesn't -- string 1"
+        ],
+        [
+          { blk: "blk", mod: ["mod", "foo--bar"] },
+          "BEM object: BEM modifier: optional BEM modifier's value: BEM value: must " +
+            "conform constraints but it doesn't -- string foo--bar"
+        ]
+      ];
+      for (const [value, error] of values) {
+        expect(validateBemObject(value)).toEqual({ error, value });
+      }
+    });
+  });
+
+  describe("validation succeeds when", () => {
+    it("'blk' is valid BEM block and no 'elt' and 'mod' provided", () => {
+      const value = { blk: "blk" };
+      expect(validateBemObject(value)).toEqual({ value });
+    });
+
+    it("'blk' is valid BEM block, 'elt' is valid BEM element and no 'mod' is provided", () => {
+      const value = { blk: "blk", elt: "elt" };
+      expect(validateBemObject(value)).toEqual({ value });
+    });
+
+    it("'blk' is valid BEM block, 'elt' is valid BEM element and 'mod' is valid BEM modifier", () => {
+      const values = [
+        { blk: "blk", elt: "elt", mod: ["modNam"] },
+        { blk: "blk", elt: "elt", mod: ["modNam", "modVal"] }
+      ];
+      for (const value of values) {
+        expect(validateBemObject(value)).toEqual({ value });
+      }
+    });
+  });
+});
+
+describe("validateBemVector()", () => {
+  describe("validation fails when 'bemVector'", () => {
+    it("is not an array", function() {
+      const error =
+        "BEM vector: must be an array of one, two or three elements but it " +
+        "doesn't -- string foo";
+      const value = "foo";
+      expect(validateBemVector(value)).toEqual({ error, value });
+    });
+
+    it("is an array with wrong number of elements", function() {
+      const error =
+        "BEM vector: must be an array of one, two or three elements but it " +
+        "doesn't -- Array foo,bar,buz,foobar";
+      const value = ["foo", "bar", ["buz"], "foobar"];
+      expect(validateBemVector(value)).toEqual({ error, value });
+    });
+
+    it("BEM block is not valid", () => {
+      const value = ["1"];
+      expect(validateBemVector(value)).toEqual({
+        error:
+          "BEM vector: BEM block: BEM name: must conform constraints but " +
+          "it doesn't -- string 1",
+        value
+      });
+    });
+
+    it("BEM element is provided but not valid", () => {
+      const value = ["block", "1"];
+      expect(validateBemVector(value)).toEqual({
+        error:
+          "BEM vector: BEM element: BEM name: must conform constraints but " +
+          "it doesn't -- string 1",
+        value
+      });
+    });
+
+    describe("BEM modifier", () => {
+      const values = [
+        [
+          "BEM modifier's name",
+          ["block", "elt", ["1"]],
+          "BEM vector: BEM modifier: BEM modifier's name: BEM name: must " +
+            "conform constraints but it doesn't -- string 1"
+        ],
+        [
+          "BEM modifier's value",
+          ["block", "elt", ["modName", "foo--bar"]],
+          "BEM vector: BEM modifier: optional BEM modifier's value: BEM " +
+            "value: must conform constraints but it doesn't -- string foo--bar"
+        ]
+      ];
+      for (const [label, value, error] of values) {
+        it(`${label} is not valid`, () => {
+          expect(validateBemVector(value)).toEqual({
+            error,
+            value
+          });
+        });
+      }
+    });
+  });
+
+  it("validation succeeds when 'bemVector' is valid", () => {
+    const values = [
+      ["blk"],
+      ["blk", "elt"],
+      ["blk", undefined, ["mod"]],
+      ["blk", "elt", ["mod"]],
+      ["blk", undefined, ["modName", "modValue"]],
+      ["blk", "elt", ["modName", "modValue"]]
+    ];
+    for (const value of values) {
+      expect(validateBemVector(value)).toEqual({ value });
+    }
+  });
+});
+
+describe("validateBemString()", () => {
+  describe("validation fails when 'bemString'", () => {
+    it("is not a string", () => {
+      const value = 42;
+      expect(validateBemString(value)).toEqual({
+        error: "BEM string: must be a string but it doesn't -- number 42",
+        value
+      });
+    });
+
+    it("is a blank string", () => {
+      const values = ["", " "];
+      for (const value of values) {
+        expect(validateBemString(value)).toEqual({
+          error:
+            "BEM string: BEM block: BEM name: must conform constraints but " +
+            `it doesn't -- string ${value}`,
+          value
+        });
+      }
+    });
+
+    it("have more than one BEM modifier", () => {
+      const value = "blk--mod1--mod2_2";
+      expect(validateBemString(value)).toEqual({
+        error:
+          "BEM string: can have only one BEM modifier but 2 of them " +
+          "found -- mod1, mod2_2",
+        value
+      });
+    });
+
+    describe("BEM modifier", () => {
+      it("have more than one BEM modifier values", () => {
+        const value = "blk--mod_a_b";
+        expect(validateBemString(value)).toEqual({
+          error:
+            "BEM string: BEM modifier: can have only one BEM modifier " +
+            "value but it doesn't -- mod a, b",
+          value
+        });
+      });
+
+      it("BEM modifier's name is not valid", () => {
+        const value = "blk--mod@name_val";
+        expect(validateBemString(value)).toEqual({
+          error:
+            "BEM string: BEM modifier: BEM modifier's name: BEM name: must " +
+            "conform constraints but it doesn't -- string mod@name",
+          value
+        });
+      });
+
+      it("BEM modifier's value is not valid", () => {
+        const value = "blk--mod-name_val-";
+        expect(validateBemString(value)).toEqual({
+          error:
+            "BEM string: BEM modifier: optional BEM modifier's value: BEM " +
+            "value: must conform constraints but it doesn't -- string val-",
+          value
+        });
+      });
+    });
+  });
+
+  it("have more than one BEM element", () => {
+    const value = "blk__elt1__elt2__elt3";
+    expect(validateBemString(value)).toEqual({
+      error:
+        "BEM string: can have only one BEM element but 3 of them found -- " +
+        "elt1, elt2, elt3",
+      value
+    });
+  });
+
+  it("BEM element is not valid", () => {
+    const value = "blk__elt2-";
+    expect(validateBemString(value)).toEqual({
+      error:
+        "BEM string: BEM element: BEM name: must conform constraints but it " +
+        "doesn't -- string elt2-",
+      value
+    });
+  });
+
+  it("BEM block is not valid", () => {
+    const values = ["blk-", "1blk", "blk_1"];
+    for (const value of values) {
+      expect(validateBemString(value)).toEqual({
+        error:
+          `BEM string: BEM block: BEM name: must conform constraints but it ` +
+          `doesn't -- string ${value}`,
+        value
+      });
+    }
+  });
+
+  it("validation succeeds when 'bemString' is valid", () => {
+    const values = [
+      "blk",
+      "blk__elt",
+      "blk--mod",
+      "blk__elt--mod",
+      "blk--mod-name_mod-value",
+      "blk__elt--mod-name_mod-value"
+    ];
+    for (const value of values) {
+      expect(validateBemString(value)).toEqual({ value });
+    }
+  });
+});
+
+describe("validateBemStructure()", () => {
+  it("validates BEM string", () => {
+    const invalidValue = "1";
+    expect(validateBemStructure(invalidValue)).toEqual({
+      error:
+        "BEM structure: BEM string: BEM block: BEM name: must conform " +
+        "constraints but it doesn't -- string 1",
+      value: invalidValue
+    });
+
+    const validValue = "block__elt--mod";
+    expect(validateBemStructure(validValue)).toEqual({
+      value: validValue
+    });
+  });
+
+  it("validates BEM vector", () => {
+    const invalidValue = ["block", "1"];
+    expect(validateBemStructure(invalidValue)).toEqual({
+      error:
+        "BEM structure: BEM vector: BEM element: BEM name: must conform " +
+        "constraints but it doesn't -- string 1",
+      value: invalidValue
+    });
+
+    const validValue = ["block", "elt", ["mod"]];
+    expect(validateBemStructure(validValue)).toEqual({
+      value: validValue
+    });
+  });
+
+  it("validates BEM object", () => {
+    const invalidValue = { blk: "blk", elt: "1", mod: ["mod"] };
+    expect(validateBemStructure(invalidValue)).toEqual({
+      error:
+        "BEM structure: BEM object: BEM element: BEM name: must conform " +
+        "constraints but it doesn't -- string 1",
+      value: invalidValue
+    });
+
+    const validValue = { blk: "blk", elt: "elt", mod: ["mod"] };
+    expect(validateBemStructure(validValue)).toEqual({ value: validValue });
+  });
+});
+
 // describe("toBemObject()", () => {
 //   const bemObj: BemObject = {
 //     blk: "foo",
