@@ -515,6 +515,7 @@ export function validateBemStructure(bemStructure) {
  *
  * @param {BemStructure} bemStructure
  * @returns {BemObject}
+ * @throws {Error} Throws on invalid input.
  */
 export function toBemObject(bemStructure) {
   const { error } = validateBemStructure(bemStructure);
@@ -530,21 +531,32 @@ export function toBemObject(bemStructure) {
     const [blkAndEltPart, modPart] = bemStructure.split("--");
     const [blk, elt] = blkAndEltPart.split("__");
 
-    const bemObj = { blk, elt };
+    const bemObj = { blk };
+
+    if (elt) {
+      bemObj.elt = elt;
+    }
+
     if (modPart) {
-      bemObj.mod = modPart.split("_").filter(is.nonEmptyString);
+      bemObj.mod = modPart.split("_");
     }
 
     return bemObj;
   }
 
-  return { blk: bemStructure[0], elt: bemStructure[1], mod: bemStructure[2] };
+  // From BEM vector.
+  return {
+    blk: bemStructure[0],
+    elt: bemStructure[1],
+    mod: bemStructure[2]
+  };
 }
 
 /**
  *
  * @param {BemStructure} bemStructure
  * @returns {BemString}
+ * @throws {Error} Throws on invalid input.
  */
 export function toBemString(bemStructure) {
   const { error } = validateBemStructure(bemStructure);
@@ -567,7 +579,7 @@ export function toBemString(bemStructure) {
   }
 
   if (mod) {
-    let [modName, modValue] = mod;
+    const [modName, modValue] = mod;
 
     bemStr += `--${modName}`;
 
@@ -583,6 +595,7 @@ export function toBemString(bemStructure) {
  *
  * @param {BemStructure} bemStructure
  * @returns {BemVector}
+ * @throws {Error} Throws on invalid input.
  */
 export function toBemVector(bemStructure) {
   const { error } = validateBemStructure(bemStructure);
@@ -627,13 +640,12 @@ export class BemBase {
    * @param {boolean} [options.frozen=false] Changes not allowed when `true`
    */
   constructor(initializer, options) {
-    const { frozen = false } = options || {};
     const { blk, elt, mod } = toBemObject(initializer);
-
     this.#blk = blk;
     this.#elt = elt;
     this.#mod = mod;
 
+    const { frozen = false } = options || {};
     this.#frozen = frozen;
   }
 
@@ -661,6 +673,7 @@ export class BemBase {
   /**
    *
    * @param {BemBlock} bemBlock
+   * @throws {Error} Throws on invalid input or if instance is frozen.
    */
   set blk(bemBlock) {
     this.#throwIfFrozen("failed to set block part");
@@ -699,6 +712,7 @@ export class BemBase {
   /**
    *
    * @param {BemElement|undefined} bemElement
+   * @throws {Error} Throws on invalid input or if instance is frozen.
    */
   set elt(bemElement) {
     this.#throwIfFrozen("failed to set element part");
@@ -737,6 +751,7 @@ export class BemBase {
   /**
    *
    * @param {BemModifier|undefined} bemModifier
+   * @throws {Error} Throws on invalid input or if instance is frozen.
    */
   set mod(bemModifier) {
     this.#throwIfFrozen("failed to set modifier part");

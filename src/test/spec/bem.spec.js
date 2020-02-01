@@ -382,7 +382,7 @@ describe("validateBemObject()", () => {
 
 describe("validateBemVector()", () => {
   describe("validation fails when 'bemVector'", () => {
-    it("is not an array", function() {
+    it("is not an array", () => {
       const error =
         "BEM vector: must be an array of one, two or three elements but it " +
         "doesn't -- string foo";
@@ -390,7 +390,7 @@ describe("validateBemVector()", () => {
       expect(validateBemVector(value)).toEqual({ error, value });
     });
 
-    it("is an array with wrong number of elements", function() {
+    it("is an array with wrong number of elements", () => {
       const error =
         "BEM vector: must be an array of one, two or three elements but it " +
         "doesn't -- Array foo,bar,buz,foobar";
@@ -616,220 +616,241 @@ describe("validateBemStructure()", () => {
   });
 });
 
-// describe("toBemObject()", () => {
-//   const bemObj: BemObject = {
-//     blk: "foo",
-//     elt: "bar",
-//     mod: ["fiz", "buz"]
-//   };
-//
-//   it("returns BEM object as-is", () => {
-//     expect(toBemObject(bemObj)).toBe(bemObj);
-//   });
-//
-//   it("converts BEM string to BEM object", () => {
-//     expect(toBemObject("foo__bar--fiz_buz")).toEqual(bemObj);
-//   });
-//
-//   it("converts BEM vector to BEM object", () => {
-//     expect(toBemObject(["foo", "bar", ["fiz", "buz"]])).toEqual(bemObj);
-//   });
-// });
-//
-// describe("toBemString()", () => {
-//   const bemStr = "foo__bar--fiz_buz";
-//
-//   it("returns BEM string as-is", () => {
-//     expect(toBemString(bemStr)).toBe(bemStr);
-//   });
-//
-//   it("converts BEM object to BEM string", () => {
-//     expect(
-//       toBemString({ blk: "foo", elt: "bar", mod: ["fiz", "buz"] })
-//     ).toEqual(bemStr);
-//   });
-//
-//   it("converts BEM vector to BEM string", () => {
-//     expect(toBemString(["foo", "bar", ["fiz", "buz"]])).toEqual(bemStr);
-//   });
-// });
-//
-// describe("toBemVector()", () => {
-//   const bemVec: BemVector = ["foo", "bar", ["fiz", "buz"]];
-//
-//   it("returns BEM vector as-is", () => {
-//     expect(toBemVector(bemVec)).toBe(bemVec);
-//   });
-//
-//   it("converts BEM object to BEM vector", () => {
-//     expect(
-//       toBemVector({ blk: "foo", elt: "bar", mod: ["fiz", "buz"] })
-//     ).toEqual(bemVec);
-//   });
-//
-//   it("converts BEM string to BEM vector", () => {
-//     expect(toBemVector("foo__bar--fiz_buz")).toEqual(bemVec);
-//   });
-// });
-//
-// describe("BemBase class", () => {
-//   describe("#blk getter", () => {
-//     it("returns block part of instance", () => {
-//       expect(new BemBase("foo").blk).toEqual("foo");
-//     });
-//   });
-//
-//   describe("#blk setter", () => {
-//     it("throws when instance is frozen", () => {
-//       const bemBase = new BemBase("foo").freeze();
-//       expect(() => (bemBase.blk = "fiz")).toThrowError(/is frozen/);
-//     });
-//
-//     it("throws on invalid value", () => {
-//       const bemBase = new BemBase("foo");
-//       expect(() => (bemBase.blk = "1")).toThrowError(/BEM block/);
-//     });
-//
-//     it("sets new value", () => {
-//       const bemBase = new BemBase("foo");
-//       bemBase.blk = "fiz";
-//       expect(bemBase.blk).toEqual("fiz");
-//     });
-//   });
-//
-//   describe("#setBlk()", () => {
-//     it("sets new value and returns this", () => {
-//       const bemBase = new BemBase("foo");
-//       const result = bemBase.setBlk("fiz");
-//       expect(bemBase.blk).toEqual("fiz");
-//       expect(result).toBe(bemBase);
-//     });
-//   });
-//
-//   describe("#elt getter", () => {
-//     it("returns element part of instance", () => {
-//       expect(new BemBase("foo__bar").elt).toEqual("bar");
-//     });
-//   });
-//
-//   describe("#elt setter", () => {
-//     it("throws when instance is frozen", () => {
-//       const bemBase = new BemBase("foo__bar").freeze();
-//       expect(() => (bemBase.elt = "biz")).toThrowError(/is frozen/);
-//     });
-//
-//     it("throws on invalid value", () => {
-//       const bemBase = new BemBase("foo__bar");
-//       expect(() => (bemBase.elt = "1")).toThrowError(/BEM element/);
-//     });
-//
-//     it("sets new value", () => {
-//       const bemBase = new BemBase("foo__bar");
-//       bemBase.elt = "biz";
-//       expect(bemBase.elt).toEqual("biz");
-//     });
-//   });
-//
-//   describe("#setElt()", () => {
-//     it("sets new value and returns this", () => {
-//       const bemBase = new BemBase("foo__bar");
-//       const result = bemBase.setElt("biz");
-//       expect(bemBase.elt).toEqual("biz");
-//       expect(result).toBe(bemBase);
-//     });
-//   });
-//
-//   describe("#mod getter", () => {
-//     it("returns modifier part of instance", () => {
-//       expect(new BemBase("foo__bar--uno").mod).toEqual(["uno"]);
-//       expect(new BemBase("foo__bar--uno_1").mod).toEqual(["uno", "1"]);
-//     });
-//   });
-//
-//   describe("#mod setter", () => {
-//     it("throws when instance is frozen", () => {
-//       const bemBase = new BemBase("foo__bar--uno").freeze();
-//       expect(() => (bemBase.mod = ["dos"])).toThrowError(/is frozen/);
-//     });
-//
-//     it("throws on invalid value", () => {
-//       const bemBase = new BemBase("foo__bar--uno");
-//       expect(() => (bemBase.mod = ["1"])).toThrowError(/BEM modifier's name/);
-//       expect(() => (bemBase.mod = ["dos", "-1-"])).toThrowError(
-//         /BEM modifier's value/
-//       );
-//     });
-//
-//     it("sets new value", () => {
-//       const bemBase = new BemBase("foo__bar--uno");
-//       bemBase.mod = ["dos", "2"];
-//       expect(bemBase.mod).toEqual(["dos", "2"]);
-//     });
-//   });
-//
-//   describe("#setMod()", () => {
-//     it("sets new value and returns this", () => {
-//       const bemBase = new BemBase("foo__bar--uno");
-//       const result = bemBase.setMod(["dos"]);
-//       expect(bemBase.mod).toEqual(["dos"]);
-//       expect(result).toBe(bemBase);
-//     });
-//   });
-//
-//   describe("#frozen getter", () => {
-//     it("returns correct value", () => {
-//       const bemBase = new BemBase("foo");
-//       expect(bemBase.frozen).toBe(false);
-//
-//       const frozenBemBase = new BemBase("foo", { frozen: true });
-//       expect(frozenBemBase.frozen).toBe(true);
-//     });
-//   });
-//
-//   describe("#freeze()", () => {
-//     it("freezes instance and returns this", () => {
-//       const bemBase = new BemBase("foo");
-//       expect(bemBase.frozen).toBe(false);
-//
-//       const result = bemBase.freeze();
-//       expect(bemBase.frozen).toBe(true);
-//       expect(result).toBe(bemBase);
-//     });
-//   });
-//
-//   describe("#toBemObject()", () => {
-//     it("returns correct value", () => {
-//       const bemBase = new BemBase("foo__bar--uno_1");
-//       expect(bemBase.toBemObject()).toEqual({
-//         blk: "foo",
-//         elt: "bar",
-//         mod: ["uno", "1"]
-//       });
-//     });
-//   });
-//
-//   describe("#toBemString()", () => {
-//     it("returns correct value", () => {
-//       const bemBase = new BemBase("foo__bar--uno_1");
-//       expect(bemBase.toBemString()).toEqual("foo__bar--uno_1");
-//     });
-//   });
-//
-//   describe("#toBemVector()", () => {
-//     it("returns correct value", () => {
-//       const bemBase = new BemBase("foo__bar--uno_1");
-//       expect(bemBase.toBemVector()).toEqual(["foo", "bar", ["uno", "1"]]);
-//     });
-//   });
-//
-//   describe("#clone()", () => {
-//     it("returns new unfrozen instance with same block, element and modifier parts", () => {
-//       const bemBase = new BemBase("foo__bar--uno_1");
-//       bemBase.freeze();
-//       const clonedBemBase = bemBase.clone();
-//       expect(clonedBemBase.frozen).toBe(false);
-//       expect(clonedBemBase.toString()).toEqual("foo__bar--uno_1");
-//       expect(clonedBemBase).not.toBe(bemBase);
-//     });
-//   });
-// });
+describe("toBemObject()", () => {
+  it("throws on invalid input", () => {
+    const values = [{}, "", []];
+    for (const value of values) {
+      expect(() => toBemObject(value)).toThrowError(Error);
+    }
+  });
+
+  const bemObj = {
+    blk: "foo",
+    elt: "bar",
+    mod: ["fiz", "buz"]
+  };
+
+  it("returns BEM object as-is", () => {
+    expect(toBemObject(bemObj)).toBe(bemObj);
+  });
+
+  it("converts BEM string to BEM object", () => {
+    expect(toBemObject("foo__bar--fiz_buz")).toEqual(bemObj);
+  });
+
+  it("converts BEM vector to BEM object", () => {
+    expect(toBemObject(["foo", "bar", ["fiz", "buz"]])).toEqual(bemObj);
+  });
+});
+
+describe("toBemString()", () => {
+  it("throws on invalid input", () => {
+    const values = [{}, "", []];
+    for (const value of values) {
+      expect(() => toBemString(value)).toThrowError(Error);
+    }
+  });
+
+  const bemStr = "foo__bar--fiz_buz";
+
+  it("returns BEM string as-is", () => {
+    expect(toBemString(bemStr)).toBe(bemStr);
+  });
+
+  it("converts BEM object to BEM string", () => {
+    expect(
+      toBemString({ blk: "foo", elt: "bar", mod: ["fiz", "buz"] })
+    ).toEqual(bemStr);
+  });
+
+  it("converts BEM vector to BEM string", () => {
+    expect(toBemString(["foo", "bar", ["fiz", "buz"]])).toEqual(bemStr);
+  });
+});
+
+describe("toBemVector()", () => {
+  it("throws on invalid input", () => {
+    const values = [{}, "", []];
+    for (const value of values) {
+      expect(() => toBemVector(value)).toThrowError(Error);
+    }
+  });
+
+  const bemVec = ["foo", "bar", ["fiz", "buz"]];
+
+  it("returns BEM vector as-is", () => {
+    expect(toBemVector(bemVec)).toBe(bemVec);
+  });
+
+  it("converts BEM object to BEM vector", () => {
+    expect(
+      toBemVector({ blk: "foo", elt: "bar", mod: ["fiz", "buz"] })
+    ).toEqual(bemVec);
+  });
+
+  it("converts BEM string to BEM vector", () => {
+    expect(toBemVector("foo__bar--fiz_buz")).toEqual(bemVec);
+  });
+});
+
+describe("BemBase class", () => {
+  describe("#blk getter", () => {
+    it("returns block part of instance", () => {
+      expect(new BemBase("foo").blk).toEqual("foo");
+    });
+  });
+
+  describe("#blk setter", () => {
+    it("throws when instance is frozen", () => {
+      const bemBase = new BemBase("foo").freeze();
+      expect(() => (bemBase.blk = "fiz")).toThrowError(/is frozen/);
+    });
+
+    it("throws on invalid value", () => {
+      const bemBase = new BemBase("foo");
+      expect(() => (bemBase.blk = "1")).toThrowError(/BEM block/);
+    });
+
+    it("sets new value", () => {
+      const bemBase = new BemBase("foo");
+      bemBase.blk = "fiz";
+      expect(bemBase.blk).toEqual("fiz");
+    });
+  });
+
+  describe("#setBlk()", () => {
+    it("sets new value and returns this", () => {
+      const bemBase = new BemBase("foo");
+      const result = bemBase.setBlk("fiz");
+      expect(bemBase.blk).toEqual("fiz");
+      expect(result).toBe(bemBase);
+    });
+  });
+
+  describe("#elt getter", () => {
+    it("returns element part of instance", () => {
+      expect(new BemBase("foo__bar").elt).toEqual("bar");
+    });
+  });
+
+  describe("#elt setter", () => {
+    it("throws when instance is frozen", () => {
+      const bemBase = new BemBase("foo__bar").freeze();
+      expect(() => (bemBase.elt = "biz")).toThrowError(/is frozen/);
+    });
+
+    it("throws on invalid value", () => {
+      const bemBase = new BemBase("foo__bar");
+      expect(() => (bemBase.elt = "1")).toThrowError(/BEM element/);
+    });
+
+    it("sets new value", () => {
+      const bemBase = new BemBase("foo__bar");
+      bemBase.elt = "biz";
+      expect(bemBase.elt).toEqual("biz");
+    });
+  });
+
+  describe("#setElt()", () => {
+    it("sets new value and returns this", () => {
+      const bemBase = new BemBase("foo__bar");
+      const result = bemBase.setElt("biz");
+      expect(bemBase.elt).toEqual("biz");
+      expect(result).toBe(bemBase);
+    });
+  });
+
+  describe("#mod getter", () => {
+    it("returns modifier part of instance", () => {
+      expect(new BemBase("foo__bar--uno").mod).toEqual(["uno"]);
+      expect(new BemBase("foo__bar--uno_1").mod).toEqual(["uno", "1"]);
+    });
+  });
+
+  describe("#mod setter", () => {
+    it("throws when instance is frozen", () => {
+      const bemBase = new BemBase("foo__bar--uno").freeze();
+      expect(() => (bemBase.mod = ["dos"])).toThrowError(/is frozen/);
+    });
+
+    it("throws on invalid value", () => {
+      const bemBase = new BemBase("foo__bar--uno");
+      expect(() => (bemBase.mod = ["1"])).toThrowError(/BEM modifier's name/);
+      expect(() => (bemBase.mod = ["dos", "-1-"])).toThrowError(
+        /BEM modifier's value/
+      );
+    });
+
+    it("sets new value", () => {
+      const bemBase = new BemBase("foo__bar--uno");
+      bemBase.mod = ["dos", "2"];
+      expect(bemBase.mod).toEqual(["dos", "2"]);
+    });
+  });
+
+  describe("#setMod()", () => {
+    it("sets new value and returns this", () => {
+      const bemBase = new BemBase("foo__bar--uno");
+      const result = bemBase.setMod(["dos"]);
+      expect(bemBase.mod).toEqual(["dos"]);
+      expect(result).toBe(bemBase);
+    });
+  });
+
+  describe("#frozen getter", () => {
+    it("returns correct value", () => {
+      const bemBase = new BemBase("foo");
+      expect(bemBase.frozen).toBe(false);
+
+      const frozenBemBase = new BemBase("foo", { frozen: true });
+      expect(frozenBemBase.frozen).toBe(true);
+    });
+  });
+
+  describe("#freeze()", () => {
+    it("freezes instance and returns this", () => {
+      const bemBase = new BemBase("foo");
+      expect(bemBase.frozen).toBe(false);
+
+      const result = bemBase.freeze();
+      expect(bemBase.frozen).toBe(true);
+      expect(result).toBe(bemBase);
+    });
+  });
+
+  describe("#toBemObject()", () => {
+    it("returns correct value", () => {
+      const bemBase = new BemBase("foo__bar--uno_1");
+      expect(bemBase.toBemObject()).toEqual({
+        blk: "foo",
+        elt: "bar",
+        mod: ["uno", "1"]
+      });
+    });
+  });
+
+  describe("#toBemString()", () => {
+    it("returns correct value", () => {
+      const bemBase = new BemBase("foo__bar--uno_1");
+      expect(bemBase.toBemString()).toEqual("foo__bar--uno_1");
+    });
+  });
+
+  describe("#toBemVector()", () => {
+    it("returns correct value", () => {
+      const bemBase = new BemBase("foo__bar--uno_1");
+      expect(bemBase.toBemVector()).toEqual(["foo", "bar", ["uno", "1"]]);
+    });
+  });
+
+  describe("#clone()", () => {
+    it("returns new unfrozen instance with same block, element and modifier parts", () => {
+      const bemBase = new BemBase("foo__bar--uno_1");
+      bemBase.freeze();
+      const clonedBemBase = bemBase.clone();
+      expect(clonedBemBase.frozen).toBe(false);
+      expect(clonedBemBase.toString()).toEqual("foo__bar--uno_1");
+      expect(clonedBemBase).not.toBe(bemBase);
+    });
+  });
+});
