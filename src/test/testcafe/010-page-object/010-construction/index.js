@@ -181,10 +181,27 @@ test.page(buildPagePath("040"))(
   }
 );
 
-// TODO: Test error thrown on invalid input.
 test.page(buildPagePath("050"))(
   "050 Page object can be created using built-in 'cid' transformation",
   async t => {
+    let isThrown;
+
+    // -- Check error thrown on invalid input --
+
+    isThrown = false;
+    try {
+      new WidgetA(" ").selector; // selector initialization id done on first access
+    } catch (e) {
+      isThrown = true;
+      await t
+        .expect(e.message)
+        .eql(
+          "WidgetA: built-in 'cid' transformation must be non-blank string " +
+            "but it doesn't -- string  "
+        );
+    }
+    await t.expect(isThrown).ok();
+
     const widgetA2 = new WidgetA("101");
     await t.expect(widgetA2.selector.count).eql(1);
     await t
@@ -194,7 +211,7 @@ test.page(buildPagePath("050"))(
 
     // -- Check failure --
 
-    let isThrown = false;
+    isThrown = false;
     try {
       await t.expect(widgetA2.selector.textContent).eql("Widget A -- 1");
     } catch (e) {
@@ -207,10 +224,27 @@ test.page(buildPagePath("050"))(
   }
 );
 
-// TODO: Test error thrown on invalid input.
 test.page(buildPagePath("060"))(
   "060 Page object can be created using built-in 'idx' transformation",
   async t => {
+    let isThrown;
+
+    // -- Check error thrown on invalid input --
+
+    isThrown = false;
+    try {
+      new WidgetA(-1).selector; // selector initialization id done on first access
+    } catch (e) {
+      isThrown = true;
+      await t
+        .expect(e.message)
+        .eql(
+          "WidgetA: built-in 'idx' transformation must be an integer " +
+            "greater than or equal zero but it doesn't -- number -1"
+        );
+    }
+    await t.expect(isThrown).ok();
+
     const widgetA1 = new WidgetA(0);
     await t.expect(widgetA1.selector.count).eql(1);
     await t.expect(widgetA1.selector.classNames).eql(["widgetA"]);
@@ -222,7 +256,7 @@ test.page(buildPagePath("060"))(
 
     // -- Check failure --
 
-    let isThrown = false;
+    isThrown = false;
     try {
       await t.expect(widgetA3.selector.textContent).eql("abc");
     } catch (e) {
