@@ -1,5 +1,5 @@
 import is from "@sindresorhus/is";
-import { Selector } from "testcafe";
+import { Selector, t } from "testcafe";
 import { BemBase } from "./bem";
 import { typeAndValue } from "./util";
 
@@ -265,5 +265,89 @@ export class PageObject {
    */
   transformSelector(selectorTransformationAlias, selector, bemBase) {
     return selector;
+  }
+
+  /**
+   * Asserts that page object exists -- its selector returns exactly one DOM
+   * element.
+   *
+   * @param {Object} [options] Options.
+   * @param {boolean} [options.hover=false] When `true` and `isNot` is `false` then {@link PageObject#hover} would be called on page object.
+   * @param {boolean} [options.isNot=false] When `true` page object's selector must not exist (return zero DOM elements) to pass assertion.
+   * @param {string} [options.message] Custom message for error.
+   * @returns {Promise<void>}
+   */
+  async expectIsExist(options) {
+    const { hover = false, isNot = false, message } = options || {};
+    const elementsCount = await this.selector.count;
+
+    // ---------------------------------------------------------------------------
+    // Handling case when selector must not exist (return zero DOM elements)
+    // ---------------------------------------------------------------------------
+
+    if (isNot) {
+      await t
+        .expect(this.selector.exists)
+        .notOk(
+          is.string(message) && message.trim().length > 0
+            ? message
+            : `${this.displayName}: selector must not return DOM elements ` +
+                `but it does -- ${elementsCount} returned`
+        );
+      return;
+    }
+
+    // ---------------------------------------------------------------------------
+    // Handling case when selector must exist (return exactly one DOM element)
+    // ---------------------------------------------------------------------------
+
+    await t
+      .expect(elementsCount)
+      .eql(
+        1,
+        is.string(message) && message.trim().length > 0
+          ? message
+          : `${this.displayName}: selector must return exactly one DOM ` +
+              `element but it doesn't -- ${elementsCount} returned`
+      );
+
+    if (hover && !isNot) {
+      await this.hover();
+    }
+  }
+
+  /**
+   * Asserts that page object not exists -- its selector returns zero DOM
+   * elements.
+   *
+   * @param {Object} [options] Options.
+   * @param {string} [options.message] Custom message for error.
+   * @returns {Promise<void>}
+   */
+  async expectIsNotExist(options) {
+    options = options || {};
+    await this.expectIsExist({ isNot: true, message: options.message });
+  }
+
+  /**
+   * Hovers on page object's selector.
+   *
+   * When selector returns more than one DOM element hover is done on first.
+   *
+   * Throws when selector doesn't return DOM elements.
+   *
+   * @param {Object} [options] Options.
+   * @param {Selector} [options.selector=this.selector] Selector to hover on.
+   * @param {number} [options.wait] Wait specified number of milliseconds after hover is done.
+   * @returns {Promise<void>}
+   */
+  async hover(options) {
+    const { selector = this.selector, wait } = options || {};
+
+    await t.hover(selector);
+
+    if (wait) {
+      await t.wait(wait);
+    }
   }
 }
