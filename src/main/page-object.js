@@ -350,4 +350,24 @@ export class PageObject {
       await t.wait(wait);
     }
   }
+
+  /**
+   * Returns page object's and its ancestors' state parts mappings merged into
+   * one. State parts mappings is an object where keys are state part names and
+   * values are state part mode -- `true` for read-write, `false` for
+   * read-only.
+   *
+   * Page object that have additional state parts must override this method
+   * using two steps:
+   * 1. call `super.getStateParts` to get ancestors' state parts
+   * 2. merge additional state parts to result of call above
+   *
+   * @returns {Object<string, boolean>}
+   *
+   * @example
+   * new TextInput().getStateParts() // { cid: false, value: true }
+   */
+  getStateParts() {
+    return { cid: false };
+  }
 }
