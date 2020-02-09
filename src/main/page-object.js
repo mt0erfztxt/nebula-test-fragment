@@ -399,6 +399,52 @@ export class PageObject {
   }
 
   /**
+   * Returns state part with specified name.
+   *
+   * @param {string|string[]} statePartName Name of state part. When it's a string then it would be used as state part name and also as name of attribute/BEM modifier that holds that part in page object's selector DOM element. When names differ, for example a case of data attribute, an array of two non-blank strings -- a state part name and attribute/BEM modifier name, can be passed.
+   * @param {Object} [options] Options.
+   * @param {boolean} [options.simple=true] If `true` a boolean value is assumed.
+   * @param {string} [options.src='bemModifier'] The source of state part. One of 'bemModifier' or 'attribute' of DOM element returned by page object's selector.
+   * @returns {Promise<boolean | string | undefined>}
+   *
+   * @example
+   * await this.getStatePartHelper("cid", { simple: false }) // returns promise resolved with 'cid' of widget
+   * await this.getStatePartHelper("disabled") // returns promise resolved with `true` when page object has 'disabled' BEM modifier
+   * await this.getStatePartHelper("name", { simple: false, src: "attribute" }) // returns promise resolved with value of 'name' attribute
+   *
+   */
+  async getStatePartHelper(statePartName, options) {
+    // TODO: Handle `statePartName` as array
+    const { simple = false, src = "bemModifier" } = options || {};
+    if (src === "bemModifier") {
+      if (simple) {
+        return this.selector.hasClass(
+          this.bemBase
+            .clone()
+            .setMod([statePartName])
+            .toString()
+        );
+      } else {
+        const modifiers = await this.getBemModifiers(statePartName);
+        return modifiers.length ? modifiers[0][1] : undefined;
+      }
+    } else {
+      return simple
+        ? this.selector.hasAttribute(statePartName)
+        : this.selector.getAttribute(statePartName);
+    }
+  }
+
+  /**
+   * Returns 'cid' part of page object's state.
+   *
+   * @returns {Promise<string | undefined>}
+   */
+  async getCid() {
+    return this.getStatePartHelper("cid", { simple: false });
+  }
+
+  /**
    * Returns page object's and its ancestors' state parts mappings merged into
    * one. State parts mappings is an object where keys are state part names and
    * values are state part mode -- `true` for read-write, `false` for
@@ -416,5 +462,67 @@ export class PageObject {
    */
   getStateParts() {
     return { cid: false };
+  }
+
+  /**
+   * Returns page object's state.
+   *
+   * @param {...string} statePartNames Names of state parts to include.
+   * @returns {Promise<Object>}
+   * @throws {Error} Throws on invalid input.
+   */
+  async getState(...statePartNames) {
+    // Check input validity.
+    statePartNames.forEach((statePartName, idx) => {
+      if (
+        !is.string(statePartName) ||
+        is.emptyStringOrWhitespace(statePartName)
+      ) {
+        throw new Error(
+          `${this.displayName}: item at index ${idx} in 'statePartNames' must ` +
+            `be a non-blank string but it doesn't -- ` +
+            typeAndValue(statePartName)
+        );
+      }
+    });
+
+    const allStatePartNames = Object.keys(this.getStateParts());
+
+    // Check input meaningfulness.
+    statePartNames.forEach((statePartName, idx) => {
+      if (!allStatePartNames.includes(statePartName)) {
+        throw new Error(
+          `${this.displayName}: item '${statePartName}' at index ${idx} in ` +
+            `'statePartNames' must be a supported state part name but it ` +
+            `doesn't -- ${allStatePartNames.sort()}`
+        );
+      }
+    });
+
+    const isAllStatePartsRequested = statePartNames.length === 0;
+    const statePartNameToGetterNameMapping = {};
+    allStatePartNames.forEach(statePartName => {
+      if (isAllStatePartsRequested || statePartNames.includes(statePartName)) {
+        const statePartGetterName = `get${pascalCase(statePartName)}`;
+
+        if (!is.function_(this[statePartGetterName])) {
+          throw new Error(
+            `${this.displayName}: must have '${statePartGetterName}' method ` +
+              `but it doesnt`
+          );
+        }
+
+        statePartNameToGetterNameMapping[statePartName] = statePartGetterName;
+      }
+    });
+
+    const state = {};
+    Object.entries(statePartNameToGetterNameMapping).forEach(
+      ([statePartName, statePartGetterName]) => {
+        state[statePartName] = this[statePartGetterName]();
+      }
+    );
+
+    return state;
   }
 }
