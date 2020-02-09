@@ -1,6 +1,7 @@
 import is from "@sindresorhus/is";
 import { Selector, t } from "testcafe";
-import { BemBase } from "./bem";
+import { pascalCase } from "change-case";
+import { BemBase, validateBemModifierName } from "./bem";
 import { typeAndValue } from "./util";
 
 /**
@@ -349,6 +350,52 @@ export class PageObject {
     if (wait) {
       await t.wait(wait);
     }
+  }
+
+  /**
+   * Returns an array of BEM modifiers that DOM element, returned by page
+   * object's selector, have.
+   *
+   * @param {BemModifierName} [bemModifierName] If `true` then only BEM modifiers with that name would be in resulting array.
+   * @returns {Promise<BemModifier[]>}
+   *
+   * @example
+   * // Having page object Foo in HTML
+   * // <div className="foo foo-cid_1 foo--bar">Foo</div>
+   * // a call to
+   * await this.getBemModifiers(); // returns [["cid", "1"], ["foo"]]
+   * await this.getBemModifiers("cid"); // returns [["cid", "1"]]
+   */
+  async getBemModifiers(bemModifierName) {
+    /**
+     * @type {BemModifierName}
+     */
+    let bmn;
+    if (is.undefined(bemModifierName)) {
+      bmn = "";
+    } else {
+      const { error, value } = validateBemModifierName(bemModifierName);
+      if (error) {
+        throw new Error(error);
+      }
+
+      bmn = value;
+    }
+
+    const classNamePrefix =
+      this.bemBase
+        .clone()
+        .setMod()
+        .toString() + `--${bmn}`;
+    return (await this.selector.classNames).reduce(
+      (acc, className) => {
+        if (className.startsWith(classNamePrefix)) {
+          acc.push(new BemBase(className).mod);
+        }
+        return acc;
+      },
+      /** @type {BemModifier[]}  */ []
+    );
   }
 
   /**
