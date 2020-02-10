@@ -16,7 +16,7 @@ test("010 work for simple attribute", async t => {
 
   // -- Checks --
 
-  const disabledAttrVal = await textInput.getStatePartHelper("disabled", {
+  const disabledAttrVal = await textInput.getStatePartHelper("data-disabled", {
     simple: true,
     src: "attribute"
   });
@@ -90,6 +90,8 @@ test("040 work for full BEM modifier", async t => {
   });
   await t.expect(mod3BemModVal).notEql("2");
 
-  const mod4BemModVal = await textInput.getStatePartHelper("mod4");
+  const mod4BemModVal = await textInput.getStatePartHelper("mod4", {
+    simple: false
+  });
   await t.expect(mod4BemModVal).eql(undefined);
 });

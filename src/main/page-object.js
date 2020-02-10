@@ -399,39 +399,38 @@ export class PageObject {
   }
 
   /**
-   * Returns state part with specified name.
+   * Helper to obtain state part's value from BEM modifier or attribute of DOM
+   * element returned by page object's selector.
    *
-   * @param {string|string[]} statePartName Name of state part. When it's a string then it would be used as state part name and also as name of attribute/BEM modifier that holds that part in page object's selector DOM element. When names differ, for example a case of data attribute, an array of two non-blank strings -- a state part name and attribute/BEM modifier name, can be passed.
+   * @param {string} name A name of BEM modifier or attribute which holds state part's value.
    * @param {Object} [options] Options.
-   * @param {boolean} [options.simple=true] If `true` a boolean value is assumed.
-   * @param {string} [options.src='bemModifier'] The source of state part. One of 'bemModifier' or 'attribute' of DOM element returned by page object's selector.
-   * @returns {Promise<boolean | string | undefined>}
+   * @param {boolean} [options.simple=true] If `true` only presence of BEM modifier or attribute is checked.
+   * @param {string} [options.src='bemModifier'] The source of state part's value. One of 'bemModifier' or 'attribute'.
+   * @returns {Promise<boolean | string | undefined>} Returns state part's value.
    *
    * @example
    * await this.getStatePartHelper("cid", { simple: false }) // returns promise resolved with 'cid' of widget
    * await this.getStatePartHelper("disabled") // returns promise resolved with `true` when page object has 'disabled' BEM modifier
-   * await this.getStatePartHelper("name", { simple: false, src: "attribute" }) // returns promise resolved with value of 'name' attribute
-   *
+   * await this.getStatePartHelper("data-name", { simple: false, src: "attribute" }) // returns promise resolved with value of 'data-name' attribute
    */
-  async getStatePartHelper(statePartName, options) {
-    // TODO: Handle `statePartName` as array
-    const { simple = false, src = "bemModifier" } = options || {};
+  async getStatePartHelper(name, options) {
+    const { simple = true, src = "bemModifier" } = options || {};
     if (src === "bemModifier") {
       if (simple) {
         return this.selector.hasClass(
           this.bemBase
             .clone()
-            .setMod([statePartName])
+            .setMod([name])
             .toString()
         );
       } else {
-        const modifiers = await this.getBemModifiers(statePartName);
+        const modifiers = await this.getBemModifiers(name);
         return modifiers.length ? modifiers[0][1] : undefined;
       }
     } else {
       return simple
-        ? this.selector.hasAttribute(statePartName)
-        : this.selector.getAttribute(statePartName);
+        ? this.selector.hasAttribute(name)
+        : this.selector.getAttribute(name);
     }
   }
 
