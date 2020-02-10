@@ -43,8 +43,8 @@ class TextInput extends PageObject {
   /**
    * @returns {Object<string, boolean>}
    */
-  getStateParts() {
-    return Object.assign(super.getStateParts(), {
+  getStateSpec() {
+    return Object.assign(super.getStateSpec(), {
       disabled: false,
       value: true
     });

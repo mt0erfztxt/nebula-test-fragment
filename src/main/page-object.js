@@ -444,22 +444,24 @@ export class PageObject {
   }
 
   /**
-   * Returns page object's and its ancestors' state parts mappings merged into
-   * one. State parts mappings is an object where keys are state part names and
-   * values are state part mode -- `true` for read-write, `false` for
-   * read-only.
+   * Returns page object's state spec (includes its ancestor page objects
+   * state specs). State spec is an object where keys are state part names and
+   * values are state part specs, where state part spec is a boolean indicating
+   * whether state part is writable (`true`) or read-only (`false`).
    *
    * Page object that have additional state parts must override this method
    * using two steps:
-   * 1. call `super.getStateParts` to get ancestors' state parts
+   * 1. call `super.getStateSpec` to get ancestors' state parts
    * 2. merge additional state parts to result of call above
    *
    * @returns {Object<string, boolean>}
    *
    * @example
-   * new TextInput().getStateParts() // { cid: false, value: true }
+   * // If `TextInput` is a page object with writable state part named 'Value'
+   * // then call below return `{ cid: false, value: true }`.
+   * new TextInput().getStateSpec()
    */
-  getStateParts() {
+  getStateSpec() {
     return { cid: false };
   }
 
@@ -485,7 +487,7 @@ export class PageObject {
       }
     });
 
-    const allStatePartNames = Object.keys(this.getStateParts());
+    const allStatePartNames = Object.keys(this.getStateSpec());
 
     // Check input meaningfulness.
     statePartNames.forEach((statePartName, idx) => {
