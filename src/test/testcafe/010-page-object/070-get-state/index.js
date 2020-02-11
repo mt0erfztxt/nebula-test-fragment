@@ -77,7 +77,7 @@ test("010 throws on invalid input -- case of validity", async t => {
     await t
       .expect(e.message)
       .eql(
-        "TextInput: item at index 1 in 'statePartNames' must be a " +
+        "TextInput: item at index 1 in 'requestedStatePartNames' must be a " +
           "non-blank string but it doesn't -- boolean true"
       );
     isThrown = true;
@@ -95,8 +95,9 @@ test("020 throws on invalid input -- case of meaningfulness", async t => {
     await t
       .expect(e.message)
       .eql(
-        "TextInput: item 'foobar' at index 2 in 'statePartNames' must be a " +
-          "supported state part name but it doesn't -- cid,disabled,value"
+        "TextInput: item 'foobar' at index 2 in 'requestedStatePartNames' " +
+          "must be a supported state part name but it doesn't -- " +
+          "cid,disabled,value"
       );
     isThrown = true;
   }

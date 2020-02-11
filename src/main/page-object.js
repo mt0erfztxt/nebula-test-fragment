@@ -468,21 +468,21 @@ export class PageObject {
   /**
    * Returns page object's state.
    *
-   * @param {...string} statePartNames Names of state parts to include.
+   * @param {...string} requestedStatePartNames Names of state parts to include in returned state.
    * @returns {Promise<Object>}
    * @throws {Error} Throws on invalid input.
    */
-  async getState(...statePartNames) {
+  async getState(...requestedStatePartNames) {
     // Check input validity.
-    statePartNames.forEach((statePartName, idx) => {
+    requestedStatePartNames.forEach((requestedStatePartName, idx) => {
       if (
-        !is.string(statePartName) ||
-        is.emptyStringOrWhitespace(statePartName)
+        !is.string(requestedStatePartName) ||
+        is.emptyStringOrWhitespace(requestedStatePartName)
       ) {
         throw new Error(
-          `${this.displayName}: item at index ${idx} in 'statePartNames' must ` +
-            `be a non-blank string but it doesn't -- ` +
-            typeAndValue(statePartName)
+          `${this.displayName}: item at index ${idx} in ` +
+            `'requestedStatePartNames' must be a non-blank string but it ` +
+            `doesn't -- ${typeAndValue(requestedStatePartName)}`
         );
       }
     });
@@ -490,20 +490,34 @@ export class PageObject {
     const allStatePartNames = Object.keys(this.getStateSpec());
 
     // Check input meaningfulness.
-    statePartNames.forEach((statePartName, idx) => {
-      if (!allStatePartNames.includes(statePartName)) {
+    requestedStatePartNames.forEach((requestedStatePartName, idx) => {
+      if (!allStatePartNames.includes(requestedStatePartName)) {
         throw new Error(
-          `${this.displayName}: item '${statePartName}' at index ${idx} in ` +
-            `'statePartNames' must be a supported state part name but it ` +
-            `doesn't -- ${allStatePartNames.sort()}`
+          `${this.displayName}: item '${requestedStatePartName}' at index ` +
+            `${idx} in 'requestedStatePartNames' must be a supported state ` +
+            `part name but it doesn't -- ${allStatePartNames.sort()}`
         );
       }
     });
 
-    const isAllStatePartsRequested = statePartNames.length === 0;
-    const statePartNameToGetterNameMapping = {};
+    const isAllStatePartsRequested = requestedStatePartNames.length === 0;
+
+    /**
+     * A list of state part names to getters that retrieves their values.
+     *
+     * Array used because of ordering is needed when constructing state.
+     *
+     * @example
+     * [["cid", "getCid"], ["value", "getValue"]]
+     *
+     * @type {string[][]}
+     */
+    const statePartNameToGetterNameList = [];
     allStatePartNames.forEach(statePartName => {
-      if (isAllStatePartsRequested || statePartNames.includes(statePartName)) {
+      if (
+        isAllStatePartsRequested ||
+        requestedStatePartNames.includes(statePartName)
+      ) {
         const statePartGetterName = `get${pascalCase(statePartName)}`;
 
         if (!is.function_(this[statePartGetterName])) {
@@ -513,16 +527,22 @@ export class PageObject {
           );
         }
 
-        statePartNameToGetterNameMapping[statePartName] = statePartGetterName;
+        statePartNameToGetterNameList.push([
+          statePartName,
+          statePartGetterName
+        ]);
       }
     });
 
+    const statePartValuePromises = [];
+    statePartNameToGetterNameList.forEach(([, statePartGetterName]) => {
+      statePartValuePromises.push(this[statePartGetterName]());
+    });
+
     const state = {};
-    Object.entries(statePartNameToGetterNameMapping).forEach(
-      ([statePartName, statePartGetterName]) => {
-        state[statePartName] = this[statePartGetterName]();
-      }
-    );
+    (await Promise.all(statePartValuePromises)).forEach((v, i) => {
+      state[statePartNameToGetterNameList[i][0]] = v;
+    });
 
     return state;
   }
