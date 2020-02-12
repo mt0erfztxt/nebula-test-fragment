@@ -545,4 +545,49 @@ export class PageObject {
 
     return state;
   }
+
+  /**
+   * Sets page object's state.
+   *
+   * @param {Object} newState New state for page object. It can be full (all state parts present) or partial state and values for read-only state parts silently ignored.
+   * @returns {Promise<void>}
+   * @throws {Error} Throws on invalid input.
+   */
+  async setState(newState) {
+    // Check input validity.
+    if (!is.plainObject(newState)) {
+      throw new Error(
+        `${this.displayName}: 'newState' must be a plain object but it ` +
+          `doesn't -- ${typeAndValue(newState)}`
+      );
+    }
+
+    const stateSpec = this.getStateSpec();
+    const statePartNames = Object.keys(stateSpec);
+    const newStatePartNames = Object.keys(newState);
+
+    // Check input meaningfulness.
+    newStatePartNames.forEach(statePartName => {
+      if (!statePartNames.includes(statePartName)) {
+        throw new Error(
+          `${this.displayName}: '${statePartName}' state part is not one of ` +
+            `supported state parts -- ${statePartNames.join(",")}`
+        );
+      }
+    });
+
+    for (const statePartName in newStatePartNames) {
+      if (stateSpec[statePartName]) {
+        const statePartSetterName = `set${pascalCase(statePartName)}`;
+        if (is.function_(this[statePartSetterName])) {
+          await this[statePartSetterName](newState[statePartName]);
+        } else {
+          throw new Error(
+            `${this.displayName}: must have '${statePartSetterName}' method ` +
+              `but it doesnt`
+          );
+        }
+      }
+    }
+  }
 }
