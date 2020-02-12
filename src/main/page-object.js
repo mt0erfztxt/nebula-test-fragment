@@ -527,7 +527,7 @@ export class PageObject {
         } else {
           throw new Error(
             `${this.displayName}: must have '${statePartGetterName}' method ` +
-              `but it doesnt`
+              `but it doesn't`
           );
         }
       }
