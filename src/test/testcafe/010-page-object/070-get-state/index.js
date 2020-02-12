@@ -120,3 +120,30 @@ test("030 returns page object's state -- case of all state parts", async t => {
     value: "42"
   });
 });
+
+test("040 throws when state part getter not implemented", async t => {
+  const TextInputFoo = class extends PageObject {
+    static bemBase = "textInput";
+    static displayName = "TextInputFoo";
+
+    /**
+     * @returns {Object<string, boolean>}
+     */
+    getStateSpec() {
+      return Object.assign(super.getStateSpec(), { disabled: false });
+    }
+  };
+
+  let isThrown;
+  const textInputFoo = new TextInputFoo();
+
+  try {
+    await textInputFoo.getState();
+  } catch (e) {
+    await t
+      .expect(e.message)
+      .eql("TextInputFoo: must have 'getDisabled' method but it doesn't");
+    isThrown = true;
+  }
+  await t.expect(isThrown).ok();
+});
