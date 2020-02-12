@@ -519,18 +519,17 @@ export class PageObject {
         requestedStatePartNames.includes(statePartName)
       ) {
         const statePartGetterName = `get${pascalCase(statePartName)}`;
-
-        if (!is.function_(this[statePartGetterName])) {
+        if (is.function_(this[statePartGetterName])) {
+          statePartNameToGetterNameList.push([
+            statePartName,
+            statePartGetterName
+          ]);
+        } else {
           throw new Error(
             `${this.displayName}: must have '${statePartGetterName}' method ` +
               `but it doesnt`
           );
         }
-
-        statePartNameToGetterNameList.push([
-          statePartName,
-          statePartGetterName
-        ]);
       }
     });
 
