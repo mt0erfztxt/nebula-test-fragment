@@ -122,6 +122,7 @@ test("030 returns page object's state -- case of all state parts", async t => {
 });
 
 test("040 throws when state part getter not implemented", async t => {
+  let isThrown;
   const TextInputFoo = class extends PageObject {
     static bemBase = "textInput";
     static displayName = "TextInputFoo";
@@ -134,7 +135,7 @@ test("040 throws when state part getter not implemented", async t => {
     }
   };
 
-  let isThrown;
+  isThrown = false;
   const textInputFoo = new TextInputFoo();
 
   try {
