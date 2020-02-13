@@ -549,11 +549,15 @@ export class PageObject {
   /**
    * Sets page object's state.
    *
-   * @param {Object} newState New state for page object. It can be full (all state parts present) or partial state and values for read-only state parts silently ignored.
+   * @param {Object} [newState] New state for page object. It can be full (all state parts present) or partial state and values for read-only state parts silently ignored.
    * @returns {Promise<void>}
    * @throws {Error} Throws on invalid input.
    */
   async setState(newState) {
+    if (is.nullOrUndefined(newState)) {
+      return;
+    }
+
     // Check input validity.
     if (!is.plainObject(newState)) {
       throw new Error(
@@ -570,13 +574,13 @@ export class PageObject {
     newStatePartNames.forEach(statePartName => {
       if (!statePartNames.includes(statePartName)) {
         throw new Error(
-          `${this.displayName}: '${statePartName}' state part is not one of ` +
-            `supported state parts -- ${statePartNames.join(",")}`
+          `${this.displayName}: '${pascalCase(statePartName)}' state part ` +
+            `is not one of supported state parts -- ${statePartNames.join(",")}`
         );
       }
     });
 
-    for (const statePartName in newStatePartNames) {
+    for (const statePartName of newStatePartNames) {
       if (stateSpec[statePartName]) {
         const statePartSetterName = `set${pascalCase(statePartName)}`;
         if (is.function_(this[statePartSetterName])) {
@@ -584,7 +588,7 @@ export class PageObject {
         } else {
           throw new Error(
             `${this.displayName}: must have '${statePartSetterName}' method ` +
-              `but it doesnt`
+              `but it doesn't`
           );
         }
       }
