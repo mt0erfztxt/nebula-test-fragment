@@ -1,3 +1,4 @@
+import expect from "unexpected";
 import is from "@sindresorhus/is";
 import { Selector, t } from "testcafe";
 import { pascalCase } from "change-case";
@@ -593,5 +594,19 @@ export class PageObject {
         }
       }
     }
+  }
+
+  /**
+   * Asserts page object's state satisfies specified.
+   *
+   * @param {Object} expectedState State to which page object's state must satisfy.
+   * @returns {Promise<void>}
+   */
+  async expectStateSatisfies(expectedState) {
+    expect(
+      await this.getState(...Object.keys(expectedState)),
+      "to satisfy",
+      expectedState
+    );
   }
 }
