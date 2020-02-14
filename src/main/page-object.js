@@ -597,12 +597,16 @@ export class PageObject {
   }
 
   /**
-   * Asserts page object's state satisfies specified.
+   * Asserts page object's state satisfies specified value, see
+   * [Unexpected]{@link https://unexpected.js.org/assertions/any/to-satisfy/}
+   * for details.
    *
    * @param {Object} expectedState State to which page object's state must satisfy.
    * @returns {Promise<void>}
+   *
+   * @todo Allow {@link PageObject#getState} to accept requested state parts as object -- this allow to reduce number of called nested state's part getters to only required in assertion.
    */
-  async expectStateSatisfies(expectedState) {
+  async expectStateToSatisfy(expectedState) {
     expect(
       await this.getState(...Object.keys(expectedState)),
       "to satisfy",
