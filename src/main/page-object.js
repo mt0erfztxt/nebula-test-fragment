@@ -405,9 +405,12 @@ export class PageObject {
    *
    * @param {string} name A name of BEM modifier or attribute which holds state part's value.
    * @param {Object} [options] Options.
+   * @param {string} [options.defaultValue] Default value when `options.simple` is `false`.
    * @param {boolean} [options.simple=true] If `true` only presence of BEM modifier or attribute is checked.
    * @param {string} [options.src='bemModifier'] The source of state part's value. One of 'bemModifier' or 'attribute'.
    * @returns {Promise<boolean | string | undefined>} Returns state part's value.
+   * @throws {Error} Throws on invalid input.
+   * @todo Add tests for input validation.
    *
    * @example
    * await this.getStatePartHelper("cid", { simple: false }) // returns promise resolved with 'cid' of widget
@@ -415,7 +418,49 @@ export class PageObject {
    * await this.getStatePartHelper("data-name", { simple: false, src: "attribute" }) // returns promise resolved with value of 'data-name' attribute
    */
   async getStatePartHelper(name, options) {
-    const { simple = true, src = "bemModifier" } = options || {};
+    if (!is.string(name) || is.emptyStringOrWhitespace(name)) {
+      throw new Error(
+        `${this.displayName}: 'name' must be a non-blank string but it ` +
+          `doesn't -- ${typeAndValue(name)}`
+      );
+    }
+
+    if (options && !is.plainObject(options)) {
+      throw new Error(
+        `${this.displayName}: 'options' must be a plain object but it ` +
+          `doesn't -- ${typeAndValue(options)}`
+      );
+    }
+
+    const { defaultValue, simple = true, src = "bemModifier" } = options || {};
+
+    if (
+      is.emptyStringOrWhitespace(defaultValue) ||
+      (!is.undefined(defaultValue) && !is.string(defaultValue))
+    ) {
+      throw new Error(
+        `${this.displayName}: 'options.defaultValue' must be a non-blank ` +
+          `string but it doesn't -- ${typeAndValue(defaultValue)}`
+      );
+    }
+
+    if (!is.boolean(simple)) {
+      throw new Error(
+        `${this.displayName}: 'options.simple' must be a boolean but it ` +
+          `doesn't -- ${typeAndValue(simple)}`
+      );
+    }
+
+    if (!["attribute", "bemModifier"].includes(src)) {
+      throw new Error(
+        `${this.displayName}: 'options.src' must be one of supported values ` +
+          `but it doesn't -- ${typeAndValue(src)}`
+      );
+    }
+
+    const valueOrDefault = (value, defaultValue) =>
+      is.undefined(value) && defaultValue ? defaultValue : value;
+
     if (src === "bemModifier") {
       if (simple) {
         return this.selector.hasClass(
@@ -426,12 +471,16 @@ export class PageObject {
         );
       } else {
         const modifiers = await this.getBemModifiers(name);
-        return modifiers.length ? modifiers[0][1] : undefined;
+        const value = modifiers.length ? modifiers[0][1] : undefined;
+        return valueOrDefault(value, defaultValue);
       }
     } else {
-      return simple
-        ? this.selector.hasAttribute(name)
-        : this.selector.getAttribute(name);
+      if (simple) {
+        return this.selector.hasAttribute(name);
+      } else {
+        const value = await this.selector.getAttribute(name);
+        return valueOrDefault(value, defaultValue);
+      }
     }
   }
 
