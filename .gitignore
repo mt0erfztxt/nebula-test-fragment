@@ -1,4 +1,5 @@
 .idea
+generated-src
 node_modules
 
 /lib

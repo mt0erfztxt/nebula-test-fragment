@@ -1,0 +1,23 @@
+import {{extendsClassName}} from "{{fromClause}}";
+
+export default class {{exportClassName}} extends {{extendsClassName}} {
+  static bemBase = "{{bemBase}}";
+  static displayName = "{{displayName}}";
+
+  {{#each stateParts}}
+  /**
+   * Returns '{{name}}' part of page object's state.
+   *
+   * @returns {Promise<{{resultType}}>}
+   */
+  async {{getterName}}() {
+    return this.getStatePartHelper("{{attribute}}", {
+      {{#if defaultValue}}
+      defaultValue: {{defaultValue}},
+      {{/if}}
+      simple: {{simple}},
+      src: "{{src}}"
+    });
+  }
+  {{/each}}
+}

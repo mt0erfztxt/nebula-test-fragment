@@ -1,0 +1,14 @@
+{
+  "pageObjects": [
+    {
+      "extends": "test/spec/020-page-object-generator/040-extends-provided/provided-page-object",
+      "path": "test/spec/020-page-object-generator/generated-src/040-extends-provided/text-input",
+      "stateParts": [
+        {
+          "name": "active"
+        }
+      ]
+    }
+  ],
+  "srcRoot": "src"
+}

@@ -15,7 +15,7 @@ import {
   validateBemStructure,
   validateBemValue,
   validateBemVector
-} from "../../main/bem";
+} from "../../../main/bem";
 
 describe("validateBemName()", () => {
   describe("validation fails when 'bemName' is", () => {
