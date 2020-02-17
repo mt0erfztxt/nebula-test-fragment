@@ -13,11 +13,14 @@ export default class {{exportClassName}} extends {{extendsClassName}} {
   async {{getterName}}() {
     return this.getStatePartHelper("{{attribute}}", {
       {{#if defaultValue}}
-      defaultValue: {{defaultValue}},
+      defaultValue: "{{defaultValue}}",
       {{/if}}
       simple: {{simple}},
       src: "{{src}}"
     });
   }
+  {{#unless @last}}
+
+  {{/unless}}
   {{/each}}
 }

@@ -29,25 +29,24 @@ describe("Page object generator generates page object module", () => {
     ["with provided extends", "040-extends-provided"],
     ["with default display name", "050-display-name-default"],
     ["with provided display name", "060-display-name-provided"],
+    ["with default state part alias", "070-state-part-alias-default"],
+    ["with provided state part alias", "080-state-part-alias-provided"],
+    ["with provided state part name", "090-state-part-name-provided"],
+    ["with default state part simple", "100-state-part-simple-default"],
+    ["with provided state part simple", "110-state-part-simple-provided"],
+    ["with default state part src", "120-state-part-src-default"],
+    ["with provided state part src", "130-state-part-src-provided"],
     [
-      "with default state part getter name",
-      "070-state-part-getter-name-default"
+      "with default state part default value",
+      "140-state-part-default-value-default"
     ],
     [
-      "with provided state part getter name",
-      "080-state-part-getter-name-provided"
+      "with provided state part default value",
+      "150-state-part-default-value-provided"
     ],
     [
-      "with provided state part name",
-      "090-state-part-name-provided"
-    ],
-    [
-      "with default state part simple",
-      "100-state-part-simple-default"
-    ],
-    [
-      "with provided state part simple",
-      "110-state-part-simple-provided"
+      "with multiple state parts",
+      "160-multiple-state-parts-provided"
     ]
   ];
 

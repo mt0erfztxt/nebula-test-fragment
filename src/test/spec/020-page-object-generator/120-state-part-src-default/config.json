@@ -1,0 +1,14 @@
+{
+  "pageObjects": [
+    {
+      "path": "test/spec/020-page-object-generator/generated-src/120-state-part-src-default/text-input",
+      "stateParts": [
+        {
+          "name": "value",
+          "simple": false
+        }
+      ]
+    }
+  ],
+  "srcRoot": "src"
+}

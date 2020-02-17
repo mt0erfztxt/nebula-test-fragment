@@ -1,7 +1,7 @@
 {
   "pageObjects": [
     {
-      "path": "test/spec/020-page-object-generator/generated-src/070-state-part-getter-name-default/text-input",
+      "path": "test/spec/020-page-object-generator/generated-src/070-state-part-alias-default/text-input",
       "stateParts": [
         {
           "name": "active"
