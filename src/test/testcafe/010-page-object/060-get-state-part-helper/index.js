@@ -208,3 +208,51 @@ test("090 throws when 'options.src' is not valid", async t => {
   }
   await t.expect(isThrown).ok();
 });
+
+test("100 ignores 'options.defaultValue' when 'options.simple' is true", async t => {
+  const textInput = new TextInput();
+
+  // -- Pre-checks --
+
+  await t.expect(textInput.selector.count).eql(1);
+
+  // -- Checks --
+
+  const mod4BemModVal = await textInput.getStatePartHelper("mod4", {
+    defaultValue: "42",
+    simple: true,
+    src: "bemModifier"
+  });
+  await t.expect(mod4BemModVal).eql(false);
+
+  const fooAttrVal = await textInput.getStatePartHelper("data-foo", {
+    defaultValue: "bar",
+    simple: true,
+    src: "attribute"
+  });
+  await t.expect(fooAttrVal).eql(false);
+});
+
+test("110 respects 'options.defaultValue' when 'options.simple' is false", async t => {
+  const textInput = new TextInput();
+
+  // -- Pre-checks --
+
+  await t.expect(textInput.selector.count).eql(1);
+
+  // -- Checks --
+
+  const mod4BemModVal = await textInput.getStatePartHelper("mod4", {
+    defaultValue: "42",
+    simple: false,
+    src: "bemModifier"
+  });
+  await t.expect(mod4BemModVal).eql("42");
+
+  const fooAttrVal = await textInput.getStatePartHelper("data-foo", {
+    defaultValue: "bar",
+    simple: false,
+    src: "attribute"
+  });
+  await t.expect(fooAttrVal).eql("bar");
+});
