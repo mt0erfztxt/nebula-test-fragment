@@ -9,6 +9,9 @@
   },
   "author": "Sergey Kozhevnikov <mt0erfztxt@gmail.com>",
   "main": "dist/page-object.js",
+  "bin": {
+    "generate-page-objects": "lib/main/cli.js"
+  },
   "directories": {
     "test": "src/test"
   },

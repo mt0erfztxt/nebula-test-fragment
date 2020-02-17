@@ -1,0 +1,15 @@
+{
+  "pageObjects": [
+    {
+      "path": "main/generated-src/MyWidget",
+      "stateParts": [
+        {
+          "defaultValue": "bar",
+          "name": "foo",
+          "simple": false
+        }
+      ]
+    }
+  ],
+  "srcRoot": "src"
+}
