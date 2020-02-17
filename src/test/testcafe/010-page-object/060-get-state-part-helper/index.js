@@ -95,3 +95,116 @@ test("040 work for full BEM modifier", async t => {
   });
   await t.expect(mod4BemModVal).eql(undefined);
 });
+
+test("050 throws when 'name' is not valid", async t => {
+  let isThrown;
+  const textInput = new TextInput();
+
+  // -- Checks --
+
+  isThrown = false;
+  try {
+    await textInput.getStatePartHelper(true);
+  } catch (e) {
+    isThrown = true;
+    await t
+      .expect(e.message)
+      .eql(
+        "TextInput: 'name' must be a non-blank string but it doesn't -- " +
+          "boolean true"
+      );
+  }
+  await t.expect(isThrown).ok();
+});
+
+test("060 throws when 'options' is not valid", async t => {
+  let isThrown;
+  const textInput = new TextInput();
+
+  // -- Checks --
+
+  isThrown = false;
+  try {
+    await textInput.getStatePartHelper("foobar", 42);
+  } catch (e) {
+    isThrown = true;
+    await t
+      .expect(e.message)
+      .eql(
+        "TextInput: 'options' must be a plain object but it doesn't -- " +
+          "number 42"
+      );
+  }
+  await t.expect(isThrown).ok();
+});
+
+test("070 throws when 'options.defaultValue' is not valid", async t => {
+  let isThrown;
+  const textInput = new TextInput();
+
+  // -- Checks --
+
+  isThrown = false;
+  try {
+    await textInput.getStatePartHelper("foobar", { defaultValue: undefined });
+  } catch (e) {
+    isThrown = true;
+  }
+  await t.expect(isThrown).notOk();
+
+  isThrown = false;
+  try {
+    await textInput.getStatePartHelper("foobar", { defaultValue: "" });
+  } catch (e) {
+    isThrown = true;
+    await t
+      .expect(e.message)
+      .eql(
+        "TextInput: 'options.defaultValue' must be a non-blank string but " +
+          "it doesn't -- string "
+      );
+  }
+  await t.expect(isThrown).ok();
+});
+
+test("080 throws when 'options.simple' is not valid", async t => {
+  let isThrown;
+  const textInput = new TextInput();
+
+  // -- Checks --
+
+  isThrown = false;
+  try {
+    await textInput.getStatePartHelper("foobar", { simple: 42 });
+  } catch (e) {
+    isThrown = true;
+    await t
+      .expect(e.message)
+      .eql(
+        "TextInput: 'options.simple' must be a boolean but it doesn't -- " +
+          "number 42"
+      );
+  }
+  await t.expect(isThrown).ok();
+});
+
+test("090 throws when 'options.src' is not valid", async t => {
+  let isThrown;
+  const textInput = new TextInput();
+
+  // -- Checks --
+
+  isThrown = false;
+  try {
+    await textInput.getStatePartHelper("foobar", { src: "unsupported" });
+  } catch (e) {
+    isThrown = true;
+    await t
+      .expect(e.message)
+      .eql(
+        "TextInput: 'options.src' must be one of supported values but it " +
+          "doesn't -- string unsupported"
+      );
+  }
+  await t.expect(isThrown).ok();
+});
