@@ -1,0 +1,19 @@
+import PageObject from "nebula-test-fragment";
+
+export default class MyWidget extends PageObject {
+  static bemBase = "myWidget";
+  static displayName = "MyWidget";
+
+  /**
+   * Returns 'Foo' part of page object's state.
+   *
+   * @returns {Promise<string>}
+   */
+  async getFoo() {
+    return this.getStatePartHelper("foo", {
+      defaultValue: "bar",
+      simple: false,
+      src: "bemModifier"
+    });
+  }
+}

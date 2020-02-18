@@ -1,7 +1,6 @@
-#! /usr/bin/env node
+#!/usr/bin/env node
 
 import { generate } from "./page-object-generator";
 
-export default function cli() {
-  generate();
-}
+// TODO: Add tests (see src/test/spec/020-page-object-generator/170-cli).
+generate(process.argv[2]);

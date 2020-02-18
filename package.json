@@ -10,14 +10,14 @@
   "author": "Sergey Kozhevnikov <mt0erfztxt@gmail.com>",
   "main": "dist/page-object.js",
   "bin": {
-    "generate-page-objects": "lib/main/cli.js"
+    "generate-page-objects": "./lib/main/cli.js"
   },
   "directories": {
     "test": "src/test"
   },
   "scripts": {
     "clean": "rm -rf dist lib",
-    "compile": "npx babel --copy-files --extensions '.js' --ignore 'src/test/spec/**/*' --out-dir lib src",
+    "compile": "npx babel --copy-files --extensions '.js' --ignore 'src/test/spec/**/*,src/main/generated-src' --out-dir lib src",
     "compile-watch": "npm run compile -- --watch",
     "jasmine-tests": "npx jasmine --config=jasmine.json",
     "test": "npm run jasmine-tests && npm run testcafe-tests",
