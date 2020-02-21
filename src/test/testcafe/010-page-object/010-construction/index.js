@@ -1,7 +1,7 @@
 import is from "@sindresorhus/is";
 import { Selector } from "testcafe";
 import { BemBase } from "../../../../main/bem";
-import { PageObject } from "../../../../main/page-object";
+import PageObject from "../../../../main/page-object";
 
 const appRootPath = require("app-root-path");
 

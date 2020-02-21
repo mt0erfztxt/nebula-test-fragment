@@ -32,7 +32,7 @@ import { typeAndValue } from "./util";
 /**
  * Class representing page object.
  */
-export class PageObject {
+export default class PageObject {
   /**
    * Used to map instance of page object class to DOM elements. Mapping is done
    * by adding BEM string to value of `class` attribute of DOM element. Each

@@ -1,6 +1,6 @@
 import { Selector } from "testcafe";
 import { BemBase } from "../../../../main/bem";
-import { PageObject } from "../../../../main/page-object";
+import PageObject from "../../../../main/page-object";
 
 class TextInput extends PageObject {
   static bemBase = "textInput";

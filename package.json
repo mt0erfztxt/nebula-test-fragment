@@ -8,24 +8,25 @@
     "url": "https://github.com/mt0erfztxt/nebula-test-fragment.git"
   },
   "author": "Sergey Kozhevnikov <mt0erfztxt@gmail.com>",
-  "main": "dist/page-object.js",
+  "main": "lib",
   "bin": {
-    "generate-page-objects": "./lib/main/cli.js"
+    "generate-page-objects": "./lib/cli.js"
   },
+  "files": [
+    "lib"
+  ],
   "directories": {
     "test": "src/test"
   },
   "scripts": {
-    "clean": "rm -rf dist lib",
+    "clean": "rm -rf lib",
     "compile": "npx babel --copy-files --extensions '.js' --ignore 'src/test/spec/**/*,src/main/generated-src' --out-dir lib src",
     "compile-watch": "npm run compile -- --watch",
     "jasmine-tests": "npx jasmine --config=jasmine.json",
+    "prepare": "npm run clean && npm run compile && mv lib/main/* lib && rm -rf lib/main lib/test",
     "test": "npm run jasmine-tests && npm run testcafe-tests",
     "testcafe-tests": "npm run clean && npm run compile && npx testcafe --selector-timeout=3500 chromium lib/test/testcafe"
   },
-  "files": [
-    "dist"
-  ],
   "dependencies": {
     "@sindresorhus/is": "1.2.0",
     "app-root-path": "2.2.1",
@@ -41,6 +42,7 @@
     "@babel/cli": "7.8.3",
     "@babel/core": "7.8.3",
     "@babel/plugin-proposal-class-properties": "7.8.3",
+    "@babel/plugin-proposal-export-default-from": "^7.8.3",
     "@babel/plugin-proposal-object-rest-spread": "7.8.3",
     "@babel/plugin-proposal-private-methods": "7.8.3",
     "@babel/preset-env": "7.8.3",

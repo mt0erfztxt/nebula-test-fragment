@@ -1,4 +1,4 @@
-import { PageObject } from "../../../../main/page-object";
+import PageObject from "../../../../main/page-object";
 
 class WidgetA extends PageObject {
   static bemBase = "widgetA";
