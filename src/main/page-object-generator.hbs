@@ -4,9 +4,17 @@ export default class {{exportClassName}} extends {{extendsClassName}} {
   static bemBase = "{{bemBase}}";
   static displayName = "{{displayName}}";
 
+  getStateSpec() {
+    return Object.assign(super.getStateSpec(), {
+      {{#each stateParts}}
+      {{statePartJsName}}: false{{#unless @last}},{{/unless}}
+      {{/each}}
+    });
+  }
+
   {{#each stateParts}}
   /**
-   * Returns '{{name}}' part of page object's state.
+   * Returns '{{statePartCommentName}}' part of page object's state.
    *
    * @returns {Promise<{{resultType}}>}
    */

@@ -4,6 +4,12 @@ export default class TextInput extends PageObject {
   static bemBase = "textInput";
   static displayName = "TextInput";
 
+  getStateSpec() {
+    return Object.assign(super.getStateSpec(), {
+      disabled: false
+    });
+  }
+
   /**
    * Returns 'Disabled' part of page object's state.
    *

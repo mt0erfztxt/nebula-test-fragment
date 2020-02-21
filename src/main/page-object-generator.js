@@ -115,12 +115,14 @@ function generatePageObject(pageObjectSpec, pathPrefix) {
       : "nebula-test-fragment",
     stateParts: stateParts.map(({ alias, defaultValue, name, simple, src }) => {
       const isSimple = is.boolean(simple) ? simple : true;
-      const statePartName = pascalCase(alias || name);
+      const statePartJsName = camelCase(alias || name);
+      const statePartCommentName = pascalCase(statePartJsName);
       return {
         attribute: name,
         defaultValue,
-        getterName: `get${statePartName}`,
-        name: statePartName,
+        getterName: `get${statePartCommentName}`,
+        statePartCommentName,
+        statePartJsName,
         resultType: isSimple
           ? "boolean"
           : "string" + (is.undefined(defaultValue) ? " | undefined" : ""),

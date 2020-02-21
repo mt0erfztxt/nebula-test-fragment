@@ -23,29 +23,29 @@ function compareFiles(testName, generatedFileName = "text-input") {
 
 describe("Page object generator generates page object module", () => {
   const tests = [
-    ["with default bemBase", "010-bem-base-default"],
-    ["with provided bemBase", "020-bem-base-provided"],
-    ["with default extends", "030-extends-default"],
-    ["with provided extends", "040-extends-provided"],
-    ["with default display name", "050-display-name-default"],
-    ["with provided display name", "060-display-name-provided"],
-    ["with default state part alias", "070-state-part-alias-default"],
-    ["with provided state part alias", "080-state-part-alias-provided"],
-    ["with provided state part name", "090-state-part-name-provided"],
-    ["with default state part simple", "100-state-part-simple-default"],
-    ["with provided state part simple", "110-state-part-simple-provided"],
-    ["with default state part src", "120-state-part-src-default"],
-    ["with provided state part src", "130-state-part-src-provided"],
+    ["010 with default bemBase", "010-bem-base-default"],
+    ["020 with provided bemBase", "020-bem-base-provided"],
+    ["030 with default extends", "030-extends-default"],
+    ["040 with provided extends", "040-extends-provided"],
+    ["050 with default display name", "050-display-name-default"],
+    ["060 with provided display name", "060-display-name-provided"],
+    ["070 with default state part alias", "070-state-part-alias-default"],
+    ["080 with provided state part alias", "080-state-part-alias-provided"],
+    ["090 with provided state part name", "090-state-part-name-provided"],
+    ["100 with default state part simple", "100-state-part-simple-default"],
+    ["110 with provided state part simple", "110-state-part-simple-provided"],
+    ["120 with default state part src", "120-state-part-src-default"],
+    ["130 with provided state part src", "130-state-part-src-provided"],
     [
-      "with default state part default value",
+      "140 with default state part default value",
       "140-state-part-default-value-default"
     ],
     [
-      "with provided state part default value",
+      "150 with provided state part default value",
       "150-state-part-default-value-provided"
     ],
     [
-      "with multiple state parts",
+      "160 with multiple state parts",
       "160-multiple-state-parts-provided"
     ]
   ];

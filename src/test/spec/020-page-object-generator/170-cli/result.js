@@ -4,6 +4,12 @@ export default class MyWidget extends PageObject {
   static bemBase = "myWidget";
   static displayName = "MyWidget";
 
+  getStateSpec() {
+    return Object.assign(super.getStateSpec(), {
+      foo: false
+    });
+  }
+
   /**
    * Returns 'Foo' part of page object's state.
    *
