@@ -1,4 +1,4 @@
-import PageObject from "nebula-test-fragment";
+import PageObject from "nebula-test-fragment/lib/page-object";
 
 export default class TextInput extends PageObject {
   static bemBase = "myProject-textInput";

@@ -38,7 +38,6 @@ import { camelCase, pascalCase } from "change-case";
  * @property {string} name A state part name.
  * @property {boolean} [simple=true] If `true` only presence of BEM modifier or attribute is checked.
  * @property {string} [src='bemModifier'] The source of state part's value. One of 'bemModifier' or 'attribute'.
- *
  */
 
 /**
@@ -122,7 +121,7 @@ function generatePageObject(pageObjectSpec, pathPrefix, project = "") {
           nodePath.dirname(targetAbsPath),
           nodePath.join(cwd, pathPrefix, pageObjectSpec.extends)
         )
-      : "nebula-test-fragment",
+      : "nebula-test-fragment/lib/page-object",
     stateParts: stateParts.map(({ alias, defaultValue, name, simple, src }) => {
       const isSimple = is.boolean(simple) ? simple : true;
       const statePartJsName = camelCase(alias || name);
