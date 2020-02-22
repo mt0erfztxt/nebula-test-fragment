@@ -52,6 +52,14 @@ describe("Page object generator generates page object module", () => {
       "180 with module named 'base'",
       "180-module-name",
       "input/base"
+    ],
+    [
+      "190 with default project name",
+      "190-project-name-default"
+    ],
+    [
+      "200 with provided project name",
+      "200-project-name-provided"
     ]
   ];
 

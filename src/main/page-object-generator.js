@@ -11,6 +11,7 @@ import { camelCase, pascalCase } from "change-case";
  * @typedef PageObjectGeneratorConfig
  * @type {Object}
  * @property {PageObjectSpec[]} pageObjects A list of page object specs that must be used to generate page objects.
+ * @property {string} [project] A name of project. Used to calculate BEM base and display name -- prefixes them with `projectName-`.
  * @property {string} srcRoot A root directory for generated page objects. Used to calculate imports.
  */
 
@@ -46,12 +47,12 @@ import { camelCase, pascalCase } from "change-case";
  * @param {PageObjectGeneratorConfig | string} [config='page-object-generator.json'] A page object generator configuration or path to file containing it.
  */
 export function generate(config = "page-object-generator.json") {
-  const { pageObjects, srcRoot } = is.plainObject(config)
+  const { pageObjects, project, srcRoot } = is.plainObject(config)
     ? config
     : parseConfig(config);
 
   pageObjects.forEach(spec => {
-    generatePageObject(spec, srcRoot);
+    generatePageObject(spec, srcRoot, project);
   });
 }
 
@@ -93,8 +94,9 @@ const template = Handlebars.compile(
  *
  * @param {PageObjectSpec} pageObjectSpec
  * @param {string} pathPrefix
+ * @param {string} [project]
  */
-function generatePageObject(pageObjectSpec, pathPrefix) {
+function generatePageObject(pageObjectSpec, pathPrefix, project = "") {
   const { bemBase, displayName, path, stateParts } = pageObjectSpec;
   const cwd = process.cwd();
   const pathParts = path.split("/");
@@ -106,13 +108,15 @@ function generatePageObject(pageObjectSpec, pathPrefix) {
   );
   const isExtends = pageObjectSpec.extends;
   const targetAbsPath = nodePath.join(cwd, pathPrefix, path) + ".js";
+  const bb = is.string(bemBase) ? bemBase : isBase ? "" : camelCase(className);
+  const bbPrefix = project ? `${project}-` : "";
   const context = {
-    bemBase: is.string(bemBase) ? bemBase : isBase ? "" : camelCase(className),
+    bemBase: is.emptyString(bb) ? bb : `${bbPrefix}${bb}`,
     exportClassName: className,
     extendsClassName: isExtends
       ? pascalCase(nodePath.basename(pageObjectSpec.extends))
       : "PageObject",
-    displayName: displayName || className,
+    displayName: `${bbPrefix}${displayName || className}`,
     fromClause: isExtends
       ? nodePath.relative(
           nodePath.dirname(targetAbsPath),
