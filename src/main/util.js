@@ -1,9 +1,21 @@
 import is from "@sindresorhus/is";
 
 /**
+ * Returns `true` when value is a non-blank string and `false` otherwise.
  *
- * @param {*} value Subject which type and value must be returned
+ * @param {*} value A value to check.
+ * @returns {boolean}
  */
-export function typeAndValue(value) {
-  return is(value) + ` ${value}`;
+export function isNonBlankString(value) {
+  return is.string(value) && !is.emptyStringOrWhitespace(value);
+}
+
+/**
+ * Returns string with value's type and value itself separated by space.
+ *
+ * @param {*} subject A subject which type and value must be returned.
+ * @returns {string}
+ */
+export function typeAndValue(subject) {
+  return `${is(subject)} ${subject}`;
 }
