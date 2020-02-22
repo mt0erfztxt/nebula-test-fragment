@@ -39,7 +39,7 @@ class WidgetC extends PageObject {
   /**
    * Adds 'label' and 'text' selector transformation aliases.
    *
-   * @param {SelectorTransformationAlias} selectorTransformationAlias
+   * @param {NTF.PageObjectSelectorTransformationAlias} selectorTransformationAlias
    * @param {Selector} selector
    * @param {BemBase} bemBase
    * @returns {Selector}
@@ -119,7 +119,7 @@ test.page(buildPagePath("025"))(
     let isThrown = false;
     try {
       await t.expect(widgetA3.selector.textContent).eql("foo");
-    } catch (e) {
+    } catch (/** @type NTF.AssertionError*/ e) {
       isThrown = true;
       await t
         .expect(e.errMsg)
@@ -148,7 +148,7 @@ test.page(buildPagePath("030"))(
     let isThrown = false;
     try {
       new WidgetA(s => s.withText(/A -- 2/), widgetB);
-    } catch (e) {
+    } catch (/** @type NTF.AssertionError*/ e) {
       isThrown = true;
       await t
         .expect(e.message)
@@ -214,7 +214,7 @@ test.page(buildPagePath("050"))(
     isThrown = false;
     try {
       await t.expect(widgetA2.selector.textContent).eql("Widget A -- 1");
-    } catch (e) {
+    } catch (/** @type NTF.AssertionError*/ e) {
       isThrown = true;
       await t
         .expect(e.errMsg)
@@ -259,7 +259,7 @@ test.page(buildPagePath("060"))(
     isThrown = false;
     try {
       await t.expect(widgetA3.selector.textContent).eql("abc");
-    } catch (e) {
+    } catch (/** @type NTF.AssertionError*/ e) {
       isThrown = true;
       await t
         .expect(e.errMsg)
@@ -300,7 +300,7 @@ test.page(buildPagePath("070"))(
     let isThrown = false;
     try {
       await t.expect(widgetA4.selector.textContent).eql("foobar");
-    } catch (e) {
+    } catch (/** @type NTF.AssertionError*/ e) {
       isThrown = true;
       await t
         .expect(e.errMsg)

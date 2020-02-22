@@ -49,7 +49,7 @@ test("020 fails when page object's selector must not exist but it does -- 0 expe
   isThrown = false;
   try {
     await widgetA.expectIsExist({ isNot: true });
-  } catch (e) {
+  } catch (/** @type NTF.AssertionError*/ e) {
     isThrown = true;
     await t
       .expect(e.errMsg)
@@ -63,7 +63,7 @@ test("020 fails when page object's selector must not exist but it does -- 0 expe
   isThrown = false;
   try {
     await widgetA.expectIsExist({ isNot: true, message: "foobar" });
-  } catch (e) {
+  } catch (/** @type NTF.AssertionError*/ e) {
     isThrown = true;
     await t.expect(e.errMsg).match(/.*foobar.*/);
   }
@@ -83,7 +83,7 @@ test("025 fails when page object's selector must not exist but it does -- 0 expe
   isThrown = false;
   try {
     await widgetB.expectIsExist({ isNot: true });
-  } catch (e) {
+  } catch (/** @type NTF.AssertionError*/ e) {
     isThrown = true;
     await t
       .expect(e.errMsg)
@@ -97,7 +97,7 @@ test("025 fails when page object's selector must not exist but it does -- 0 expe
   isThrown = false;
   try {
     await widgetB.expectIsExist({ isNot: true, message: "foobar" });
-  } catch (e) {
+  } catch (/** @type NTF.AssertionError*/ e) {
     isThrown = true;
     await t.expect(e.errMsg).match(/.*foobar.*/);
   }
@@ -117,7 +117,7 @@ test("030 fails when page object's selector must exist but it doesn't -- 1 expec
   isThrown = false;
   try {
     await widgetC.expectIsExist();
-  } catch (e) {
+  } catch (/** @type NTF.AssertionError*/ e) {
     isThrown = true;
     await t
       .expect(e.errMsg)
@@ -131,7 +131,7 @@ test("030 fails when page object's selector must exist but it doesn't -- 1 expec
   isThrown = false;
   try {
     await widgetC.expectIsExist({ message: "foobar" });
-  } catch (e) {
+  } catch (/** @type NTF.AssertionError*/ e) {
     isThrown = true;
     await t.expect(e.errMsg).match(/.*foobar.*/);
   }
@@ -170,7 +170,7 @@ test("050 fails when page object's selector must exist and it does but more than
   isThrown = false;
   try {
     await widgetB.expectIsExist();
-  } catch (e) {
+  } catch (/** @type NTF.AssertionError*/ e) {
     isThrown = true;
     await t
       .expect(e.errMsg)
@@ -184,7 +184,7 @@ test("050 fails when page object's selector must exist and it does but more than
   isThrown = false;
   try {
     await widgetB.expectIsExist({ message: "foobar" });
-  } catch (e) {
+  } catch (/** @type NTF.AssertionError*/ e) {
     isThrown = true;
     await t.expect(e.errMsg).match(/.*foobar.*/);
   }

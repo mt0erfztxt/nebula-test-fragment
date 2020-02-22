@@ -6,30 +6,6 @@ import { BemBase, validateBemModifierName } from "./bem";
 import { typeAndValue } from "./util";
 
 /**
- * Type representing selector transformation function.
- *
- * @typedef {function(Selector, BemBase): Selector} SelectorTransformationFunction
- */
-
-/**
- * Type representing selector transformation alias.
- *
- * An array where first element is a required alias's name and other elements
- * are optional alias's value.
- *
- * @typedef {(string|*)[]} SelectorTransformationAlias
- */
-
-/**
- * Type representing selector transformation.
- *
- * String and number are reserved for built-in 'cid' and 'idx' selector
- * transformations.
- *
- * @typedef {string|number|SelectorTransformationFunction|SelectorTransformationAlias} SelectorTransformation
- */
-
-/**
  * Class representing page object.
  */
 export default class PageObject {
@@ -91,14 +67,14 @@ export default class PageObject {
    * Used to store selector transformations that must be applied to page
    * object's selector on first access.
    *
-   * @type {SelectorTransformation[]}
+   * @type {NTF.PageObjectSelectorTransformation[]}
    */
   #selectorTransformations = [];
 
   /**
    * Creates page object.
    *
-   * @param {PageObject|SelectorTransformation} args Any number of selector transformations that need to be applied to locate page object's DOM element. To specify parent page object pass it as first (and only first) argument.
+   * @param {PageObject|NTF.PageObjectSelectorTransformation} args Any number of selector transformations that need to be applied to locate page object's DOM element. To specify parent page object pass it as first (and only first) argument.
    */
   constructor(...args) {
     let parentSelector = Selector("body");
@@ -260,7 +236,7 @@ export default class PageObject {
    * Note:
    * - don't use `this.selector` in overrides because that cause infinite loop!
    *
-   * @param {SelectorTransformationAlias} selectorTransformationAlias Selector transformation to apply. How transformation is handled is a responsibility of an implementor.
+   * @param {NTF.PageObjectSelectorTransformationAlias} selectorTransformationAlias Selector transformation to apply. How transformation is handled is a responsibility of an implementor.
    * @param {Selector} selector Selector to transform.
    * @param {BemBase} bemBase Clone of page object's BEM base.
    * @returns {Selector} Returns transformed page object's selector.
