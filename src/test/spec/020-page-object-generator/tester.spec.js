@@ -47,6 +47,11 @@ describe("Page object generator generates page object module", () => {
     [
       "160 with multiple state parts",
       "160-multiple-state-parts-provided"
+    ],
+    [
+      "180 with module named 'base'",
+      "180-module-name",
+      "input/base"
     ]
   ];
 

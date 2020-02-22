@@ -1,0 +1,13 @@
+{
+  "pageObjects": [
+    {
+      "path": "test/spec/020-page-object-generator/generated-src/180-module-name/input/base",
+      "stateParts": [
+        {
+          "name": "enabled"
+        }
+      ]
+    }
+  ],
+  "srcRoot": "src"
+}

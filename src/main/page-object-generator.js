@@ -97,11 +97,17 @@ const template = Handlebars.compile(
 function generatePageObject(pageObjectSpec, pathPrefix) {
   const { bemBase, displayName, path, stateParts } = pageObjectSpec;
   const cwd = process.cwd();
-  const className = pascalCase(nodePath.basename(path));
+  const pathParts = path.split("/");
+  const isBase = !!(
+    pathParts[pathParts.length - 1].match(/^base$/i) && pathParts.pop()
+  );
+  const className = pascalCase(
+    nodePath.basename(pathParts.join("/")) + (isBase ? "Base" : "")
+  );
   const isExtends = pageObjectSpec.extends;
   const targetAbsPath = nodePath.join(cwd, pathPrefix, path) + ".js";
   const context = {
-    bemBase: is.string(bemBase) ? bemBase : camelCase(className),
+    bemBase: is.string(bemBase) ? bemBase : isBase ? "" : camelCase(className),
     exportClassName: className,
     extendsClassName: isExtends
       ? pascalCase(nodePath.basename(pageObjectSpec.extends))
