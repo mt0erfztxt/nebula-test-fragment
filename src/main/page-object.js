@@ -656,4 +656,30 @@ export default class PageObject {
       expectedState
     );
   }
+
+  /**
+   * Returns page object of specified class using this page object as its
+   * parent.
+   *
+   * @param {*} PageObjectClass A page object class which instance to return.
+   * @param {NTF.PageObjectConstructorParams} args Same args as in {@link PageObject.constructor} but parent page object is always set to this page object.
+   * @returns {*}
+   * @throws {Error} Throws on invalid input or output.
+   */
+  getPageObjectHelper(PageObjectClass, ...args) {
+    // Remove passed in parent (if any).
+    if (args[0] instanceof PageObject) {
+      args.shift();
+    }
+
+    const pageObject = new PageObjectClass(this, ...args);
+    if (pageObject instanceof PageObject) {
+      return pageObject;
+    } else {
+      throw new Error(
+        `${this.displayName}: '${PageObjectClass}' must be a page object ` +
+          `class but it doesn't -- ${is(pageObject)}`
+      );
+    }
+  }
 }
