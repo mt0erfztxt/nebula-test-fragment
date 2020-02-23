@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <link rel="stylesheet" type="text/css" href="../../styles.css" />
+    <title>PageObject#click()</title>
+  </head>
+  <body>
+    <p id="display"></p>
+    <button class="btn btn--cid_addOne" onclick="add(1)">Add one</button>
+    <button class="btn btn--cid_addTen" onclick="add(10)">Add ten</button>
+    <button class="btn btn--cid_reset" onclick="reset()">Reset</button>
+
+    <script>
+      let counter = 0;
+      const display = document.getElementById("display");
+
+      function setText() {
+        display.innerHTML = "Clicked times: " + counter;
+      }
+
+      function add(n) {
+        counter += n;
+        setText();
+      }
+
+      function reset() {
+        counter = 0;
+        setText();
+      }
+
+      setText();
+    </script>
+  </body>
+</html>

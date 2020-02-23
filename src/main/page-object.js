@@ -308,6 +308,24 @@ export default class PageObject {
   }
 
   /**
+   * Clicks on page object's selector.
+   *
+   * @param {Object} [options] An options.
+   * @param {*} [options.selector=this.selector] A selector to click on. Anything TestCafe Selector accepts.
+   * @param {number} [options.wait] A number of milliseconds to wait after click.
+   * @returns {Promise<void>}
+   */
+  async click(options) {
+    const { selector = this.selector, wait } = options || {};
+
+    await t.click(Selector(selector));
+
+    if (wait) {
+      await t.wait(wait);
+    }
+  }
+
+  /**
    * Hovers on page object's selector.
    *
    * When selector returns more than one DOM element hover is done on first.
