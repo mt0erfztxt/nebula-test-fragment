@@ -328,19 +328,15 @@ export default class PageObject {
   /**
    * Hovers on page object's selector.
    *
-   * When selector returns more than one DOM element hover is done on first.
-   *
-   * Throws when selector doesn't return DOM elements.
-   *
-   * @param {Object} [options] Options.
-   * @param {Selector} [options.selector=this.selector] Selector to hover on.
-   * @param {number} [options.wait] Wait specified number of milliseconds after hover is done.
+   * @param {Object} [options] An options.
+   * @param {*} [options.selector=this.selector] A selector to hover on. Anything TestCafe Selector accepts.
+   * @param {number} [options.wait] A number of milliseconds to wait after hover.
    * @returns {Promise<void>}
    */
   async hover(options) {
     const { selector = this.selector, wait } = options || {};
 
-    await t.hover(selector);
+    await t.hover(Selector(selector));
 
     if (wait) {
       await t.wait(wait);
