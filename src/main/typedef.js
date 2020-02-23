@@ -40,3 +40,9 @@
  *
  * @typedef {string|number|NTF.PageObjectSelectorTransformationFunction|NTF.PageObjectSelectorTransformationAlias} NTF.PageObjectSelectorTransformation
  */
+
+/**
+ * Type representing parameters of Page object's {@link PageObject.constructor constructor}.
+ *
+ * @typedef {PageObject|NTF.PageObjectSelectorTransformation} NTF.PageObjectConstructorParams
+ */

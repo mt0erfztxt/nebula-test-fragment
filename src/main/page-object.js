@@ -74,7 +74,7 @@ export default class PageObject {
   /**
    * Creates page object.
    *
-   * @param {PageObject|NTF.PageObjectSelectorTransformation} args Any number of selector transformations that need to be applied to locate page object's DOM element. To specify parent page object pass it as first (and only first) argument.
+   * @param {NTF.PageObjectConstructorParams} args Any number of selector transformations that need to be applied to locate page object's DOM element. To specify parent page object pass it as first (and only first) argument.
    */
   constructor(...args) {
     let parentSelector = Selector("body");
