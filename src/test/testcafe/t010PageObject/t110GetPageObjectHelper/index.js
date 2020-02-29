@@ -1,5 +1,5 @@
 import { Selector } from "testcafe";
-import PageObject from "../../../../main/page-object";
+import PageObject from "../../../../main/pageObject";
 
 fixture("PageObject#getPageObjectHelper()").page(`${__dirname}/index.html`);
 

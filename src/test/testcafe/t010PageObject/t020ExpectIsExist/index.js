@@ -1,4 +1,4 @@
-import PageObject from "../../../../main/page-object";
+import PageObject from "../../../../main/pageObject";
 
 class WidgetA extends PageObject {
   static bemBase = "widgetA";
@@ -15,7 +15,7 @@ class WidgetC extends PageObject {
   static displayName = "WidgetC";
 }
 
-fixture("PageObject#expectIsExist()").page(__dirname + "/index.html");
+fixture("PageObject#expectIsExist()").page(`${__dirname}/index.html`);
 
 test("010 succeeds when page object's selector must not exist and it doesn't -- 0 expected and 0 returned", async t => {
   let isThrown;

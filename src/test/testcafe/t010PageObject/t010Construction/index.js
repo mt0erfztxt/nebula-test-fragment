@@ -1,9 +1,7 @@
 import is from "@sindresorhus/is";
 import { Selector } from "testcafe";
 import { BemBase } from "../../../../main/bem";
-import PageObject from "../../../../main/page-object";
-
-const appRootPath = require("app-root-path");
+import PageObject from "../../../../main/pageObject";
 
 /**
  * Builds path (as string) to test's HTML file.
@@ -12,10 +10,7 @@ const appRootPath = require("app-root-path");
  * @returns {string}
  */
 function buildPagePath(testId) {
-  return (
-    appRootPath.path +
-    `/lib/test/testcafe/010-page-object/010-construction/${testId}.html`
-  );
+  return `${__dirname}/${testId}.html`;
 }
 
 class WidgetA extends PageObject {

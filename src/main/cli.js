@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 
-import { generate } from "./page-object-generator";
+import { generate } from "./pageObjectGenerator";
 
 /**
  * Provided argument must be a path to configuration file from project root and

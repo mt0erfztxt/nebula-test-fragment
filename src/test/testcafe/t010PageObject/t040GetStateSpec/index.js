@@ -1,4 +1,4 @@
-import PageObject from "../../../../main/page-object";
+import PageObject from "../../../../main/pageObject";
 
 class WidgetA extends PageObject {
   static bemBase = "widgetA";
@@ -33,7 +33,7 @@ class WidgetC extends WidgetB {
   }
 }
 
-fixture("PageObject#getStateSpec()").page(__dirname + "/index.html");
+fixture("PageObject#getStateSpec()").page(`${__dirname}/index.html`);
 
 test("010 returns page object's state parts -- case without override", async t => {
   await t

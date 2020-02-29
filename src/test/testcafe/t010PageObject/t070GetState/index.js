@@ -1,8 +1,6 @@
-import expect from "unexpected";
-import is from "@sindresorhus/is";
-import { Selector, t } from "testcafe";
+import { Selector } from "testcafe";
 import { BemBase } from "../../../../main/bem";
-import PageObject from "../../../../main/page-object";
+import PageObject from "../../../../main/pageObject";
 
 class TextInput extends PageObject {
   static bemBase = "textInput";
@@ -65,78 +63,65 @@ class TextInput extends PageObject {
   async getValue() {
     return this.inputElementSelector.value;
   }
-
-  /**
-   * Sets 'Value' part of fragment's state.
-   *
-   * @param {*} newValue
-   * @returns {Promise<void>}
-   */
-  async setValue(newValue) {
-    if (is.nullOrUndefined(newValue)) {
-      return;
-    }
-
-    if (is.emptyString(newValue)) {
-      await t.selectText(this.inputElementSelector).pressKey("delete");
-    }
-
-    await t.typeText(this.inputElementSelector, newValue, {
-      paste: true,
-      replace: true
-    });
-  }
 }
 
-fixture("PageObject#setState()").page(`${__dirname}/index.html`);
+fixture("PageObject#getState()").page(`${__dirname}/index.html`);
 
-test("010 does nothing when 'newState' is null or undefined", async t => {
-  const textInput = new TextInput();
-  const curState = await textInput.getState();
-
-  await textInput.setState();
-
-  const newState = await textInput.getState();
-  await t.expect(curState).eql(newState);
-});
-
-test("020 throws on invalid input -- case of validity", async t => {
+test("010 throws on invalid input -- case of validity", async t => {
   let isThrown;
   const textInput = new TextInput();
 
   try {
-    await textInput.setState(42);
+    await textInput.getState("disabled", true, "value");
   } catch (e) {
     await t
       .expect(e.message)
       .eql(
-        "TextInput: 'newState' must be a plain object but it doesn't -- " +
-          "number 42"
+        "TextInput: item at index 1 in 'requestedStatePartNames' must be a " +
+          "non-blank string but it doesn't -- boolean true"
       );
     isThrown = true;
   }
   await t.expect(isThrown).ok();
 });
 
-test("030 throws on invalid input -- case of meaningfulness", async t => {
+test("020 throws on invalid input -- case of meaningfulness", async t => {
   let isThrown;
   const textInput = new TextInput();
 
   try {
-    await textInput.setState({ focused: true });
+    await textInput.getState("disabled", "value", "foobar");
   } catch (e) {
     await t
       .expect(e.message)
       .eql(
-        "TextInput: 'Focused' state part is not one of supported state " +
-          "parts -- cid,disabled,value"
+        "TextInput: item 'foobar' at index 2 in 'requestedStatePartNames' " +
+          "must be a supported state part name but it doesn't -- " +
+          "cid,disabled,value"
       );
     isThrown = true;
   }
   await t.expect(isThrown).ok();
 });
 
-test("040 throws when state part setter not implemented", async t => {
+test("030 returns page object's state -- case of all state parts", async t => {
+  const textInput = new TextInput();
+
+  // -- Pre-checks --
+
+  await t.expect(textInput.inputElementSelector.count).eql(1);
+
+  // -- Checks --
+
+  const state = await textInput.getState();
+  await t.expect(state).eql({
+    cid: undefined,
+    disabled: true,
+    value: "42"
+  });
+});
+
+test("040 throws when state part getter not implemented", async t => {
   let isThrown;
   const TextInputFoo = class extends PageObject {
     static bemBase = "textInput";
@@ -146,7 +131,7 @@ test("040 throws when state part setter not implemented", async t => {
      * @returns {Object<string, boolean>}
      */
     getStateSpec() {
-      return Object.assign(super.getStateSpec(), { disabled: true });
+      return Object.assign(super.getStateSpec(), { disabled: false });
     }
   };
 
@@ -154,27 +139,12 @@ test("040 throws when state part setter not implemented", async t => {
   const textInputFoo = new TextInputFoo();
 
   try {
-    await textInputFoo.setState({ disabled: false });
+    await textInputFoo.getState();
   } catch (e) {
     await t
       .expect(e.message)
-      .eql("TextInputFoo: must have 'setDisabled' method but it doesn't");
+      .eql("TextInputFoo: must have 'getDisabled' method but it doesn't");
     isThrown = true;
   }
   await t.expect(isThrown).ok();
-});
-
-test("050 sets new state", async () => {
-  const textInput = new TextInput();
-
-  expect(await textInput.getState(), "to satisfy", {
-    disabled: false,
-    value: "42"
-  });
-
-  await textInput.setState({ disabled: true, value: "foo" });
-  expect(await textInput.getState(), "to satisfy", {
-    disabled: false,
-    value: "foo"
-  });
 });

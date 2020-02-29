@@ -1,4 +1,4 @@
-import PageObject from "../../../../main/page-object";
+import PageObject from "../../../../main/pageObject";
 
 class TextInput extends PageObject {
   static bemBase = "textInput";

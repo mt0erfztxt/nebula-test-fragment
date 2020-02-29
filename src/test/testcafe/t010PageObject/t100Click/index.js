@@ -1,5 +1,5 @@
 import { Selector, t } from "testcafe";
-import PageObject from "../../../../main/page-object";
+import PageObject from "../../../../main/pageObject";
 
 const display = Selector("#display");
 const resetDisplayButton = Selector(".btn--cid_reset");

@@ -87,7 +87,7 @@ export function parseConfig(path = "page-object-generator.json") {
 
 const template = Handlebars.compile(
   nodeFs.readFileSync(
-    nodePath.join(__dirname, "page-object-generator.hbs"),
+    nodePath.join(__dirname, "pageObjectGenerator.hbs"),
     "utf8"
   )
 );

@@ -1,7 +1,7 @@
 import nodeFs from "fs";
 import nodePath from "path";
 import is from "@sindresorhus/is";
-import { generate, parseConfig } from "../../../main/page-object-generator";
+import { generate, parseConfig } from "../../../main/pageObjectGenerator";
 
 /**
  * Compares generated and expected files.
