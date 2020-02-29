@@ -1,0 +1,8 @@
+{
+  "displayName": "my-display-name",
+  "stateParts": [
+    {
+      "name": "active"
+    }
+  ]
+}

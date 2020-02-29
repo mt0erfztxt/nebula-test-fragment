@@ -1,0 +1,9 @@
+{
+  "stateParts": [
+    {
+      "name": "value",
+      "simple": false,
+      "src": "attribute"
+    }
+  ]
+}

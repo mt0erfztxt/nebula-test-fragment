@@ -2,5 +2,10 @@
 
 import { generate } from "./page-object-generator";
 
-// TODO: Add tests (see src/test/spec/020-page-object-generator/170-cli).
+/**
+ * Provided argument must be a path to configuration file from project root and
+ * by default it is 'page-object-generator.json'.
+ *
+ * @todo: Add tests.
+ */
 generate(process.argv[2]);

@@ -3,3 +3,5 @@ generated-src
 node_modules
 
 /lib
+/src/test/spec/t020PageObjectGenerator/**/mySrc/**/*.js
+/src/test/spec/t020PageObjectGenerator/**/src/**/*.js

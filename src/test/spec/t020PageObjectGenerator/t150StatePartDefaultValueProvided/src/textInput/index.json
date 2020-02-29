@@ -1,0 +1,9 @@
+{
+  "stateParts": [
+    {
+      "defaultValue": "foobar",
+      "name": "value",
+      "simple": false
+    }
+  ]
+}

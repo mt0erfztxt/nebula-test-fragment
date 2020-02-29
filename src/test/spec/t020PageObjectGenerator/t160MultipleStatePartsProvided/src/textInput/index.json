@@ -1,0 +1,14 @@
+{
+  "stateParts": [
+    {
+      "alias": "enabled",
+      "name": "data-enabled",
+      "simple": true
+    },
+    {
+      "defaultValue": "foobar",
+      "name": "value",
+      "simple": false
+    }
+  ]
+}

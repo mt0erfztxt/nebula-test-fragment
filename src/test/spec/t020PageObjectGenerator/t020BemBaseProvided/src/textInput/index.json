@@ -1,0 +1,8 @@
+{
+  "bemBase": "MyTextInput",
+  "stateParts": [
+    {
+      "name": "active"
+    }
+  ]
+}

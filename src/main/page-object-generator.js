@@ -1,5 +1,6 @@
 import nodeFs from "fs";
 import nodePath from "path";
+import glob from "glob";
 import Handlebars from "handlebars";
 import is from "@sindresorhus/is";
 import mkdirp from "mkdirp";
@@ -10,9 +11,8 @@ import { camelCase, pascalCase } from "change-case";
  *
  * @typedef PageObjectGeneratorConfig
  * @type {Object}
- * @property {PageObjectSpec[]} pageObjects A list of page object specs that must be used to generate page objects.
  * @property {string} [project] A name of project. Used to calculate BEM base and display name -- prefixes them with `projectName-`.
- * @property {string} srcRoot A root directory for generated page objects. Used to calculate imports.
+ * @property {string} srcRoot A root directory for project source files where spec files must be searched.
  */
 
 /**
@@ -23,7 +23,6 @@ import { camelCase, pascalCase } from "change-case";
  * @property {string} [bemBase=''] A BEM base for page object.
  * @property {string} [displayName] A display name for page object.
  * @property {string} [extends] A path to page object to extend to.
- * @property {string} path An output path relative to `PageObjectGeneratorConfig.pathPrefix`.
  * @property {PageObjectStatePartSpec[]} [stateParts] A specs for state parts of page object to be generated.
  */
 
@@ -46,32 +45,37 @@ import { camelCase, pascalCase } from "change-case";
  * @param {PageObjectGeneratorConfig | string} [config='page-object-generator.json'] A page object generator configuration or path to file containing it.
  */
 export function generate(config = "page-object-generator.json") {
-  const { pageObjects, project, srcRoot } = is.plainObject(config)
-    ? config
-    : parseConfig(config);
-
-  pageObjects.forEach(spec => {
-    generatePageObject(spec, srcRoot, project);
-  });
+  const parsedConfig = is.plainObject(config) ? config : parseConfig(config);
+  glob
+    .sync(`**/*.json`, {
+      absolute: true,
+      cwd: parsedConfig.srcRoot,
+      nodir: true,
+      strict: true
+    })
+    .forEach(path =>
+      generatePageObject(
+        parsedConfig,
+        path,
+        JSON.parse(nodeFs.readFileSync(path, "utf8"))
+      )
+    );
 }
 
 /**
  * Reads and parses specified configuration file.
  *
- * @param {string} [path='page-objects.json'] A path to configuration file.
+ * @param {string} [path='page-object-generator.json'] A path to configuration file.
  * @returns {PageObjectGeneratorConfig} Returns parsed configuration file.
  * @throws {Error} Throws on invalid input.
  */
-function parseConfig(path = "page-objects.json") {
-  const cwd = process.cwd();
-  const configAbsPath = nodePath.join(cwd, path);
-
+export function parseConfig(path = "page-object-generator.json") {
+  const configAbsPath = nodePath.join(process.cwd(), path);
   if (!nodeFs.existsSync(configAbsPath)) {
     throw new Error(
       `Specified configuration file not exists: ${configAbsPath}`
     );
   }
-
   if (!nodeFs.lstatSync(configAbsPath).isFile()) {
     throw new Error(
       `Specified configuration file can't be parsed: ${configAbsPath}`
@@ -91,35 +95,49 @@ const template = Handlebars.compile(
 /**
  * Generates page object from spec.
  *
- * @param {PageObjectSpec} pageObjectSpec
- * @param {string} pathPrefix
- * @param {string} [project]
+ * @param {PageObjectGeneratorConfig} config A page object generator config.
+ * @param {string} specPath An absolute path to page object spec. Used to calculate generated file path.
+ * @param {PageObjectSpec} spec A page object spec to be used.
  */
-function generatePageObject(pageObjectSpec, pathPrefix, project = "") {
-  const { bemBase, displayName, path, stateParts } = pageObjectSpec;
-  const cwd = process.cwd();
-  const pathParts = path.split("/");
-  const isBase = !!(
-    pathParts[pathParts.length - 1].match(/^base$/i) && pathParts.pop()
-  );
+function generatePageObject(config, specPath, spec) {
+  if (is.undefined(spec.stateParts)) {
+    // Skip invalid spec, e.g. JSON file used for purposes other than page
+    // object generation.
+    return;
+  }
+
+  specPath = specPath.replace(/\.[^/.]+$/, "");
+  const { srcRoot, project } = config;
+  const { bemBase, displayName, stateParts } = spec;
+  const pathParts = specPath.split(nodePath.sep);
+  const pathPartsLength = pathParts.length;
+  const namePart = pathParts[pathPartsLength - 1];
+  const isIndex = namePart === "index";
+  const isBase = namePart === "base";
+
+  if (isBase || isIndex) {
+    pathParts.pop();
+  }
+
   const className = pascalCase(
-    nodePath.basename(pathParts.join("/")) + (isBase ? "Base" : "")
+    (isBase || isIndex ? pathParts[pathPartsLength - 2] : namePart) +
+      (isBase ? "Base" : "")
   );
-  const isExtends = pageObjectSpec.extends;
-  const targetAbsPath = nodePath.join(cwd, pathPrefix, path) + ".js";
+  const isExtends = spec.extends;
+  const targetAbsPath = `${specPath}.js`;
   const bb = is.string(bemBase) ? bemBase : isBase ? "" : camelCase(className);
   const bbPrefix = project ? `${project}-` : "";
   const context = {
     bemBase: is.emptyString(bb) ? bb : `${bbPrefix}${bb}`,
     exportClassName: className,
     extendsClassName: isExtends
-      ? pascalCase(nodePath.basename(pageObjectSpec.extends))
+      ? pascalCase(nodePath.basename(spec.extends))
       : "PageObject",
     displayName: `${bbPrefix}${displayName || className}`,
     fromClause: isExtends
       ? nodePath.relative(
           nodePath.dirname(targetAbsPath),
-          nodePath.join(cwd, pathPrefix, pageObjectSpec.extends)
+          nodePath.join(srcRoot, spec.extends)
         )
       : "nebula-test-fragment/lib/page-object",
     stateParts: stateParts.map(({ alias, defaultValue, name, simple, src }) => {

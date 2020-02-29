@@ -1,0 +1,8 @@
+{
+  "extends": "provided-page-object",
+  "stateParts": [
+    {
+      "name": "active"
+    }
+  ]
+}

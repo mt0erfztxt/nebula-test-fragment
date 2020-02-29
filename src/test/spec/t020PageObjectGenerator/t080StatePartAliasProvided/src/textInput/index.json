@@ -1,0 +1,8 @@
+{
+  "stateParts": [
+    {
+      "alias": "active",
+      "name": "data-active"
+    }
+  ]
+}
