@@ -1,4 +1,4 @@
-import PageObject from "nebula-test-fragment/lib/page-object";
+import PageObject from "nebula-test-fragment/lib/pageObject";
 
 export default class BarBase extends PageObject {
   static bemBase = "";

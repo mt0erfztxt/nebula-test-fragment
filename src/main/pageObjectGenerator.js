@@ -139,7 +139,7 @@ function generatePageObject(config, specPath, spec) {
           nodePath.dirname(targetAbsPath),
           nodePath.join(srcRoot, spec.extends)
         )
-      : "nebula-test-fragment/lib/page-object",
+      : "nebula-test-fragment/lib/pageObject",
     stateParts: stateParts.map(({ alias, defaultValue, name, simple, src }) => {
       const isSimple = is.boolean(simple) ? simple : true;
       const statePartJsName = camelCase(alias || name);
