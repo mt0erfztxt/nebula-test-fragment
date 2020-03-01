@@ -3,7 +3,8 @@
     "@babel/proposal-class-properties",
     "@babel/proposal-export-default-from",
     "@babel/proposal-object-rest-spread",
-    "@babel/proposal-private-methods"
+    "@babel/proposal-private-methods",
+    "@babel/transform-async-to-generator"
   ],
   "presets": [
     [
