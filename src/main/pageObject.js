@@ -74,26 +74,34 @@ export default class PageObject {
   /**
    * Creates page object.
    *
-   * @param {NTF.PageObjectConstructorParams} args Any number of selector transformations that need to be applied to locate page object's DOM element. To specify parent page object pass it as first (and only first) argument.
+   * @param {NTF.PageObjectConstructorParams} args Any number of selector transformations that need to be applied to locate page object's DOM element. To specify parent selector pass page object or TestCafe selector as first (and only first) argument.
    */
   constructor(...args) {
     let parentSelector = Selector("body");
-    for (let i = 0; i < args.length; i++) {
-      const selectorTransformation = args[i];
-      if (selectorTransformation instanceof PageObject) {
+
+    args.forEach((selectorTransformation, i) => {
+      const isPageObject = selectorTransformation instanceof PageObject;
+      if (
+        isPageObject ||
+        (is.object(selectorTransformation) &&
+          is.function_(selectorTransformation.withExactText))
+      ) {
         if (i === 0) {
-          parentSelector = selectorTransformation.selector;
+          parentSelector = isPageObject
+            ? selectorTransformation.selector
+            : selectorTransformation;
         } else {
           throw new Error(
             `${this.displayName}: only first selector transformation ` +
-              `allowed to be parent page object but transformation at ` +
-              `index ${i} is page object`
+              `allowed to provide parent selector but transformation at ` +
+              `index ${i} is a ` +
+              (isPageObject ? "page object" : "TestCafe selector")
           );
         }
       } else {
         this.#selectorTransformations.push(selectorTransformation);
       }
-    }
+    });
 
     this.#bemBase = new BemBase(
       "" + (this.constructor.bemBase || super.bemBase),

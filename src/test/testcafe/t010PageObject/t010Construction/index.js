@@ -64,7 +64,9 @@ class WidgetC extends PageObject {
   }
 }
 
-fixture("PageObject / Construction");
+fixture("PageObject / Construction").beforeEach(async t => {
+  await t.maximizeWindow();
+});
 
 test.page(buildPagePath("010"))(
   "010 Page object created with correct BEM base",
@@ -125,7 +127,7 @@ test.page(buildPagePath("025"))(
 );
 
 test.page(buildPagePath("030"))(
-  "030 Page object can be created with parent page object provided as first selector transformation",
+  "030 Page object can be created with parent page object provided as first selector transformation -- case of page object",
   async t => {
     // Without parent.
     const widgetA1 = new WidgetA();
@@ -148,8 +150,41 @@ test.page(buildPagePath("030"))(
       await t
         .expect(e.message)
         .eql(
-          "WidgetA: only first selector transformation allowed to be parent " +
-            "page object but transformation at index 1 is page object"
+          "WidgetA: only first selector transformation allowed to provide " +
+            "parent selector but transformation at index 1 is a page object"
+        );
+    }
+    await t.expect(isThrown).ok();
+  }
+);
+
+test.page(buildPagePath("035"))(
+  "035 Page object can be created with parent page object provided as first selector transformation -- case of TestCafe selector",
+  async t => {
+    // Without parent.
+    const widgetA1 = new WidgetA();
+    await t.expect(widgetA1.selector.textContent).eql("Widget A -- 1");
+    await t.expect(widgetA1.selector.parent(0).tagName).eql("body");
+
+    // With parent.
+    const sel = Selector(".selector");
+    const widgetA2 = new WidgetA(sel);
+    await t.expect(widgetA2.selector.textContent).eql("Widget A -- 2");
+    await t.expect(widgetA2.selector.parent(0).tagName).eql("div");
+    await t.expect(widgetA2.selector.parent(0).classNames).eql(["selector"]);
+
+    // Throws if not first.
+    let isThrown = false;
+    try {
+      new WidgetA(s => s.withText(/A -- 2/), sel);
+    } catch (/** @type NTF.AssertionError*/ e) {
+      isThrown = true;
+      await t
+        .expect(e.message)
+        .eql(
+          "WidgetA: only first selector transformation allowed to provide " +
+            "parent selector but transformation at index 1 is a TestCafe " +
+            "selector"
         );
     }
     await t.expect(isThrown).ok();

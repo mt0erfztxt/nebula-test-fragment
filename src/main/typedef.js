@@ -1,3 +1,5 @@
+import { Selector } from "testcafe";
+
 /**
  * Namespace for nebula-test-fragment.
  *
@@ -44,5 +46,5 @@
 /**
  * Type representing parameters of Page object's {@link PageObject.constructor constructor}.
  *
- * @typedef {PageObject|NTF.PageObjectSelectorTransformation} NTF.PageObjectConstructorParams
+ * @typedef {Selector|PageObject|NTF.PageObjectSelectorTransformation} NTF.PageObjectConstructorParams
  */
