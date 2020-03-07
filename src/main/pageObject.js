@@ -222,7 +222,7 @@ export default class PageObject {
         case "Function":
           this.#selector = transformation(
             this.#selector,
-            this.#bemBase.clone()
+            this.#bemBase
           );
           break;
 
@@ -246,7 +246,7 @@ export default class PageObject {
    *
    * @param {NTF.PageObjectSelectorTransformationAlias} selectorTransformationAlias Selector transformation to apply. How transformation is handled is a responsibility of an implementor.
    * @param {Selector} selector Selector to transform.
-   * @param {BemBase} bemBase Clone of page object's BEM base.
+   * @param {BemBase} bemBase Page object's BEM base (frozen).
    * @returns {Selector} Returns transformed page object's selector.
    */
   transformSelector(selectorTransformationAlias, selector, bemBase) {
