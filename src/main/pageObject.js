@@ -297,6 +297,15 @@ export default class PageObject {
               `element but it doesn't -- ${elementsCount} returned`
       );
 
+    const classNames = await this.selector.classNames;
+    if (!classNames.includes(this.bemBase.toString())) {
+      throw new Error(
+        `${this.displayName}: selector must return dom element with class ` +
+          `attribute's value contain page objects BEM base but it doesn't ` +
+          `-- ${classNames}`
+      );
+    }
+
     if (hover && !isNot) {
       await this.hover();
     }

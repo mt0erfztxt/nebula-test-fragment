@@ -15,7 +15,11 @@ class WidgetC extends PageObject {
   static displayName = "WidgetC";
 }
 
-fixture("PageObject#expectIsExist()").page(`${__dirname}/index.html`);
+fixture("PageObject#expectIsExist()")
+  .page(`${__dirname}/index.html`)
+  .beforeEach(async t => {
+    await t.maximizeWindow();
+  });
 
 test("010 succeeds when page object's selector must not exist and it doesn't -- 0 expected and 0 returned", async t => {
   let isThrown;
@@ -187,6 +191,37 @@ test("050 fails when page object's selector must exist and it does but more than
   } catch (/** @type NTF.AssertionError*/ e) {
     isThrown = true;
     await t.expect(e.errMsg).match(/.*foobar.*/);
+  }
+  await t.expect(isThrown).ok();
+});
+
+test("060 fails when page object's selector returns DOM element with class attribute's value not including BEM base", async t => {
+  const WidgetT060 = class extends PageObject {
+    static bemBase = "widgetT060";
+    static displayName = "WidgetT060";
+  };
+
+  let isThrown;
+  const widget = new WidgetT060(s => s.child(0));
+
+  // -- Pre-checks --
+
+  await t.expect(widget.selector.count).eql(1);
+
+  // -- Checks --
+
+  isThrown = false;
+  try {
+    await widget.expectIsExist();
+  } catch (e) {
+    isThrown = true;
+    await t
+      .expect(e.message)
+      .eql(
+        "WidgetT060: selector must return dom element with class " +
+          "attribute's value contain page objects BEM base but it doesn't " +
+          "-- widgetT060__element,foobar"
+      );
   }
   await t.expect(isThrown).ok();
 });
