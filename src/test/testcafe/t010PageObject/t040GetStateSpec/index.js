@@ -9,9 +9,9 @@ class WidgetA extends PageObject {
    */
   getStateSpec() {
     return Object.assign(super.getStateSpec(), {
-      foo: false,
-      a1: false,
-      a2: true
+      foo: { simple: false, writable: false },
+      a1: { simple: true, writable: false },
+      a2: { simple: true, writable: true }
     });
   }
 }
@@ -29,20 +29,32 @@ class WidgetC extends WidgetB {
    * @returns {Object<string, boolean>}
    */
   getStateSpec() {
-    return Object.assign(super.getStateSpec(), { foo: true, c: false });
+    return Object.assign(super.getStateSpec(), {
+      foo: { simple: false, writable: true },
+      c: { simple: true, writable: false }
+    });
   }
 }
 
-fixture("PageObject#getStateSpec()").page(`${__dirname}/index.html`);
+fixture("PageObject#getStateSpec()")
+  .page(`${__dirname}/index.html`)
+  .beforeEach(async t => await t.maximizeWindow());
 
 test("010 returns page object's state parts -- case without override", async t => {
-  await t
-    .expect(new WidgetB().getStateSpec())
-    .eql({ cid: false, foo: false, a1: false, a2: true });
+  await t.expect(new WidgetB().getStateSpec()).eql({
+    cid: { simple: false, writable: false },
+    foo: { simple: false, writable: false },
+    a1: { simple: true, writable: false },
+    a2: { simple: true, writable: true }
+  });
 });
 
 test("020 returns page object's state parts -- case with override", async t => {
-  await t
-    .expect(new WidgetC().getStateSpec())
-    .eql({ cid: false, foo: true, a1: false, a2: true, c: false });
+  await t.expect(new WidgetC().getStateSpec()).eql({
+    cid: { simple: false, writable: false },
+    foo: { simple: false, writable: true },
+    a1: { simple: true, writable: false },
+    a2: { simple: true, writable: true },
+    c: { simple: true, writable: false }
+  });
 });

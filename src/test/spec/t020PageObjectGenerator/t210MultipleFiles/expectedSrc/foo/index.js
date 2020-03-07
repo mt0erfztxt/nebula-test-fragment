@@ -6,7 +6,7 @@ export default class Foo extends PageObject {
 
   getStateSpec() {
     return Object.assign(super.getStateSpec(), {
-      foo: false
+      foo: { simple: true, writable: false }
     });
   }
 

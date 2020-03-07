@@ -7,7 +7,7 @@ export default class {{exportClassName}} extends {{extendsClassName}} {
   getStateSpec() {
     return Object.assign(super.getStateSpec(), {
       {{#each stateParts}}
-      {{statePartJsName}}: false{{#unless @last}},{{/unless}}
+      {{statePartJsName}}: { simple: {{simple}}, writable: false }{{#unless @last}},{{/unless}}
       {{/each}}
     });
   }

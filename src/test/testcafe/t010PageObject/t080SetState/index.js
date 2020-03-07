@@ -47,8 +47,8 @@ class TextInput extends PageObject {
    */
   getStateSpec() {
     return Object.assign(super.getStateSpec(), {
-      disabled: false,
-      value: true
+      disabled: { simple: true, writable: false },
+      value: { simple: false, writable: true }
     });
   }
 
@@ -88,7 +88,9 @@ class TextInput extends PageObject {
   }
 }
 
-fixture("PageObject#setState()").page(`${__dirname}/index.html`);
+fixture("PageObject#setState()")
+  .page(`${__dirname}/index.html`)
+  .beforeEach(async t => await t.maximizeWindow());
 
 test("010 does nothing when 'newState' is null or undefined", async t => {
   const textInput = new TextInput();
@@ -146,7 +148,9 @@ test("040 throws when state part setter not implemented", async t => {
      * @returns {Object<string, boolean>}
      */
     getStateSpec() {
-      return Object.assign(super.getStateSpec(), { disabled: true });
+      return Object.assign(super.getStateSpec(), {
+        disabled: { simple: true, writable: true }
+      });
     }
   };
 

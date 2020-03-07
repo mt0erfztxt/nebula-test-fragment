@@ -1,7 +1,7 @@
 import expect from "unexpected";
 import is from "@sindresorhus/is";
 import { Selector, t } from "testcafe";
-import { pascalCase } from "change-case";
+import { camelCase, pascalCase } from "change-case";
 import { BemBase, validateBemModifierName } from "./bem";
 import { isTestCafeSelector, typeAndValue } from "./util";
 
@@ -494,10 +494,11 @@ export default class PageObject {
   }
 
   /**
-   * Returns page object's state spec (includes its ancestor page objects
+   * Returns page object's state spec (including its ancestor page objects
    * state specs). State spec is an object where keys are state part names and
-   * values are state part specs, where state part spec is a boolean indicating
-   * whether state part is writable (`true`) or read-only (`false`).
+   * values are state part specs. State part spec is an object of shape:
+   * - simple, a boolean -- whether state part's value is a boolean or not
+   * - writable, a boolean -- whether state part is writable or read-only
    *
    * Page object that have additional state parts must override this method
    * using two steps:
@@ -508,11 +509,20 @@ export default class PageObject {
    *
    * @example
    * // If `TextInput` is a page object with writable state part named 'Value'
-   * // then call below return `{ cid: false, value: true }`.
+   * // then call below return
+   * // {
+   * //    cid: { simple: false, writable: false },
+   * //    value: { simple: false, writable: true }
+   * // }
    * new TextInput().getStateSpec()
    */
   getStateSpec() {
-    return { cid: false };
+    return {
+      cid: {
+        simple: false,
+        writable: false
+      }
+    };
   }
 
   /**
@@ -631,7 +641,7 @@ export default class PageObject {
     });
 
     for (const statePartName of newStatePartNames) {
-      if (stateSpec[statePartName]) {
+      if (stateSpec[statePartName]["writable"]) {
         const statePartSetterName = `set${pascalCase(statePartName)}`;
         if (is.function_(this[statePartSetterName])) {
           await this[statePartSetterName](newState[statePartName]);
@@ -661,6 +671,38 @@ export default class PageObject {
       "to satisfy",
       expectedState
     );
+  }
+
+  /**
+   *
+   * @param {string} expectation
+   * @param {*} [expected]
+   * @returns {Promise<void>}
+   */
+  async expect(expectation, expected) {
+    const isNot = expectation.match(/^not\s+|\s+not\s+|\s+not$/i);
+    const isSimple = true;
+    const parts = expectation
+      .split(/\s+/)
+      .map(p => p.trim())
+      .filter(p => !p.match(/^not$/i));
+
+    const partsLength = parts.length;
+    if ((!isNot && partsLength === 0) || (isNot && partsLength < 2)) {
+      throw new Error(
+        `${this.displayName}: expectation must contain state part name but ` +
+          `it doesn't -- ${typeAndValue(expectation)}`
+      );
+    }
+
+    const key = camelCase(parts.join("-"));
+    const state = await this.getState(key);
+    const val = state[key];
+    if (isSimple) {
+      expect(val, `to be ${isNot ? "false" : "true"}`);
+    } else {
+      expect(val, `${isNot ? "not" : ""} to equal`, expected);
+    }
   }
 
   /**

@@ -6,7 +6,7 @@ export default class BarBase extends PageObject {
 
   getStateSpec() {
     return Object.assign(super.getStateSpec(), {
-      bar: false
+      bar: { simple: true, writable: false }
     });
   }
 

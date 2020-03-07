@@ -6,7 +6,7 @@ export default class TextInputBase extends PageObject {
 
   getStateSpec() {
     return Object.assign(super.getStateSpec(), {
-      enabled: false
+      enabled: { simple: true, writable: false }
     });
   }
 
