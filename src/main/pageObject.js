@@ -674,34 +674,49 @@ export default class PageObject {
   }
 
   /**
+   * Asserts on page object's state part value.
    *
-   * @param {string} expectation
-   * @param {*} [expected]
+   * @param {string} expectation An expectation (see examples and tests for syntax).
+   * @param {*} [expected] An expected value.
    * @returns {Promise<void>}
+   *
+   * @example
+   * // If Foo page object have simple state part with name 'Disabled':
+   * await foo.expect("disabled") // not throws when value is `true`
+   * await foo.expect("not disabled") // not throws when value is `false`
+   *
+   * @example
+   * // If Foo page object have non-simple state part with name
+   * // 'Truly Awesome':
+   * await foo.expect("trulyAwesome", "42") // this and below not throws when value is '42'
+   * await foo.expect("truly Awesome", "42")
+   * await foo.expect("Truly  awesome ", "42")
+   * await foo.expect("not trulyAwesome", "42") // this and below throws when value is '42'
+   * await foo.expect("trulyAwesome not", "42")
+   * await foo.expect("not truly Awesome", "42")
+   * await foo.expect("Truly not  awesome", "42")
    */
   async expect(expectation, expected) {
-    const isNot = expectation.match(/^not\s+|\s+not\s+|\s+not$/i);
-    const isSimple = true;
+    const isNot = /^not\s+|\s+not\s+|\s+not$/i.test(expectation);
     const parts = expectation
       .split(/\s+/)
       .map(p => p.trim())
-      .filter(p => !p.match(/^not$/i));
+      .filter(p => !(is.emptyString(p) || /^not$/i.test(p)));
 
     const partsLength = parts.length;
-    if ((!isNot && partsLength === 0) || (isNot && partsLength < 2)) {
+    if ((!isNot && partsLength === 0) || (isNot && partsLength < 1)) {
       throw new Error(
-        `${this.displayName}: expectation must contain state part name but ` +
-          `it doesn't -- ${typeAndValue(expectation)}`
+        `${this.displayName}: 'expectation' must contain state part name ` +
+          `but it doesn't -- ${typeAndValue(expectation)}`
       );
     }
 
-    const key = camelCase(parts.join("-"));
-    const state = await this.getState(key);
-    const val = state[key];
-    if (isSimple) {
-      expect(val, `to be ${isNot ? "false" : "true"}`);
+    const statePartName = camelCase(parts.join("-"));
+    const statePartValue = (await this.getState(statePartName))[statePartName];
+    if (this.getStateSpec()[statePartName]["simple"]) {
+      expect(statePartValue, `to be ${isNot ? "false" : "true"}`);
     } else {
-      expect(val, `${isNot ? "not" : ""} to equal`, expected);
+      expect(statePartValue, `${isNot ? "not " : ""}to equal`, expected);
     }
   }
 
