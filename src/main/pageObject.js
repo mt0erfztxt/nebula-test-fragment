@@ -3,7 +3,7 @@ import is from "@sindresorhus/is";
 import { Selector, t } from "testcafe";
 import { pascalCase } from "change-case";
 import { BemBase, validateBemModifierName } from "./bem";
-import { typeAndValue } from "./util";
+import { isTestCafeSelector, typeAndValue } from "./util";
 
 /**
  * Class representing page object.
@@ -81,11 +81,7 @@ export default class PageObject {
 
     args.forEach((selectorTransformation, i) => {
       const isPageObject = selectorTransformation instanceof PageObject;
-      if (
-        isPageObject ||
-        (is.object(selectorTransformation) &&
-          is.function_(selectorTransformation.withExactText))
-      ) {
+      if (isPageObject || isTestCafeSelector(selectorTransformation)) {
         if (i === 0) {
           parentSelector = isPageObject
             ? selectorTransformation.selector
@@ -220,10 +216,7 @@ export default class PageObject {
 
         // Selector transformation function.
         case "Function":
-          this.#selector = transformation(
-            this.#selector,
-            this.#bemBase
-          );
+          this.#selector = transformation(this.#selector, this.#bemBase);
           break;
 
         default:
@@ -681,7 +674,8 @@ export default class PageObject {
    */
   getPageObjectHelper(PageObjectClass, ...args) {
     // Remove passed in parent (if any).
-    if (args[0] instanceof PageObject) {
+    const firstArg = args[0];
+    if (firstArg instanceof PageObject || isTestCafeSelector(firstArg)) {
       args.shift();
     }
 
