@@ -5,6 +5,7 @@ import { Selector } from "testcafe";
  *
  * @namespace NTF
  */
+export const NTF = {};
 
 /**
  * Type representing TestCafe's assertion error.
