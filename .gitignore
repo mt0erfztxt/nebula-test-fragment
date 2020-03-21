@@ -2,7 +2,7 @@
 generated-src
 node_modules
 
-/lib
-/src/test/spec/t020PageObjectGenerator/**/mySrc/**/index.js
-/src/test/spec/t020PageObjectGenerator/**/src/**/base.js
-/src/test/spec/t020PageObjectGenerator/**/src/**/index.js
+/packages/nebula-page-object/lib
+/packages/nebula-page-object/src/test/spec/t020PageObjectGenerator/**/mySrc/**/index.js
+/packages/nebula-page-object/src/test/spec/t020PageObjectGenerator/**/src/**/base.js
+/packages/nebula-page-object/src/test/spec/t020PageObjectGenerator/**/src/**/index.js
