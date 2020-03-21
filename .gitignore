@@ -1,6 +1,7 @@
 .idea
 generated-src
 node_modules
+*.iml
 
 /packages/nebula-page-object/lib
 /packages/nebula-page-object/src/test/spec/t020PageObjectGenerator/**/mySrc/**/index.js
