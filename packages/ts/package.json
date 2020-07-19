@@ -27,7 +27,7 @@
     "change-case": "^3.0.1",
     "deep-object-diff": "^1.1.0",
     "escape-string-regexp": "^2.0.0",
-    "lodash": "^4.17.15",
+    "lodash": "^4.17.19",
     "testcafe": "^1.7.1",
     "url-parse": "^1.4.7"
   },
